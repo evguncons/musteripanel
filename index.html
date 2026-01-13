@@ -2,7 +2,7 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>HEDEF AVM ONLİNE SATIŞ YÖNLENDİRME</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -19,6 +19,7 @@
             background: linear-gradient(135deg, #f0f4ff 0%, #ffffff 100%);
             color: #1e293b; 
             min-height: 100vh;
+            -webkit-tap-highlight-color: transparent;
         }
         
         /* Glassmorphism Card */
@@ -31,10 +32,6 @@
             transition: transform 0.3s ease, box-shadow 0.3s ease;
         }
         
-        .glass-card:hover {
-            box-shadow: 0 20px 50px -10px rgba(79, 70, 229, 0.1);
-        }
-
         /* Modern Input */
         .modern-input {
             width: 100%;
@@ -53,36 +50,60 @@
             background-color: #fff;
             box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1); 
         }
-        .modern-input::placeholder { color: #94a3b8; font-weight: 400; }
         
         /* Table Styling */
         .custom-table { width: 100%; border-collapse: separate; border-spacing: 0 8px; }
         .custom-table th { 
-            color: #64748b; 
-            font-weight: 600; 
-            text-transform: uppercase; 
-            font-size: 0.75rem; 
-            padding: 0 20px 10px 20px;
-            letter-spacing: 0.05em;
+            color: #64748b; font-weight: 600; text-transform: uppercase; 
+            font-size: 0.75rem; padding: 0 20px 10px 20px; letter-spacing: 0.05em;
         }
         .custom-table tbody tr {
             background: white;
             box-shadow: 0 2px 5px rgba(0,0,0,0.02);
             transition: transform 0.2s;
         }
-        .custom-table tbody tr:hover {
-            transform: scale(1.005);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
-            z-index: 10;
-            position: relative;
-        }
-        .custom-table td { 
-            padding: 16px 20px; 
-            font-size: 0.9rem; 
-            vertical-align: middle;
-        }
+        .custom-table td { padding: 16px 20px; font-size: 0.9rem; vertical-align: middle; }
         .custom-table td:first-child { border-top-left-radius: 16px; border-bottom-left-radius: 16px; }
         .custom-table td:last-child { border-top-right-radius: 16px; border-bottom-right-radius: 16px; }
+
+        /* RESPONSIVE TABLE (CARD VIEW FOR MOBILE) */
+        @media (max-width: 768px) {
+            .custom-table, .custom-table tbody, .custom-table tr, .custom-table td {
+                display: block;
+                width: 100%;
+            }
+            .custom-table thead { display: none; }
+            .custom-table tr {
+                margin-bottom: 15px;
+                border-radius: 16px;
+                box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+                border: 1px solid #e2e8f0;
+                padding: 10px;
+            }
+            .custom-table td {
+                text-align: right;
+                padding: 10px 15px;
+                position: relative;
+                padding-left: 40%;
+                border-bottom: 1px solid #f1f5f9;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+            }
+            .custom-table td:last-child { border-bottom: none; justify-content: flex-end; }
+            .custom-table td::before {
+                content: attr(data-label);
+                position: absolute;
+                left: 15px;
+                width: 35%;
+                text-align: left;
+                font-weight: 700;
+                color: #94a3b8;
+                font-size: 0.75rem;
+                text-transform: uppercase;
+            }
+            .custom-table td:first-child, .custom-table td:last-child { border-radius: 0; }
+        }
 
         /* Buttons */
         .btn-modern { 
@@ -93,27 +114,15 @@
         .btn-gradient { 
             background: linear-gradient(135deg, #4f46e5 0%, #6366f1 100%); 
             color: white; 
-            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.25); 
-            border: none;
+            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.25); border: none;
         }
-        .btn-gradient:hover { 
-            transform: translateY(-2px); 
-            box-shadow: 0 6px 20px rgba(79, 70, 229, 0.35); 
-        }
-        .btn-gradient:active { transform: translateY(0); }
-        
-        .btn-soft { background-color: #f1f5f9; color: #475569; }
-        .btn-soft:hover { background-color: #e2e8f0; color: #1e293b; }
-
         .btn-action { 
             width: 36px; height: 36px; border-radius: 10px; 
             display: inline-flex; align-items: center; justify-content: center; 
-            transition: 0.2s; cursor: pointer; border: none; outline: none;
+            transition: 0.2s; cursor: pointer; border: none;
         }
         .btn-edit { background-color: #eef2ff; color: #4f46e5; }
-        .btn-edit:hover { background-color: #4f46e5; color: white; }
         .btn-delete { background-color: #fef2f2; color: #ef4444; }
-        .btn-delete:hover { background-color: #ef4444; color: white; }
 
         /* Grid Input Row */
         .input-row-wrapper {
@@ -126,78 +135,78 @@
             display: grid;
             grid-template-columns: 140px 140px 1fr 1fr 110px 130px 1fr 110px 50px;
             gap: 12px;
-            align-items: center;
+            align-items: end; /* Label'lar gelince align değişti */
             transition: all 0.2s;
         }
-        .input-row-wrapper:hover { border-color: #e0e7ff; box-shadow: 0 5px 15px rgba(79, 70, 229, 0.05); }
+
+        /* RESPONSIVE INPUT ROW */
+        @media (max-width: 1200px) {
+            .input-row-wrapper {
+                display: flex;
+                flex-direction: column;
+                gap: 16px;
+                padding: 20px;
+                border: 1px solid #e0e7ff;
+                box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            }
+            .grid-header { display: none !important; }
+            .btn-action { width: 100%; height: 44px; margin-bottom: 5px; border-radius: 8px; font-size: 1rem;}
+        }
 
         /* Status Pills */
-        .status-pill {
-            padding: 6px 12px; border-radius: 30px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase;
-        }
+        .status-pill { padding: 6px 12px; border-radius: 30px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; }
         .status-green { background-color: #d1fae5; color: #047857; }
         .status-gray { background-color: #f1f5f9; color: #64748b; }
-        .status-indigo { background-color: #e0e7ff; color: #3730a3; }
 
-        /* Modal */
         .modal-overlay { background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(8px); }
-        
-        @media (max-width: 1400px) {
-            .input-row-wrapper { display: flex; flex-direction: column; gap: 10px; }
-            .grid-header { display: none !important; }
-            .btn-action { width: 100%; height: 40px; margin-bottom: 5px; border-radius: 8px; }
-        }
-        
-        /* Loading Animation */
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         .loader { border: 2px solid #f3f3f3; border-top: 2px solid #4f46e5; border-radius: 50%; width: 16px; height: 16px; animation: spin 1s linear infinite; display: inline-block; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
 </head>
 <body>
 
-    <div class="max-w-[1800px] mx-auto p-4 md:p-8">
+    <div class="max-w-[1800px] mx-auto p-3 md:p-8">
         
         <!-- HEADER -->
-        <header class="flex flex-col md:flex-row justify-between items-center mb-10 gap-6">
-            <div class="flex items-center gap-4">
-                <div class="w-14 h-14 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-2xl flex items-center justify-center shadow-lg shadow-indigo-200">
-                    <i class="fas fa-cube text-white text-2xl"></i>
+        <header class="flex flex-col md:flex-row justify-between items-center mb-6 md:mb-10 gap-4 md:gap-6">
+            <div class="flex flex-col md:flex-row items-center gap-4 text-center md:text-left">
+                <div class="w-12 h-12 md:w-14 md:h-14 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-2xl flex items-center justify-center shadow-lg shadow-indigo-200 shrink-0">
+                    <i class="fas fa-cube text-white text-xl md:text-2xl"></i>
                 </div>
                 <div>
-                    <!-- Değişiklik: Başlık güncellendi -->
-                    <h1 class="text-2xl font-bold text-slate-800 tracking-tight">HEDEF AVM ONLİNE SATIŞ YÖNLENDİRME</h1>
-                    <div class="flex items-center gap-2 mt-1">
+                    <h1 class="text-lg md:text-2xl font-bold text-slate-800 tracking-tight leading-tight">HEDEF AVM ONLİNE<br class="md:hidden"> SATIŞ YÖNLENDİRME</h1>
+                    <div class="flex items-center justify-center md:justify-start gap-2 mt-1">
                         <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                        <p class="text-sm text-slate-500 font-medium">Veritabanı Bağlı • v2.2</p>
+                        <p class="text-xs md:text-sm text-slate-500 font-medium">Veritabanı Bağlı • v2.3 (Mobil Uyumlu)</p>
                     </div>
                 </div>
             </div>
             
-            <div class="flex gap-3">
+            <div class="flex w-full md:w-auto gap-3">
                 <div class="hidden md:flex flex-col items-end mr-4">
                     <span class="text-xs font-bold text-slate-400 uppercase">Son Güncelleme</span>
                     <span id="lastUpdateTime" class="text-sm font-semibold text-slate-700">--:--</span>
                 </div>
-                <button onclick="refreshData()" class="btn-modern btn-soft shadow-sm group">
+                <button onclick="refreshData()" class="btn-modern btn-soft shadow-sm group w-full md:w-auto justify-center">
                     <i class="fas fa-sync-alt mr-2 text-indigo-500 group-hover:rotate-180 transition-transform duration-500"></i> Yenile
                 </button>
             </div>
         </header>
 
         <!-- INPUT SECTION -->
-        <section class="glass-card p-1 mb-10">
-            <div class="p-6 border-b border-slate-100 flex justify-between items-center">
-                <h2 class="font-bold text-slate-700 text-lg flex items-center">
+        <section class="glass-card p-1 mb-6 md:mb-10">
+            <div class="p-4 md:p-6 border-b border-slate-100 flex justify-between items-center">
+                <h2 class="font-bold text-slate-700 text-base md:text-lg flex items-center">
                     <span class="w-1 h-6 bg-indigo-500 rounded-full mr-3"></span>
                     Hızlı Veri Girişi
                 </h2>
-                <button onclick="addInputRow()" class="text-sm font-semibold text-indigo-600 hover:text-indigo-700 bg-indigo-50 hover:bg-indigo-100 px-4 py-2 rounded-lg transition">
-                    <i class="fas fa-plus mr-1"></i> Satır Ekle
+                <button onclick="addInputRow()" class="text-xs md:text-sm font-semibold text-indigo-600 hover:text-indigo-700 bg-indigo-50 hover:bg-indigo-100 px-3 py-2 md:px-4 md:py-2 rounded-lg transition">
+                    <i class="fas fa-plus mr-1"></i> <span class="hidden md:inline">Satır</span> Ekle
                 </button>
             </div>
             
-            <div class="p-6 bg-slate-50/50 rounded-b-[20px]">
-                <!-- Headers -->
+            <div class="p-3 md:p-6 bg-slate-50/50 rounded-b-[20px]">
+                <!-- Desktop Headers (Hidden on Mobile) -->
                 <div class="grid-header grid grid-cols-[140px_140px_1fr_1fr_110px_130px_1fr_110px_50px] gap-3 px-4 mb-3 text-xs font-bold text-slate-400 uppercase tracking-wider">
                     <div>Tarih</div>
                     <div>Şube</div>
@@ -214,7 +223,7 @@
                 <div id="inputContainer"></div>
 
                 <div class="mt-6 flex justify-end">
-                    <button onclick="submitAllRows()" id="submitBtn" class="btn-modern btn-gradient px-10 py-3 text-base">
+                    <button onclick="submitAllRows()" id="submitBtn" class="btn-modern btn-gradient w-full md:w-auto py-3 text-base shadow-lg shadow-indigo-200">
                         <i class="fas fa-paper-plane mr-2"></i> KAYDET VE GÖNDER
                     </button>
                 </div>
@@ -222,23 +231,23 @@
         </section>
 
         <!-- DASHBOARD GRID -->
-        <div class="grid grid-cols-1 xl:grid-cols-12 gap-8">
+        <div class="grid grid-cols-1 xl:grid-cols-12 gap-6 md:gap-8">
             
-            <!-- RECENT TRANSACTIONS (Left - Wider) -->
+            <!-- RECENT TRANSACTIONS (Left) -->
             <div class="xl:col-span-8 flex flex-col gap-6">
-                <div class="glass-card flex-1 flex flex-col min-h-[500px]">
-                    <div class="p-6 border-b border-slate-100 flex justify-between items-center">
+                <div class="glass-card flex-1 flex flex-col min-h-[400px]">
+                    <div class="p-4 md:p-6 border-b border-slate-100 flex justify-between items-center">
                         <div>
                             <h3 class="font-bold text-slate-800 text-lg">Son İşlemler</h3>
-                            <p class="text-xs text-slate-400 mt-1">Sisteme girilen son kayıtlar listeleniyor</p>
+                            <p class="text-xs text-slate-400 mt-1 hidden md:block">Sisteme girilen son kayıtlar listeleniyor</p>
                         </div>
                         <div class="bg-indigo-50 text-indigo-600 px-3 py-1 rounded-lg text-xs font-bold">
                             <i class="fas fa-list mr-1"></i> Kayıtlar
                         </div>
                     </div>
                     
-                    <div class="flex-1 overflow-x-auto p-4">
-                        <table class="custom-table">
+                    <div class="flex-1 p-3 md:p-4">
+                        <table class="custom-table w-full">
                             <thead>
                                 <tr>
                                     <th>Tarih</th>
@@ -255,7 +264,7 @@
                     </div>
 
                     <div class="p-4 border-t border-slate-100 flex justify-between items-center bg-slate-50/50 rounded-b-[20px]">
-                        <span class="text-sm text-slate-500 font-medium ml-2">Sayfa <span id="pageIndicator" class="text-slate-900 font-bold">1</span></span>
+                        <span class="text-xs md:text-sm text-slate-500 font-medium ml-2">Sayfa <span id="pageIndicator" class="text-slate-900 font-bold">1</span></span>
                         <div class="flex gap-2">
                             <button onclick="changePage(-1)" id="prevPageBtn" class="btn-soft px-3 py-1.5 rounded-lg text-xs font-bold" disabled>Önceki</button>
                             <button onclick="changePage(1)" id="nextPageBtn" class="btn-soft px-3 py-1.5 rounded-lg text-xs font-bold">Sonraki</button>
@@ -264,10 +273,10 @@
                 </div>
             </div>
 
-            <!-- LATEST SALES (Right - Narrower) -->
+            <!-- LATEST SALES (Right) -->
             <div class="xl:col-span-4 flex flex-col gap-6">
                 <div class="glass-card h-full bg-gradient-to-b from-white to-slate-50">
-                    <div class="p-6 border-b border-slate-100">
+                    <div class="p-4 md:p-6 border-b border-slate-100">
                         <h3 class="font-bold text-slate-800 text-lg flex items-center">
                             <span class="bg-emerald-100 text-emerald-600 p-2 rounded-lg mr-3"><i class="fas fa-chart-line"></i></span>
                             Son Satışlar
@@ -285,67 +294,72 @@
     </div>
 
     <!-- EDIT MODAL -->
-    <div id="editModal" class="fixed inset-0 modal-overlay z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg transform transition-all scale-100 overflow-hidden border border-slate-100">
-            <div class="px-6 py-5 border-b border-slate-100 bg-slate-50 flex justify-between items-center">
+    <div id="editModal" class="fixed inset-0 modal-overlay z-50 hidden flex items-end md:items-center justify-center p-0 md:p-4">
+        <div class="bg-white rounded-t-2xl md:rounded-2xl shadow-2xl w-full max-w-lg transform transition-all scale-100 overflow-hidden border border-slate-100 h-[90vh] md:h-auto flex flex-col">
+            <div class="px-6 py-5 border-b border-slate-100 bg-slate-50 flex justify-between items-center shrink-0">
                 <h3 class="text-lg font-bold text-slate-800">Kaydı Düzenle</h3>
                 <button onclick="closeEditModal()" class="w-8 h-8 rounded-full bg-white text-slate-400 hover:text-rose-500 shadow-sm flex items-center justify-center transition"><i class="fas fa-times"></i></button>
             </div>
             
-            <form id="editForm" class="p-6 space-y-5">
-                <input type="hidden" id="modalRowIndex">
-                <input type="hidden" id="modalSheetName">
-                
-                <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <label class="text-xs font-bold text-slate-500 mb-1.5 block uppercase">Tarih</label>
-                        <input type="text" id="modalDate" class="modern-input">
+            <div class="overflow-y-auto p-6 space-y-5 flex-1">
+                <form id="editForm" class="space-y-5">
+                    <input type="hidden" id="modalRowIndex">
+                    <input type="hidden" id="modalSheetName">
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="text-xs font-bold text-slate-500 mb-1.5 block uppercase">Tarih</label>
+                            <input type="text" id="modalDate" class="modern-input">
+                        </div>
+                        <div>
+                            <label class="text-xs font-bold text-slate-500 mb-1.5 block uppercase">Şube</label>
+                            <input type="text" id="modalBranch" class="modern-input bg-slate-100 text-slate-500 cursor-not-allowed" readonly>
+                        </div>
                     </div>
-                    <div>
-                        <label class="text-xs font-bold text-slate-500 mb-1.5 block uppercase">Şube</label>
-                        <input type="text" id="modalBranch" class="modern-input bg-slate-100 text-slate-500 cursor-not-allowed" readonly>
-                    </div>
-                </div>
 
-                <div>
-                    <label class="text-xs font-bold text-slate-500 mb-1.5 block uppercase">Müşteri Adı</label>
-                    <input type="text" id="modalName" class="modern-input">
-                </div>
+                    <div>
+                        <label class="text-xs font-bold text-slate-500 mb-1.5 block uppercase">Müşteri Adı</label>
+                        <input type="text" id="modalName" class="modern-input">
+                    </div>
 
-                <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <label class="text-xs font-bold text-slate-500 mb-1.5 block uppercase">İletişim</label>
-                        <input type="text" id="modalContact" class="modern-input">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="text-xs font-bold text-slate-500 mb-1.5 block uppercase">İletişim</label>
+                            <input type="text" id="modalContact" class="modern-input">
+                        </div>
+                        <div>
+                            <label class="text-xs font-bold text-slate-500 mb-1.5 block uppercase">Durum</label>
+                            <select id="modalStatus" class="modern-input">
+                                <option>Aranmadı</option><option>Arandı</option>
+                            </select>
+                        </div>
                     </div>
-                    <div>
-                        <label class="text-xs font-bold text-slate-500 mb-1.5 block uppercase">Durum</label>
-                        <select id="modalStatus" class="modern-input">
-                            <option>Aranmadı</option><option>Arandı</option>
-                        </select>
-                    </div>
-                </div>
 
-                <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <label class="text-xs font-bold text-slate-500 mb-1.5 block uppercase">Kategori</label>
-                        <select id="modalCategory" class="modern-input">
-                            <option>Mobilya</option><option>Baza Yatak Başlık</option><option>Bebek Çocuk</option>
-                            <option>Beyaz Eşya</option><option>Elektrikli Ev Aletleri</option><option>Elektronik</option>
-                            <option>Ev Dekorasyonu</option><option>Halı</option><option>Tekstil</option>
-                            <option>Züccaciye</option><option>Ayakkabı</option>
-                        </select>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="text-xs font-bold text-slate-500 mb-1.5 block uppercase">Kategori</label>
+                            <select id="modalCategory" class="modern-input">
+                                <option>Mobilya</option><option>Baza Yatak Başlık</option><option>Bebek Çocuk</option>
+                                <option>Beyaz Eşya</option><option>Elektrikli Ev Aletleri</option><option>Elektronik</option>
+                                <option>Ev Dekorasyonu</option><option>Halı</option><option>Tekstil</option>
+                                <option>Züccaciye</option><option>Ayakkabı</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="text-xs font-bold text-slate-500 mb-1.5 block uppercase">Ürün Adı</label>
+                            <input type="text" id="modalProduct" class="modern-input">
+                        </div>
                     </div>
-                    <div>
-                        <label class="text-xs font-bold text-slate-500 mb-1.5 block uppercase">Ürün Adı</label>
-                        <input type="text" id="modalProduct" class="modern-input">
-                    </div>
-                </div>
+                    
+                    <!-- Form bitişi için boşluk -->
+                    <div class="h-4"></div>
+                </form>
+            </div>
 
-                <div class="flex justify-end gap-3 pt-4 mt-2 border-t border-slate-100">
-                    <button type="button" onclick="closeEditModal()" class="btn-modern btn-soft">İptal</button>
-                    <button type="submit" class="btn-modern btn-gradient px-8">Değişiklikleri Kaydet</button>
-                </div>
-            </form>
+            <div class="p-4 border-t border-slate-100 bg-white shrink-0 flex justify-end gap-3">
+                <button type="button" onclick="closeEditModal()" class="btn-modern btn-soft w-full md:w-auto">İptal</button>
+                <button type="submit" form="editForm" class="btn-modern btn-gradient w-full md:w-auto px-8">Kaydet</button>
+            </div>
         </div>
     </div>
 
@@ -364,8 +378,6 @@
             await fetchBranches();
             addInputRow();
             refreshData();
-            
-            // Otomatik Yenileme (30sn daha makul)
             setInterval(refreshData, 30000); 
         });
 
@@ -374,12 +386,10 @@
             const timeDisplay = document.getElementById('lastUpdateTime');
             const now = new Date();
             timeDisplay.textContent = now.toLocaleTimeString('tr-TR', {hour:'2-digit', minute:'2-digit'});
-            
             fetchRecentRecords(); 
             fetchLatestSales();
         }
 
-        // Tarih Formatlayıcı (Formlar için)
         function getTodayDateTime() {
             const now = new Date();
             const year = now.getFullYear();
@@ -398,7 +408,7 @@
             } catch(e) { console.error("Şubeler çekilemedi", e); }
         }
 
-        // --- FORM GİRİŞİ (INPUT ROW) ---
+        // --- FORM GİRİŞİ (INPUT ROW) - RESPONSIVE LABEL DESTEĞİ ---
         function addInputRow() {
             const container = document.getElementById('inputContainer');
             const row = document.createElement('div');
@@ -407,27 +417,64 @@
             let branchOptions = '<option value="" disabled selected>Şube Seçin</option>';
             branchList.forEach(b => branchOptions += `<option value="${b}">${b}</option>`);
 
+            // Her inputun başına mobil için (md:hidden) label eklendi.
+            // Masaüstünde bu label'lar gizlenir, grid yapısı korunur.
             row.innerHTML = `
-                <input type="datetime-local" class="modern-input inp-date" value="${getTodayDateTime()}">
-                <select class="modern-input inp-branch">${branchOptions}</select>
-                <input type="text" class="modern-input inp-name" placeholder="Müşteri Adı Soyadı">
-                <input type="text" class="modern-input inp-contact" placeholder="05XX XXX XX XX">
-                <select class="modern-input inp-media">
-                    <option>Instagram</option><option>Whatsapp</option><option>Facebook</option>
-                    <option>Çağrı</option><option>Web Form</option>
-                </select>
-                <select class="modern-input inp-category">
-                    <option>Mobilya</option><option>Baza Yatak Başlık</option><option>Bebek Çocuk</option>
-                    <option>Beyaz Eşya</option><option>Elektrikli Ev Aletleri</option><option>Elektronik</option>
-                    <option>Ev Dekorasyonu</option><option>Halı</option><option>Tekstil</option>
-                    <option>Züccaciye</option><option>Ayakkabı</option>
-                </select>
-                <input type="text" class="modern-input inp-product" placeholder="Ürün Modeli/Adı">
-                <select class="modern-input inp-status">
-                    <option>Aranmadı</option><option>Arandı</option>
-                </select>
-                <div class="text-center">
-                    <button onclick="removeRow(this)" class="w-8 h-8 rounded-lg bg-rose-50 text-rose-500 hover:bg-rose-500 hover:text-white transition flex items-center justify-center"><i class="fas fa-trash-alt text-sm"></i></button>
+                <div class="w-full">
+                    <label class="block text-xs font-bold text-slate-400 mb-1 xl:hidden uppercase">Tarih</label>
+                    <input type="datetime-local" class="modern-input inp-date" value="${getTodayDateTime()}">
+                </div>
+                
+                <div class="w-full">
+                    <label class="block text-xs font-bold text-slate-400 mb-1 xl:hidden uppercase">Şube</label>
+                    <select class="modern-input inp-branch">${branchOptions}</select>
+                </div>
+                
+                <div class="w-full">
+                    <label class="block text-xs font-bold text-slate-400 mb-1 xl:hidden uppercase">Müşteri Adı</label>
+                    <input type="text" class="modern-input inp-name" placeholder="Ad Soyad">
+                </div>
+                
+                <div class="w-full">
+                    <label class="block text-xs font-bold text-slate-400 mb-1 xl:hidden uppercase">İletişim</label>
+                    <input type="tel" class="modern-input inp-contact" placeholder="5XX XXX XX XX">
+                </div>
+                
+                <div class="w-full">
+                    <label class="block text-xs font-bold text-slate-400 mb-1 xl:hidden uppercase">Medya</label>
+                    <select class="modern-input inp-media">
+                        <option>Instagram</option><option>Whatsapp</option><option>Facebook</option>
+                        <option>Çağrı</option><option>Web Form</option>
+                    </select>
+                </div>
+                
+                <div class="w-full">
+                    <label class="block text-xs font-bold text-slate-400 mb-1 xl:hidden uppercase">Kategori</label>
+                    <select class="modern-input inp-category">
+                        <option>Mobilya</option><option>Baza Yatak Başlık</option><option>Bebek Çocuk</option>
+                        <option>Beyaz Eşya</option><option>Elektrikli Ev Aletleri</option><option>Elektronik</option>
+                        <option>Ev Dekorasyonu</option><option>Halı</option><option>Tekstil</option>
+                        <option>Züccaciye</option><option>Ayakkabı</option>
+                    </select>
+                </div>
+                
+                <div class="w-full">
+                    <label class="block text-xs font-bold text-slate-400 mb-1 xl:hidden uppercase">Ürün Adı</label>
+                    <input type="text" class="modern-input inp-product" placeholder="Ürün Modeli">
+                </div>
+                
+                <div class="w-full">
+                    <label class="block text-xs font-bold text-slate-400 mb-1 xl:hidden uppercase">Durum</label>
+                    <select class="modern-input inp-status">
+                        <option>Aranmadı</option><option>Arandı</option>
+                    </select>
+                </div>
+                
+                <div class="w-full flex justify-end xl:justify-center">
+                    <label class="block text-xs font-bold text-slate-400 mb-1 xl:hidden uppercase mr-2 self-center">Sil</label>
+                    <button onclick="removeRow(this)" class="w-10 h-10 xl:w-8 xl:h-8 rounded-lg bg-rose-50 text-rose-500 hover:bg-rose-500 hover:text-white transition flex items-center justify-center">
+                        <i class="fas fa-trash-alt text-sm"></i>
+                    </button>
                 </div>
             `;
             container.appendChild(row);
@@ -436,6 +483,7 @@
         function removeRow(btn) {
             const container = document.getElementById('inputContainer');
             if(container.children.length > 1) {
+                // btn -> div -> div.input-row-wrapper (structure değiştiği için closest ile buluyoruz)
                 btn.closest('.input-row-wrapper').remove();
             } else {
                 alert("En az bir satır kalmalıdır.");
@@ -451,10 +499,8 @@
                 const branch = row.querySelector('.inp-branch').value;
                 const name = row.querySelector('.inp-name').value;
                 const dateVal = row.querySelector('.inp-date').value;
-                
-                const formattedDate = dateVal.replace('T', ' '); // Backend formatı
+                const formattedDate = dateVal.replace('T', ' '); 
 
-                // Telefon numarası temizleme işlemi: Boşlukları ve +90'ı kaldır
                 let rawContact = row.querySelector('.inp-contact').value;
                 let cleanContact = rawContact.replace(/\s/g, '').replace(/^\+90/, '');
 
@@ -463,8 +509,6 @@
                     isValid = false;
                 } else {
                     row.style.border = '1px solid #f1f5f9';
-                    
-                    // DEĞİŞİKLİK: Emoji kaldırıldı, sadece isim gönderiliyor.
                     dataToSend.push({
                         date: formattedDate,
                         branch: branch,
@@ -496,23 +540,15 @@
             .then(result => {
                 alert("Başarıyla Kaydedildi!");
                 
-                // --- OPTIMISTIC UI GÜNCELLEMESİ (HIZLI GÖSTERİM) ---
-                // Veritabanı gecikse bile kullanıcı veriyi tabloda hemen görsün
                 const tempRecords = dataToSend.map(item => ({
-                    ...item,
-                    sheetName: null, // Henüz backend'den gelmedi
-                    rowIndex: null   // Henüz ID yok
+                    ...item, sheetName: null, rowIndex: null
                 }));
-                
-                // Yeni kayıtları listenin başına ekle
                 globalRecords = [...tempRecords, ...globalRecords];
                 currentPage = 1;
                 renderTable();
 
                 document.getElementById('inputContainer').innerHTML = ''; 
                 addInputRow();
-                
-                // Gerçek senkronizasyonu biraz ertele ki Google Sheets işleyebilsin
                 setTimeout(refreshData, 5000);
             })
             .catch(err => {
@@ -525,23 +561,17 @@
             });
         }
 
-        // --- SON İŞLEMLER (LİSTELEME) ---
+        // --- SON İŞLEMLER (RESPONSIVE TABLE RENDER) ---
         async function fetchRecentRecords() {
             try {
                 const response = await fetch(`${GOOGLE_APPS_SCRIPT_WEB_APP_URL}?action=getRecentRecords&t=${new Date().getTime()}`);
                 const data = await response.json();
                 
                 if (data.records && data.records.length > 0) {
-                    // Backend'den veri gelince global listeyi güncelle, ancak filtreyi geniş tut
                     globalRecords = data.records; 
                     renderTable();
-                } else {
-                    // Eğer veri gelmezse ve zaten elimizde "geçici" (optimistic) veri varsa tabloyu silme
-                    if (globalRecords.some(r => r.sheetName === null)) {
-                        // Veriler hala kaydediliyor olabilir, mevcutu koru
-                    } else {
-                        document.getElementById('crmTableBody').innerHTML = '<tr><td colspan="5" class="text-center text-slate-400 py-8">Kayıt bulunamadı.</td></tr>';
-                    }
+                } else if (!globalRecords.some(r => r.sheetName === null)) {
+                    document.getElementById('crmTableBody').innerHTML = '<tr><td colspan="5" class="text-center text-slate-400 py-8">Kayıt bulunamadı.</td></tr>';
                 }
             } catch(e) { console.error(e); }
         }
@@ -563,16 +593,13 @@
             const pageData = globalRecords.slice(start, end);
 
             pageData.forEach((data, index) => {
-                const actualIndex = start + index; // Global array indexi
+                const actualIndex = start + index; 
                 const row = document.createElement('tr');
                 
                 let cleanBranch = data.branch.replace(/ Şubesi/gi, "").trim();
                 let statusClass = data.status === 'Arandı' ? 'status-green' : 'status-gray';
-                
-                // rowIndex kontrolü (Optimistic kayıtlarda null olabilir)
                 const isDeletable = data.rowIndex !== undefined && data.rowIndex !== null && data.rowIndex !== -1 && data.sheetName;
 
-                // Tarih parsing
                 let displayDate = data.date;
                 let displayTime = '';
                 if(data.date.includes(' ')) {
@@ -581,31 +608,35 @@
                     displayTime = parts[1];
                 }
 
-                // Geçici kayıt görsel farkındalığı (hafif şeffaf)
                 if (!isDeletable) row.classList.add('opacity-75', 'bg-slate-50');
 
+                // Mobil uyumluluk için "data-label" attribute'ları eklendi
                 row.innerHTML = `
-                    <td>
-                        <div class="flex flex-col">
+                    <td data-label="Tarih">
+                        <div class="flex flex-col md:block text-right md:text-left">
                             <span class="font-bold text-slate-700 text-sm">${displayDate}</span>
-                            <span class="text-xs text-slate-400">${displayTime}</span>
+                            <span class="text-xs text-slate-400 block">${displayTime}</span>
                         </div>
                     </td>
-                    <td>
-                        <div class="flex flex-col gap-1 items-start">
+                    <td data-label="Şube / Durum">
+                        <div class="flex flex-col gap-1 items-end md:items-start">
                             <span class="text-xs font-bold text-slate-600 bg-slate-100 px-2 py-0.5 rounded">${cleanBranch}</span>
                             <span class="status-pill ${statusClass} text-[10px]">${data.status || 'Belirsiz'}</span>
                         </div>
                     </td>
-                    <td>
-                        <div class="font-bold text-sm text-slate-800">${data.name}</div>
-                        <div class="text-xs text-slate-400 flex items-center gap-1"><i class="fas fa-phone-alt text-[10px]"></i> ${data.contact}</div>
+                    <td data-label="Müşteri">
+                        <div class="text-right md:text-left">
+                            <div class="font-bold text-sm text-slate-800">${data.name}</div>
+                            <div class="text-xs text-slate-400 flex items-center justify-end md:justify-start gap-1"><i class="fas fa-phone-alt text-[10px]"></i> ${data.contact}</div>
+                        </div>
                     </td>
-                    <td>
-                        <div class="text-sm text-slate-600 font-medium">${data.category}</div>
-                        <div class="text-xs text-slate-400 truncate w-32">${data.product || '-'}</div>
+                    <td data-label="Ürün">
+                        <div class="text-right md:text-left">
+                            <div class="text-sm text-slate-600 font-medium">${data.category}</div>
+                            <div class="text-xs text-slate-400 truncate w-32 ml-auto md:ml-0">${data.product || '-'}</div>
+                        </div>
                     </td>
-                    <td class="text-right pr-4">
+                    <td data-label="İşlemler">
                         <div class="flex justify-end gap-2">
                             ${isDeletable ? `
                             <button class="btn-action btn-edit" onclick="openEditModal(${actualIndex})" title="Düzenle">
@@ -663,7 +694,6 @@
             } catch(e) {}
         }
 
-        // --- DÜZELTİLMİŞ SİLME FONKSİYONU ---
         function deleteRow(index, btnElement) {
             const data = globalRecords[index];
             if(!data || !data.sheetName || !data.rowIndex) {
@@ -673,7 +703,6 @@
 
             if(!confirm(`${data.name} isimli müşteriyi silmek istediğinize emin misiniz?`)) return;
             
-            // UI Feedback: Butonu loading yap
             const originalContent = btnElement.innerHTML;
             btnElement.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
             btnElement.disabled = true;
@@ -693,16 +722,11 @@
             .then(res => res.json())
             .then(res => {
                 if(res.status === 'success') {
-                    // Satırı görsel olarak hemen kaldır (Optimistic UI)
                     const row = btnElement.closest('tr');
                     row.style.transition = 'all 0.5s';
                     row.style.opacity = '0';
                     setTimeout(() => row.remove(), 500);
-                    
-                    // Global listeden de sil ki sayfa değişince geri gelmesin
                     globalRecords = globalRecords.filter(r => r.rowIndex !== data.rowIndex);
-                    
-                    // Veriyi arkada güncelle
                     setTimeout(refreshData, 2000);
                 } else {
                     alert("Hata: " + res.message);
@@ -734,7 +758,6 @@
             
             const modal = document.getElementById('editModal');
             modal.classList.remove('hidden');
-            // Animasyon için küçük bir timeout
             setTimeout(() => {
                 modal.querySelector('div').classList.remove('scale-95', 'opacity-0');
                 modal.querySelector('div').classList.add('scale-100', 'opacity-100');
