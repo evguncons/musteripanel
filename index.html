@@ -459,10 +459,15 @@
                     isValid = false;
                 } else {
                     row.style.border = '1px solid #f1f5f9';
+                    
+                    // --- İSTENEN DEĞİŞİKLİK: İSME EMOJİ EKLEME ---
+                    // Google Sheets'te panelden eklendiğini belli etmek için ⚠️ emojisi ekleniyor.
+                    const nameWithEmoji = name.trim() + " ⚠️";
+
                     dataToSend.push({
                         date: formattedDate,
                         branch: branch,
-                        name: name,
+                        name: nameWithEmoji, // Emoji eklenmiş hali gönderiliyor
                         contact: row.querySelector('.inp-contact').value,
                         media: row.querySelector('.inp-media').value,
                         category: row.querySelector('.inp-category').value,
