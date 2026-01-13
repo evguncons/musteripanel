@@ -3,386 +3,626 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Online Satış Müşteri Paneli</title>
+    <title>HEDEF AVM ONLİNE SATIŞ YÖNLENDİRME</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        /* --- MODERN LIGHT TEMA --- */
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: #f3f4f6; /* Açık Gri Arka Plan */
-            background-image: 
-                radial-gradient(at 0% 0%, hsla(253,16%,7%,0) 0, hsla(253,16%,7%,0) 50%), 
-                radial-gradient(at 50% 0%, hsla(225,39%,30%,0.1) 0, hsla(225,39%,30%,0) 50%), 
-                radial-gradient(at 100% 0%, hsla(339,49%,30%,0.1) 0, hsla(339,49%,30%,0) 50%);
+        :root {
+            --primary: #4f46e5;
+            --primary-dark: #4338ca;
+            --bg-color: #f8fafc;
+        }
+        
+        body { 
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+            background: linear-gradient(135deg, #f0f4ff 0%, #ffffff 100%);
+            color: #1e293b; 
             min-height: 100vh;
-            margin: 0;
-            padding: 20px;
-            color: #1f2937;
-            overflow-x: hidden;
         }
-
-        /* Scrollbar */
-        ::-webkit-scrollbar { width: 8px; }
-        ::-webkit-scrollbar-track { background: #e5e7eb; }
-        ::-webkit-scrollbar-thumb { background: #9ca3af; border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: #6b7280; }
-
-        .main-content-wrapper {
-            position: relative;
-            z-index: 10;
-            width: 100%;
-            max-width: 1100px;
-            margin: 0 auto;
-            display: flex;
-            flex-direction: column;
-            gap: 25px;
-        }
-
-        .panel-title {
-            font-size: 2.2rem;
-            font-weight: 800;
-            text-align: center;
-            color: #111827;
-            margin-bottom: 5px;
-            letter-spacing: -0.5px;
-        }
-
-        /* Kart Tasarımı (Clean White) */
+        
+        /* Glassmorphism Card */
         .glass-card {
-            background-color: #ffffff;
-            border-radius: 16px;
-            padding: 30px;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-            border: 1px solid #e5e7eb;
-            transition: transform 0.2s, box-shadow 0.2s;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            border-radius: 20px;
+            box-shadow: 0 10px 40px -10px rgba(0,0,0,0.05);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
         }
+        
         .glass-card:hover {
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            box-shadow: 0 20px 50px -10px rgba(79, 70, 229, 0.1);
         }
 
-        /* Form Elemanları */
-        .form-group label {
-            display: block;
-            margin-bottom: 6px;
-            color: #4b5563; /* Koyu Gri */
-            font-weight: 600;
-            font-size: 0.9rem;
-        }
-        .form-control {
+        /* Modern Input */
+        .modern-input {
             width: 100%;
-            padding: 12px 16px;
-            background-color: #f9fafb;
-            border: 1px solid #d1d5db;
-            border-radius: 8px;
-            color: #1f2937;
-            transition: all 0.2s;
-            font-size: 0.95rem;
-        }
-        .form-control:focus {
-            outline: none;
-            border-color: #3b82f6; /* Mavi Odak */
-            background-color: #ffffff;
-            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
-        }
-        
-        /* Select Okunu Özelleştirme (Dark) */
-        select.form-control {
-            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
-            background-position: right 1rem center;
-            background-repeat: no-repeat;
-            background-size: 1.5em 1.5em;
-            appearance: none;
-        }
-
-        /* Tablo */
-        .custom-table {
-            width: 100%;
-            border-collapse: separate;
-            border-spacing: 0;
-            border-radius: 8px;
-            overflow: hidden;
-        }
-        .custom-table th {
-            background-color: #f3f4f6;
-            padding: 12px 16px;
-            text-align: left;
-            color: #4b5563;
-            font-weight: 700;
-            font-size: 0.85rem;
-            text-transform: uppercase;
-            border-bottom: 1px solid #e5e7eb;
-        }
-        .custom-table td {
-            background-color: #ffffff;
-            padding: 12px 16px;
-            color: #1f2937;
-            border-bottom: 1px solid #f3f4f6;
+            padding: 10px 14px;
             font-size: 0.9rem;
-        }
-        .custom-table tr:last-child td { border-bottom: none; }
-        .custom-table tr:hover td { background-color: #f9fafb; }
-
-        /* Butonlar */
-        .action-btn { padding: 6px 10px; border-radius: 6px; cursor: pointer; margin-right: 5px; transition: background 0.2s; }
-        .btn-edit { background: #eff6ff; color: #2563eb; }
-        .btn-edit:hover { background: #dbeafe; }
-        .btn-delete { background: #fef2f2; color: #dc2626; }
-        .btn-delete:hover { background: #fee2e2; }
-
-        .pagination-btn {
-            background-color: #ffffff;
-            color: #374151;
-            padding: 8px 16px;
-            border-radius: 8px;
-            transition: 0.2s;
-            cursor: pointer;
-            border: 1px solid #d1d5db;
-            font-size: 0.9rem;
-        }
-        .pagination-btn:hover:not(:disabled) { background-color: #f3f4f6; border-color: #9ca3af; }
-        .pagination-btn:disabled { opacity: 0.5; cursor: not-allowed; background-color: #f9fafb; }
-
-        /* Son Satışlar Kartları */
-        .sales-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }
-        .sale-card {
-            background: #ffffff;
-            border-left: 4px solid #10b981; /* Yeşil sol border */
-            padding: 20px;
+            border: 1px solid #e2e8f0;
             border-radius: 12px;
-            position: relative;
-            animation: slideIn 0.5s ease-out;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-            border: 1px solid #f3f4f6;
-            border-left-width: 4px;
+            background-color: #f8fafc;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            color: #334155;
+            font-weight: 500;
         }
-        .sale-amount { font-size: 1.4rem; font-weight: 800; color: #10b981; }
+        .modern-input:focus { 
+            outline: none; 
+            border-color: var(--primary); 
+            background-color: #fff;
+            box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1); 
+        }
+        .modern-input::placeholder { color: #94a3b8; font-weight: 400; }
         
-        .editing-mode { border: 2px solid #f59e0b; box-shadow: 0 0 0 4px rgba(245, 158, 11, 0.1); }
+        /* Table Styling */
+        .custom-table { width: 100%; border-collapse: separate; border-spacing: 0 8px; }
+        .custom-table th { 
+            color: #64748b; 
+            font-weight: 600; 
+            text-transform: uppercase; 
+            font-size: 0.75rem; 
+            padding: 0 20px 10px 20px;
+            letter-spacing: 0.05em;
+        }
+        .custom-table tbody tr {
+            background: white;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.02);
+            transition: transform 0.2s;
+        }
+        .custom-table tbody tr:hover {
+            transform: scale(1.005);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            z-index: 10;
+            position: relative;
+        }
+        .custom-table td { 
+            padding: 16px 20px; 
+            font-size: 0.9rem; 
+            vertical-align: middle;
+        }
+        .custom-table td:first-child { border-top-left-radius: 16px; border-bottom-left-radius: 16px; }
+        .custom-table td:last-child { border-top-right-radius: 16px; border-bottom-right-radius: 16px; }
+
+        /* Buttons */
+        .btn-modern { 
+            display: inline-flex; align-items: center; justify-content: center;
+            padding: 10px 20px; border-radius: 12px; font-weight: 600; font-size: 0.9rem;
+            transition: all 0.3s; cursor: pointer; letter-spacing: 0.02em;
+        }
+        .btn-gradient { 
+            background: linear-gradient(135deg, #4f46e5 0%, #6366f1 100%); 
+            color: white; 
+            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.25); 
+            border: none;
+        }
+        .btn-gradient:hover { 
+            transform: translateY(-2px); 
+            box-shadow: 0 6px 20px rgba(79, 70, 229, 0.35); 
+        }
+        .btn-gradient:active { transform: translateY(0); }
         
-        @keyframes slideIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .btn-soft { background-color: #f1f5f9; color: #475569; }
+        .btn-soft:hover { background-color: #e2e8f0; color: #1e293b; }
+
+        .btn-action { 
+            width: 36px; height: 36px; border-radius: 10px; 
+            display: inline-flex; align-items: center; justify-content: center; 
+            transition: 0.2s; cursor: pointer; border: none; outline: none;
+        }
+        .btn-edit { background-color: #eef2ff; color: #4f46e5; }
+        .btn-edit:hover { background-color: #4f46e5; color: white; }
+        .btn-delete { background-color: #fef2f2; color: #ef4444; }
+        .btn-delete:hover { background-color: #ef4444; color: white; }
+
+        /* Grid Input Row */
+        .input-row-wrapper {
+            background: white;
+            padding: 15px;
+            border-radius: 16px;
+            border: 1px solid #f1f5f9;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.02);
+            margin-bottom: 12px;
+            display: grid;
+            grid-template-columns: 140px 140px 1fr 1fr 110px 130px 1fr 110px 50px;
+            gap: 12px;
+            align-items: center;
+            transition: all 0.2s;
+        }
+        .input-row-wrapper:hover { border-color: #e0e7ff; box-shadow: 0 5px 15px rgba(79, 70, 229, 0.05); }
+
+        /* Status Pills */
+        .status-pill {
+            padding: 6px 12px; border-radius: 30px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase;
+        }
+        .status-green { background-color: #d1fae5; color: #047857; }
+        .status-gray { background-color: #f1f5f9; color: #64748b; }
+        .status-indigo { background-color: #e0e7ff; color: #3730a3; }
+
+        /* Modal */
+        .modal-overlay { background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(8px); }
         
-        /* Animasyonlu Bildirim */
-        .pulse-dot { display: inline-block; width: 8px; height: 8px; background-color: #10b981; border-radius: 50%; animation: pulse 2s infinite; margin-left: 5px; }
-        @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); } 70% { box-shadow: 0 0 0 6px rgba(16, 185, 129, 0); } 100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); } }
+        @media (max-width: 1400px) {
+            .input-row-wrapper { display: flex; flex-direction: column; gap: 10px; }
+            .grid-header { display: none !important; }
+            .btn-action { width: 100%; height: 40px; margin-bottom: 5px; border-radius: 8px; }
+        }
+        
+        /* Loading Animation */
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .loader { border: 2px solid #f3f3f3; border-top: 2px solid #4f46e5; border-radius: 50%; width: 16px; height: 16px; animation: spin 1s linear infinite; display: inline-block; }
     </style>
 </head>
 <body>
-    <div class="main-content-wrapper">
-        <div class="panel-header text-center py-6">
-            <h1 class="panel-title">SATIŞ & MÜŞTERİ PANELİ</h1>
-            <p class="text-gray-500 text-sm font-medium">CANLI VERİ AKIŞI AKTİF <span class="pulse-dot"></span></p>
-        </div>
 
-        <!-- FORM BÖLÜMÜ -->
-        <div class="glass-card" id="formCard">
-            <h2 class="text-xl font-bold text-gray-800 mb-6 border-b border-gray-200 pb-3 flex items-center justify-between">
-                <span class="flex items-center"><i class="fas fa-user-plus text-blue-600 mr-3"></i> <span id="formTitle">Yeni Müşteri Kaydı</span></span>
-                <button id="cancelEditBtn" class="hidden text-sm bg-red-100 text-red-600 px-3 py-1 rounded hover:bg-red-200 transition" onclick="cancelEditMode()">Vazgeç</button>
-            </h2>
+    <div class="max-w-[1800px] mx-auto p-4 md:p-8">
+        
+        <!-- HEADER -->
+        <header class="flex flex-col md:flex-row justify-between items-center mb-10 gap-6">
+            <div class="flex items-center gap-4">
+                <div class="w-14 h-14 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-2xl flex items-center justify-center shadow-lg shadow-indigo-200">
+                    <i class="fas fa-cube text-white text-2xl"></i>
+                </div>
+                <div>
+                    <!-- Değişiklik: Başlık güncellendi -->
+                    <h1 class="text-2xl font-bold text-slate-800 tracking-tight">HEDEF AVM ONLİNE SATIŞ YÖNLENDİRME</h1>
+                    <div class="flex items-center gap-2 mt-1">
+                        <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                        <p class="text-sm text-slate-500 font-medium">Veritabanı Bağlı • v2.2</p>
+                    </div>
+                </div>
+            </div>
             
-            <form id="customerForm" class="grid grid-cols-1 md:grid-cols-2 gap-6 form-grid">
-                <input type="hidden" id="editRowIndex" value="">
-                <input type="hidden" id="editSheetName" value="">
-                
-                <div class="form-group">
-                    <label>Tarih</label>
-                    <input type="date" id="crmDate" class="form-control" required>
+            <div class="flex gap-3">
+                <div class="hidden md:flex flex-col items-end mr-4">
+                    <span class="text-xs font-bold text-slate-400 uppercase">Son Güncelleme</span>
+                    <span id="lastUpdateTime" class="text-sm font-semibold text-slate-700">--:--</span>
                 </div>
-                <div class="form-group">
-                    <label>Şube Seçimi</label>
-                    <select id="crmBranch" class="form-control" required>
-                        <option value="">Şube Seçiniz...</option>
-                    </select>
+                <button onclick="refreshData()" class="btn-modern btn-soft shadow-sm group">
+                    <i class="fas fa-sync-alt mr-2 text-indigo-500 group-hover:rotate-180 transition-transform duration-500"></i> Yenile
+                </button>
+            </div>
+        </header>
+
+        <!-- INPUT SECTION -->
+        <section class="glass-card p-1 mb-10">
+            <div class="p-6 border-b border-slate-100 flex justify-between items-center">
+                <h2 class="font-bold text-slate-700 text-lg flex items-center">
+                    <span class="w-1 h-6 bg-indigo-500 rounded-full mr-3"></span>
+                    Hızlı Veri Girişi
+                </h2>
+                <button onclick="addInputRow()" class="text-sm font-semibold text-indigo-600 hover:text-indigo-700 bg-indigo-50 hover:bg-indigo-100 px-4 py-2 rounded-lg transition">
+                    <i class="fas fa-plus mr-1"></i> Satır Ekle
+                </button>
+            </div>
+            
+            <div class="p-6 bg-slate-50/50 rounded-b-[20px]">
+                <!-- Headers -->
+                <div class="grid-header grid grid-cols-[140px_140px_1fr_1fr_110px_130px_1fr_110px_50px] gap-3 px-4 mb-3 text-xs font-bold text-slate-400 uppercase tracking-wider">
+                    <div>Tarih</div>
+                    <div>Şube</div>
+                    <div>Müşteri Adı</div>
+                    <div>İletişim</div>
+                    <div>Medya</div>
+                    <div>Kategori</div>
+                    <div>Ürün Adı</div>
+                    <div>Durum</div>
+                    <div class="text-center">Sil</div>
                 </div>
 
-                <div class="form-group">
-                    <label>Müşteri Adı Soyadı</label>
-                    <input type="text" id="crmName" class="form-control" placeholder="Örn: Ahmet Yılmaz" required>
-                </div>
-                <div class="form-group">
-                    <label>İletişim Bilgisi</label>
-                    <input type="text" id="crmContact" class="form-control" placeholder="05XX XXX XX XX" required>
-                </div>
+                <!-- Input Rows -->
+                <div id="inputContainer"></div>
 
-                <div class="form-group">
-                    <label>Medya Türü</label>
-                    <select id="crmMedia" class="form-control">
-                        <option value="Instagram">Instagram</option>
-                        <option value="Whatsapp">Whatsapp</option>
-                        <option value="Facebook">Facebook</option>
-                        <option value="Çağrı">Çağrı</option>
-                        <option value="Web Form">Web Site Form</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>İlgilendiği Kategori</label>
-                    <select id="crmCategory" class="form-control">
-                        <option value="Mobilya">Mobilya</option>
-                        <option value="Baza Yatak Başlık">Baza Yatak Başlık</option>
-                        <option value="Bebek Çocuk">Bebek Çocuk</option>
-                        <option value="Beyaz Eşya">Beyaz Eşya</option>
-                        <option value="Elektrikli Ev Aletleri">Elektrikli Ev Aletleri</option>
-                        <option value="Elektronik">Elektronik</option>
-                        <option value="Ev Dekorasyonu">Ev Dekorasyonu</option>
-                        <option value="Halı">Halı</option>
-                        <option value="Tekstil">Tekstil</option>
-                        <option value="Züccaciye">Züccaciye</option>
-                        <option value="Ayakkabı">Ayakkabı</option>
-                    </select>
-                </div>
-
-                <div class="form-group md:col-span-2">
-                    <label>Ürün Adı</label>
-                    <input type="text" id="crmProduct" class="form-control" placeholder="Örn: 3'lü Chester Koltuk Takımı Gri">
-                </div>
-
-                <div class="form-group">
-                    <label>Durum</label>
-                    <select id="crmStatus" class="form-control">
-                        <option value="Yeni Kayıt">Yeni Kayıt</option>
-                        <option value="Görüşülüyor">Görüşülüyor</option>
-                        <option value="Teklif Verildi">Teklif Verildi</option>
-                        <option value="Sonuçlandı">Sonuçlandı</option>
-                    </select>
-                </div>
-
-                <div class="md:col-span-2 mt-4">
-                    <button type="submit" id="submitBtn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg shadow-md transform transition hover:scale-[1.01] flex items-center justify-center text-lg tracking-wide">
-                        <i class="fas fa-save mr-2"></i> KAYDET VE GÖNDER
+                <div class="mt-6 flex justify-end">
+                    <button onclick="submitAllRows()" id="submitBtn" class="btn-modern btn-gradient px-10 py-3 text-base">
+                        <i class="fas fa-paper-plane mr-2"></i> KAYDET VE GÖNDER
                     </button>
                 </div>
-            </form>
-        </div>
+            </div>
+        </section>
 
-        <!-- SON İŞLEMLER TABLOSU -->
-        <div class="glass-card">
-            <div class="flex flex-wrap justify-between items-center mb-6 pl-3 border-l-4 border-blue-500">
-                <h3 class="text-xl font-bold text-gray-800">Son İşlemler (Müşteri Kayıtları)</h3>
-                <button id="refreshTableBtn" onclick="fetchRecentRecords()" class="text-sm bg-gray-100 text-gray-600 px-4 py-2 rounded-lg hover:bg-gray-200 transition flex items-center"><i class="fas fa-sync-alt mr-2"></i> Yenile</button>
-            </div>
+        <!-- DASHBOARD GRID -->
+        <div class="grid grid-cols-1 xl:grid-cols-12 gap-8">
             
-            <div class="overflow-x-auto rounded-lg border border-gray-200">
-                <table class="custom-table text-sm" id="crmTable">
-                    <thead>
-                        <tr>
-                            <th>Tarih</th><th>Şube</th><th>Müşteri</th><th>Kategori</th><th class="text-right">İşlemler</th>
-                        </tr>
-                    </thead>
-                    <tbody id="crmTableBody">
-                        <tr><td colspan="5" class="text-center text-gray-500 py-8">Veriler yükleniyor...</td></tr>
-                    </tbody>
-                </table>
-            </div>
-            <div class="flex justify-between items-center mt-6 pt-4 border-t border-gray-100">
-                <span class="text-sm text-gray-500">Sayfa <span id="pageIndicator" class="text-gray-900 font-bold">1</span></span>
-                <div class="flex gap-2">
-                    <button onclick="changePage(-1)" id="prevPageBtn" class="pagination-btn" disabled><i class="fas fa-chevron-left mr-1"></i> Önceki</button>
-                    <button onclick="changePage(1)" id="nextPageBtn" class="pagination-btn">Sonraki <i class="fas fa-chevron-right ml-1"></i></button>
+            <!-- RECENT TRANSACTIONS (Left - Wider) -->
+            <div class="xl:col-span-8 flex flex-col gap-6">
+                <div class="glass-card flex-1 flex flex-col min-h-[500px]">
+                    <div class="p-6 border-b border-slate-100 flex justify-between items-center">
+                        <div>
+                            <h3 class="font-bold text-slate-800 text-lg">Son İşlemler</h3>
+                            <p class="text-xs text-slate-400 mt-1">Sisteme girilen son kayıtlar listeleniyor</p>
+                        </div>
+                        <div class="bg-indigo-50 text-indigo-600 px-3 py-1 rounded-lg text-xs font-bold">
+                            <i class="fas fa-list mr-1"></i> Kayıtlar
+                        </div>
+                    </div>
+                    
+                    <div class="flex-1 overflow-x-auto p-4">
+                        <table class="custom-table">
+                            <thead>
+                                <tr>
+                                    <th>Tarih</th>
+                                    <th>Şube / Durum</th>
+                                    <th>Müşteri Bilgisi</th>
+                                    <th>Ürün Detayı</th>
+                                    <th class="text-right">İşlemler</th>
+                                </tr>
+                            </thead>
+                            <tbody id="crmTableBody">
+                                <tr><td colspan="5" class="text-center text-slate-400 py-12">Veriler yükleniyor...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="p-4 border-t border-slate-100 flex justify-between items-center bg-slate-50/50 rounded-b-[20px]">
+                        <span class="text-sm text-slate-500 font-medium ml-2">Sayfa <span id="pageIndicator" class="text-slate-900 font-bold">1</span></span>
+                        <div class="flex gap-2">
+                            <button onclick="changePage(-1)" id="prevPageBtn" class="btn-soft px-3 py-1.5 rounded-lg text-xs font-bold" disabled>Önceki</button>
+                            <button onclick="changePage(1)" id="nextPageBtn" class="btn-soft px-3 py-1.5 rounded-lg text-xs font-bold">Sonraki</button>
+                        </div>
+                    </div>
                 </div>
             </div>
-        </div>
 
-        <!-- SON SATIŞLAR -->
-        <div class="glass-card" style="border-top: 4px solid #10b981;">
-            <div class="flex justify-between items-center mb-6">
-                <h3 class="text-2xl font-bold text-gray-800 flex items-center"><i class="fas fa-chart-line text-green-600 mr-3"></i> Son Satışlar</h3>
-                <div class="text-xs text-gray-500 flex items-center bg-gray-100 px-2 py-1 rounded"><i class="fas fa-wifi mr-2 text-green-500"></i> Canlı (1dk)</div>
+            <!-- LATEST SALES (Right - Narrower) -->
+            <div class="xl:col-span-4 flex flex-col gap-6">
+                <div class="glass-card h-full bg-gradient-to-b from-white to-slate-50">
+                    <div class="p-6 border-b border-slate-100">
+                        <h3 class="font-bold text-slate-800 text-lg flex items-center">
+                            <span class="bg-emerald-100 text-emerald-600 p-2 rounded-lg mr-3"><i class="fas fa-chart-line"></i></span>
+                            Son Satışlar
+                        </h3>
+                        <p class="text-xs text-slate-400 mt-1 pl-12">Onaylanmış başarılı işlemler</p>
+                    </div>
+                    
+                    <div id="latestSalesContainer" class="p-4 space-y-3 overflow-y-auto max-h-[600px] custom-scrollbar">
+                        <div class="text-center text-slate-400 text-sm py-4">Veriler yükleniyor...</div>
+                    </div>
+                </div>
             </div>
-            <div id="latestSalesContainer" class="sales-grid">
-                <div class="col-span-full text-center py-8 text-gray-500">Veriler yükleniyor...</div>
+
+        </div>
+    </div>
+
+    <!-- EDIT MODAL -->
+    <div id="editModal" class="fixed inset-0 modal-overlay z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg transform transition-all scale-100 overflow-hidden border border-slate-100">
+            <div class="px-6 py-5 border-b border-slate-100 bg-slate-50 flex justify-between items-center">
+                <h3 class="text-lg font-bold text-slate-800">Kaydı Düzenle</h3>
+                <button onclick="closeEditModal()" class="w-8 h-8 rounded-full bg-white text-slate-400 hover:text-rose-500 shadow-sm flex items-center justify-center transition"><i class="fas fa-times"></i></button>
             </div>
+            
+            <form id="editForm" class="p-6 space-y-5">
+                <input type="hidden" id="modalRowIndex">
+                <input type="hidden" id="modalSheetName">
+                
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="text-xs font-bold text-slate-500 mb-1.5 block uppercase">Tarih</label>
+                        <input type="text" id="modalDate" class="modern-input">
+                    </div>
+                    <div>
+                        <label class="text-xs font-bold text-slate-500 mb-1.5 block uppercase">Şube</label>
+                        <input type="text" id="modalBranch" class="modern-input bg-slate-100 text-slate-500 cursor-not-allowed" readonly>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="text-xs font-bold text-slate-500 mb-1.5 block uppercase">Müşteri Adı</label>
+                    <input type="text" id="modalName" class="modern-input">
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="text-xs font-bold text-slate-500 mb-1.5 block uppercase">İletişim</label>
+                        <input type="text" id="modalContact" class="modern-input">
+                    </div>
+                    <div>
+                        <label class="text-xs font-bold text-slate-500 mb-1.5 block uppercase">Durum</label>
+                        <select id="modalStatus" class="modern-input">
+                            <option>Aranmadı</option><option>Arandı</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="text-xs font-bold text-slate-500 mb-1.5 block uppercase">Kategori</label>
+                        <select id="modalCategory" class="modern-input">
+                            <option>Mobilya</option><option>Baza Yatak Başlık</option><option>Bebek Çocuk</option>
+                            <option>Beyaz Eşya</option><option>Elektrikli Ev Aletleri</option><option>Elektronik</option>
+                            <option>Ev Dekorasyonu</option><option>Halı</option><option>Tekstil</option>
+                            <option>Züccaciye</option><option>Ayakkabı</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="text-xs font-bold text-slate-500 mb-1.5 block uppercase">Ürün Adı</label>
+                        <input type="text" id="modalProduct" class="modern-input">
+                    </div>
+                </div>
+
+                <div class="flex justify-end gap-3 pt-4 mt-2 border-t border-slate-100">
+                    <button type="button" onclick="closeEditModal()" class="btn-modern btn-soft">İptal</button>
+                    <button type="submit" class="btn-modern btn-gradient px-8">Değişiklikleri Kaydet</button>
+                </div>
+            </form>
         </div>
     </div>
 
     <script>
-        // WEB APP URL'İNİZİ BURAYA GİRİN
+        // --- AYARLAR ---
         const GOOGLE_APPS_SCRIPT_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbyMs3PM9WuAa1U60xQdPJb7vNCHqjZtnNRS1nU8Hrz2JAsjqgNpLzAOV5uSEua4rUDe/exec'; 
-
+        
+        // State
+        let branchList = [];
         let globalRecords = [];
         let currentPage = 1;
         const recordsPerPage = 10;
 
-        document.addEventListener('DOMContentLoaded', () => {
-            document.getElementById('crmDate').valueAsDate = new Date();
-            fetchBranchData();
-            fetchRecentRecords(); 
-            fetchLatestSales(); 
-            setInterval(() => { fetchRecentRecords(); fetchLatestSales(); }, 60000); 
-            document.getElementById('customerForm').addEventListener('submit', handleFormSubmit);
+        // --- BAŞLANGIÇ ---
+        document.addEventListener('DOMContentLoaded', async () => {
+            await fetchBranches();
+            addInputRow();
+            refreshData();
+            
+            // Otomatik Yenileme (30sn daha makul)
+            setInterval(refreshData, 30000); 
         });
 
-        async function fetchBranchData() {
-            const select = document.getElementById('crmBranch');
-            try {
-                const response = await fetch(`${GOOGLE_APPS_SCRIPT_WEB_APP_URL}?action=getLeaderboard&t=${new Date().getTime()}`);
-                const data = await response.json();
-                if (data.leaderboard) {
-                    select.innerHTML = '<option value="">Şube Seçiniz...</option>';
-                    data.leaderboard.forEach(item => select.add(new Option(item.branch, item.branch)));
-                }
-            } catch (e) { console.error("Şubeler yüklenemedi", e); }
+        // --- VERİ ÇEKME & YÖNETİMİ ---
+        function refreshData() {
+            const timeDisplay = document.getElementById('lastUpdateTime');
+            const now = new Date();
+            timeDisplay.textContent = now.toLocaleTimeString('tr-TR', {hour:'2-digit', minute:'2-digit'});
+            
+            fetchRecentRecords(); 
+            fetchLatestSales();
         }
 
+        // Tarih Formatlayıcı (Formlar için)
+        function getTodayDateTime() {
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const day = String(now.getDate()).padStart(2, '0');
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            return `${year}-${month}-${day}T${hours}:${minutes}`;
+        }
+
+        async function fetchBranches() {
+            try {
+                const response = await fetch(`${GOOGLE_APPS_SCRIPT_WEB_APP_URL}?action=getLeaderboard`);
+                const data = await response.json();
+                if(data.leaderboard) branchList = data.leaderboard.map(b => b.branch);
+            } catch(e) { console.error("Şubeler çekilemedi", e); }
+        }
+
+        // --- FORM GİRİŞİ (INPUT ROW) ---
+        function addInputRow() {
+            const container = document.getElementById('inputContainer');
+            const row = document.createElement('div');
+            row.className = 'input-row-wrapper animate-[fadeIn_0.4s_ease-out]';
+            
+            let branchOptions = '<option value="" disabled selected>Şube Seçin</option>';
+            branchList.forEach(b => branchOptions += `<option value="${b}">${b}</option>`);
+
+            row.innerHTML = `
+                <input type="datetime-local" class="modern-input inp-date" value="${getTodayDateTime()}">
+                <select class="modern-input inp-branch">${branchOptions}</select>
+                <input type="text" class="modern-input inp-name" placeholder="Müşteri Adı Soyadı">
+                <input type="text" class="modern-input inp-contact" placeholder="05XX XXX XX XX">
+                <select class="modern-input inp-media">
+                    <option>Instagram</option><option>Whatsapp</option><option>Facebook</option>
+                    <option>Çağrı</option><option>Web Form</option>
+                </select>
+                <select class="modern-input inp-category">
+                    <option>Mobilya</option><option>Baza Yatak Başlık</option><option>Bebek Çocuk</option>
+                    <option>Beyaz Eşya</option><option>Elektrikli Ev Aletleri</option><option>Elektronik</option>
+                    <option>Ev Dekorasyonu</option><option>Halı</option><option>Tekstil</option>
+                    <option>Züccaciye</option><option>Ayakkabı</option>
+                </select>
+                <input type="text" class="modern-input inp-product" placeholder="Ürün Modeli/Adı">
+                <select class="modern-input inp-status">
+                    <option>Aranmadı</option><option>Arandı</option>
+                </select>
+                <div class="text-center">
+                    <button onclick="removeRow(this)" class="w-8 h-8 rounded-lg bg-rose-50 text-rose-500 hover:bg-rose-500 hover:text-white transition flex items-center justify-center"><i class="fas fa-trash-alt text-sm"></i></button>
+                </div>
+            `;
+            container.appendChild(row);
+        }
+
+        function removeRow(btn) {
+            const container = document.getElementById('inputContainer');
+            if(container.children.length > 1) {
+                btn.closest('.input-row-wrapper').remove();
+            } else {
+                alert("En az bir satır kalmalıdır.");
+            }
+        }
+
+        async function submitAllRows() {
+            const rows = document.querySelectorAll('.input-row-wrapper');
+            const dataToSend = [];
+            let isValid = true;
+
+            rows.forEach(row => {
+                const branch = row.querySelector('.inp-branch').value;
+                const name = row.querySelector('.inp-name').value;
+                const dateVal = row.querySelector('.inp-date').value;
+                
+                const formattedDate = dateVal.replace('T', ' '); // Backend formatı
+
+                if(!branch || !name) {
+                    row.style.border = '1px solid #ef4444';
+                    isValid = false;
+                } else {
+                    row.style.border = '1px solid #f1f5f9';
+                    dataToSend.push({
+                        date: formattedDate,
+                        branch: branch,
+                        name: name,
+                        contact: row.querySelector('.inp-contact').value,
+                        media: row.querySelector('.inp-media').value,
+                        category: row.querySelector('.inp-category').value,
+                        product: row.querySelector('.inp-product').value,
+                        status: row.querySelector('.inp-status').value,
+                        isOrder: 'Hayır', amount: '', negativeReason: ''
+                    });
+                }
+            });
+
+            if(!isValid) { alert("Lütfen kırmızı işaretli alanları (Şube ve İsim) doldurunuz."); return; }
+            if(dataToSend.length === 0) return;
+
+            const btn = document.getElementById('submitBtn');
+            const originalHTML = btn.innerHTML;
+            btn.innerHTML = '<span class="loader border-t-white mr-2"></span> Gönderiliyor...';
+            btn.disabled = true;
+
+            fetch(GOOGLE_APPS_SCRIPT_WEB_APP_URL, {
+                method: "POST",
+                headers: { "Content-Type": "text/plain;charset=utf-8" },
+                body: JSON.stringify({ action: 'addCustomersBulk', data: dataToSend })
+            })
+            .then(res => res.json())
+            .then(result => {
+                alert("Başarıyla Kaydedildi!");
+                
+                // --- OPTIMISTIC UI GÜNCELLEMESİ (HIZLI GÖSTERİM) ---
+                // Veritabanı gecikse bile kullanıcı veriyi tabloda hemen görsün
+                const tempRecords = dataToSend.map(item => ({
+                    ...item,
+                    sheetName: null, // Henüz backend'den gelmedi
+                    rowIndex: null   // Henüz ID yok
+                }));
+                
+                // Yeni kayıtları listenin başına ekle
+                globalRecords = [...tempRecords, ...globalRecords];
+                currentPage = 1;
+                renderTable();
+
+                document.getElementById('inputContainer').innerHTML = ''; 
+                addInputRow();
+                
+                // Gerçek senkronizasyonu biraz ertele ki Google Sheets işleyebilsin
+                setTimeout(refreshData, 5000);
+            })
+            .catch(err => {
+                console.error(err);
+                alert("Bir hata oluştu. Bağlantınızı kontrol edin.");
+            })
+            .finally(() => {
+                btn.innerHTML = originalHTML;
+                btn.disabled = false;
+            });
+        }
+
+        // --- SON İŞLEMLER (LİSTELEME) ---
         async function fetchRecentRecords() {
             try {
                 const response = await fetch(`${GOOGLE_APPS_SCRIPT_WEB_APP_URL}?action=getRecentRecords&t=${new Date().getTime()}`);
                 const data = await response.json();
-                if (data.records) {
-                    globalRecords = data.records;
-                    const totalPages = Math.ceil(globalRecords.length / recordsPerPage);
-                    if(currentPage > totalPages) currentPage = 1;
+                
+                if (data.records && data.records.length > 0) {
+                    // Backend'den veri gelince global listeyi güncelle, ancak filtreyi geniş tut
+                    globalRecords = data.records; 
                     renderTable();
                 } else {
-                    document.getElementById('crmTableBody').innerHTML = '<tr><td colspan="5" class="text-center text-gray-500 py-6">Kayıt bulunamadı.</td></tr>';
+                    // Eğer veri gelmezse ve zaten elimizde "geçici" (optimistic) veri varsa tabloyu silme
+                    if (globalRecords.some(r => r.sheetName === null)) {
+                        // Veriler hala kaydediliyor olabilir, mevcutu koru
+                    } else {
+                        document.getElementById('crmTableBody').innerHTML = '<tr><td colspan="5" class="text-center text-slate-400 py-8">Kayıt bulunamadı.</td></tr>';
+                    }
                 }
-            } catch (e) { 
-                console.error(e);
-                document.getElementById('crmTableBody').innerHTML = '<tr><td colspan="5" class="text-center text-red-400 py-6">Bağlantı Hatası.</td></tr>';
-            }
+            } catch(e) { console.error(e); }
         }
 
         function renderTable() {
             const tbody = document.getElementById('crmTableBody');
             tbody.innerHTML = '';
+            
+            if(globalRecords.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" class="text-center text-slate-400 py-8">Son işlemlerde kayıt yok.</td></tr>';
+                return;
+            }
+
+            const totalPages = Math.ceil(globalRecords.length / recordsPerPage);
+            if(currentPage > totalPages) currentPage = 1;
+            
             const start = (currentPage - 1) * recordsPerPage;
             const end = start + recordsPerPage;
             const pageData = globalRecords.slice(start, end);
 
             pageData.forEach((data, index) => {
-                const actualIndex = start + index;
+                const actualIndex = start + index; // Global array indexi
                 const row = document.createElement('tr');
-                let displayDate = data.date;
-                try { if(displayDate.includes('T')) displayDate = displayDate.split('T')[0]; displayDate = displayDate.split('-').reverse().join('.'); } catch(e){}
+                
+                let cleanBranch = data.branch.replace(/ Şubesi/gi, "").trim();
+                let statusClass = data.status === 'Arandı' ? 'status-green' : 'status-gray';
+                
+                // rowIndex kontrolü (Optimistic kayıtlarda null olabilir)
+                const isDeletable = data.rowIndex !== undefined && data.rowIndex !== null && data.rowIndex !== -1 && data.sheetName;
 
-                let branchName = data.branch.replace(/ Şubesi/gi, "").trim();
+                // Tarih parsing
+                let displayDate = data.date;
+                let displayTime = '';
+                if(data.date.includes(' ')) {
+                    const parts = data.date.split(' ');
+                    displayDate = parts[0];
+                    displayTime = parts[1];
+                }
+
+                // Geçici kayıt görsel farkındalığı (hafif şeffaf)
+                if (!isDeletable) row.classList.add('opacity-75', 'bg-slate-50');
 
                 row.innerHTML = `
-                    <td><span class="font-medium text-gray-700">${displayDate}</span></td>
-                    <td><span class="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full font-semibold">${branchName}</span></td>
                     <td>
-                        <div class="font-bold text-gray-800">${data.name}</div>
-                        <div class="text-xs text-gray-500">${data.contact}</div>
+                        <div class="flex flex-col">
+                            <span class="font-bold text-slate-700 text-sm">${displayDate}</span>
+                            <span class="text-xs text-slate-400">${displayTime}</span>
+                        </div>
                     </td>
-                    <td><span class="text-gray-700">${data.category}</span></td>
-                    <td class="text-right">
-                        <button class="action-btn btn-edit" onclick="editRow(${actualIndex})" title="Düzenle"><i class="fas fa-pen"></i></button>
-                        <button class="action-btn btn-delete" onclick="deleteRow(${actualIndex})" title="Sil"><i class="fas fa-trash"></i></button>
+                    <td>
+                        <div class="flex flex-col gap-1 items-start">
+                            <span class="text-xs font-bold text-slate-600 bg-slate-100 px-2 py-0.5 rounded">${cleanBranch}</span>
+                            <span class="status-pill ${statusClass} text-[10px]">${data.status || 'Belirsiz'}</span>
+                        </div>
+                    </td>
+                    <td>
+                        <div class="font-bold text-sm text-slate-800">${data.name}</div>
+                        <div class="text-xs text-slate-400 flex items-center gap-1"><i class="fas fa-phone-alt text-[10px]"></i> ${data.contact}</div>
+                    </td>
+                    <td>
+                        <div class="text-sm text-slate-600 font-medium">${data.category}</div>
+                        <div class="text-xs text-slate-400 truncate w-32">${data.product || '-'}</div>
+                    </td>
+                    <td class="text-right pr-4">
+                        <div class="flex justify-end gap-2">
+                            ${isDeletable ? `
+                            <button class="btn-action btn-edit" onclick="openEditModal(${actualIndex})" title="Düzenle">
+                                <i class="fas fa-pen text-sm"></i>
+                            </button>
+                            <button class="btn-action btn-delete" onclick="deleteRow(${actualIndex}, this)" title="Sil">
+                                <i class="fas fa-trash text-sm"></i>
+                            </button>` 
+                            : `<span class="text-[10px] text-orange-400 font-bold border border-orange-200 bg-orange-50 px-2 py-1 rounded">Kaydediliyor..</span>`}
+                        </div>
                     </td>
                 `;
                 tbody.appendChild(row);
             });
-            updatePaginationControls();
-        }
-
-        function updatePaginationControls() {
-            const totalPages = Math.ceil(globalRecords.length / recordsPerPage);
+            
             document.getElementById('pageIndicator').textContent = `${currentPage} / ${totalPages || 1}`;
             document.getElementById('prevPageBtn').disabled = currentPage === 1;
             document.getElementById('nextPageBtn').disabled = currentPage >= totalPages || totalPages === 0;
         }
+
         function changePage(d) { currentPage += d; renderTable(); }
 
+        // --- SON SATIŞLAR (SAĞ PANEL) ---
         async function fetchLatestSales() {
             try {
                 const response = await fetch(`${GOOGLE_APPS_SCRIPT_WEB_APP_URL}?action=getLatestSalesGlobal&t=${new Date().getTime()}`);
@@ -393,164 +633,151 @@
                     container.innerHTML = '';
                     data.sales.forEach(sale => {
                         let cleanBranch = sale.branch.replace(/ Şubesi/gi, '').toUpperCase();
-                        let dateStr = new Date(sale.timestamp).toLocaleString('tr-TR', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
+                        let dateStr = sale.timestamp ? new Date(sale.timestamp).toLocaleTimeString('tr-TR', {hour:'2-digit', minute:'2-digit'}) : '';
 
-                        const card = document.createElement('div');
-                        card.className = 'sale-card';
-                        card.innerHTML = `
-                            <div class="flex justify-between items-start mb-3">
-                                <span class="bg-green-100 text-green-800 text-xs px-2 py-1 rounded font-bold tracking-wider">${cleanBranch}</span>
-                                <span class="text-gray-400 text-xs font-mono flex items-center"><i class="far fa-clock mr-1"></i>${dateStr}</span>
-                            </div>
-                            <h4 class="text-gray-900 font-bold text-lg mb-1 truncate">${sale.name}</h4>
-                             <p class="text-blue-600 text-xs font-bold mb-1 uppercase tracking-wide">${sale.category}</p>
-                             <p class="text-gray-500 text-xs mb-4 truncate">${sale.product || ''}</p>
-                            <div class="flex justify-between items-end border-t border-gray-100 pt-3">
-                                <span class="text-xs text-gray-400 font-medium uppercase">Tutar</span>
-                                <span class="sale-amount text-green-600">${new Intl.NumberFormat('tr-TR', { style: 'currency', currency: 'TRY', maximumFractionDigits: 0 }).format(sale.amount)}</span>
+                        container.innerHTML += `
+                            <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 hover:shadow-md transition group">
+                                <div class="flex justify-between items-start mb-2">
+                                    <span class="bg-indigo-50 text-indigo-700 text-[10px] px-2 py-0.5 rounded font-bold tracking-wide">${cleanBranch}</span>
+                                    <span class="text-slate-300 text-xs font-mono group-hover:text-indigo-400 transition">${dateStr}</span>
+                                </div>
+                                <h4 class="font-bold text-slate-800 text-sm mb-1">${sale.name}</h4>
+                                <div class="flex justify-between items-center mt-3 pt-3 border-t border-dashed border-slate-100">
+                                    <span class="text-xs text-slate-500">${sale.category}</span>
+                                    <span class="font-bold text-emerald-600 text-sm bg-emerald-50 px-2 py-0.5 rounded">
+                                        ${new Intl.NumberFormat('tr-TR', { style: 'currency', currency: 'TRY', maximumFractionDigits: 0 }).format(sale.amount)}
+                                    </span>
+                                </div>
                             </div>
                         `;
-                        container.appendChild(card);
                     });
                 } else {
-                    container.innerHTML = '<div class="col-span-full text-center text-gray-400 py-8 bg-gray-50 rounded-lg">Henüz onaylanan satış yok.</div>';
+                    container.innerHTML = '<div class="text-center text-slate-400 py-8 text-sm italic">Henüz satış yok.</div>';
                 }
-            } catch (e) { console.error("Satış hatası:", e); }
+            } catch(e) {}
         }
 
-        function handleFormSubmit(e) {
-            e.preventDefault();
-            const btn = document.getElementById('submitBtn');
-            const originalText = btn.innerHTML;
-            
-            const formData = {
-                rowIndex: document.getElementById('editRowIndex').value, 
-                sheetName: document.getElementById('editSheetName').value, 
-                date: document.getElementById('crmDate').value,
-                branch: document.getElementById('crmBranch').value,
-                name: document.getElementById('crmName').value,
-                contact: document.getElementById('crmContact').value,
-                media: document.getElementById('crmMedia').value,
-                category: document.getElementById('crmCategory').value,
-                product: document.getElementById('crmProduct').value,
-                status: document.getElementById('crmStatus').value,
-                isOrder: "Hayır", 
-                negativeReason: "",
-                amount: ""        
-            };
+        // --- DÜZELTİLMİŞ SİLME FONKSİYONU ---
+        function deleteRow(index, btnElement) {
+            const data = globalRecords[index];
+            if(!data || !data.sheetName || !data.rowIndex) {
+                alert("Veri senkronizasyonu bekleniyor, lütfen sayfayı yenileyip tekrar deneyin.");
+                return;
+            }
 
-            const action = formData.rowIndex ? 'updateCustomer' : 'addCustomer';
-            btn.innerHTML = `<i class="fas fa-spinner fa-spin mr-2"></i> İşleniyor...`;
-            btn.disabled = true;
+            if(!confirm(`${data.name} isimli müşteriyi silmek istediğinize emin misiniz?`)) return;
+            
+            // UI Feedback: Butonu loading yap
+            const originalContent = btnElement.innerHTML;
+            btnElement.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+            btnElement.disabled = true;
 
             fetch(GOOGLE_APPS_SCRIPT_WEB_APP_URL, {
                 method: "POST",
                 headers: { "Content-Type": "text/plain;charset=utf-8" },
-                body: JSON.stringify({ action: action, data: formData })
-            })
-            .then(res => res.json())
-            .then(result => {
-                if(result.status === 'success') {
-                    alert(result.message);
-                    if(action === 'addCustomer') {
-                        // Yeni kayıt: Listeye ekle (Optimistik)
-                        // Backend'den gelen sheetName ve rowIndex önemli, yoksa ilk etapta silinemez.
-                        // Geçici çözüm olarak, fetchRecentRecords'u beklemeden ekliyoruz ama ID eksik olabilir.
-                        // Güvenli yöntem: Kaydı listeye ekle ama 1-2 saniye sonra gerçek veriyi çek.
-                        
-                        // Geçici ID ile ekle (Görsel doyum için)
-                        const tempRecord = { ...formData, rowIndex: -1, sheetName: '' };
-                        globalRecords.unshift(tempRecord);
-                        renderTable();
-                        
-                        e.target.reset();
-                        document.getElementById('crmDate').value = formData.date;
-                        document.getElementById('crmBranch').value = formData.branch;
-                    } else {
-                        // Güncelleme
-                        cancelEditMode();
-                    }
-                    
-                    // Gerçek verileri çekerek listeyi doğrula
-                    setTimeout(() => { fetchRecentRecords(); fetchLatestSales(); }, 1500);
-                } else {
-                    alert("Hata: " + result.message);
-                }
-            })
-            .catch(err => { alert("Hata: " + err.message); })
-            .finally(() => { btn.innerHTML = originalText; btn.disabled = false; });
-        }
-
-        function editRow(index) {
-            const data = globalRecords[index];
-            document.getElementById('formCard').classList.add('editing-mode');
-            document.getElementById('formTitle').textContent = "Kaydı Düzenle";
-            const btn = document.getElementById('submitBtn');
-            btn.innerHTML = '<i class="fas fa-sync mr-2"></i> GÜNCELLE';
-            btn.classList.replace('bg-blue-600', 'bg-orange-500');
-            btn.classList.replace('hover:bg-blue-700', 'hover:bg-orange-600');
-            document.getElementById('cancelEditBtn').classList.remove('hidden');
-
-            document.getElementById('editRowIndex').value = data.rowIndex;
-            document.getElementById('editSheetName').value = data.sheetName;
-            
-            let dateVal = data.date;
-            try { if(dateVal.includes('T')) dateVal = dateVal.split('T')[0]; } catch(e){}
-            
-            document.getElementById('crmDate').value = dateVal;
-            document.getElementById('crmBranch').value = data.branch;
-            document.getElementById('crmName').value = data.name;
-            document.getElementById('crmContact').value = data.contact;
-            document.getElementById('crmMedia').value = data.media;
-            document.getElementById('crmCategory').value = data.category;
-            document.getElementById('crmProduct').value = data.product;
-            document.getElementById('crmStatus').value = data.status;
-
-            document.getElementById('crmName').focus();
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        }
-
-        function cancelEditMode() {
-            document.getElementById('formCard').classList.remove('editing-mode');
-            document.getElementById('formTitle').textContent = "Yeni Müşteri Kaydı";
-            const btn = document.getElementById('submitBtn');
-            btn.innerHTML = '<i class="fas fa-save mr-2"></i> KAYDET VE GÖNDER';
-            btn.classList.replace('bg-orange-500', 'bg-blue-600');
-            btn.classList.replace('hover:bg-orange-600', 'hover:bg-blue-700');
-            document.getElementById('cancelEditBtn').classList.add('hidden');
-            
-            document.getElementById('editRowIndex').value = "";
-            document.getElementById('editSheetName').value = "";
-            document.getElementById('customerForm').reset();
-            document.getElementById('crmDate').valueAsDate = new Date();
-        }
-
-        function deleteRow(index) {
-            const data = globalRecords[index];
-            if(!confirm("Bu kaydı veritabanından SİLMEK istediğinize emin misiniz?")) return;
-
-            fetch(GOOGLE_APPS_SCRIPT_WEB_APP_URL, {
-                method: "POST",
-                headers: { "Content-Type": "text/plain;charset=utf-8" },
-                body: JSON.stringify({
-                    action: 'deleteCustomer',
-                    data: { branch: data.branch, sheetName: data.sheetName, rowIndex: data.rowIndex }
+                body: JSON.stringify({ 
+                    action: 'deleteCustomer', 
+                    data: { 
+                        sheetName: data.sheetName, 
+                        rowIndex: data.rowIndex, 
+                        branch: data.branch 
+                    } 
                 })
             })
             .then(res => res.json())
-            .then(result => {
-                if(result.status === 'success') {
-                    alert("Kayıt silindi.");
-                    globalRecords.splice(index, 1);
-                    renderTable();
-                    setTimeout(fetchRecentRecords, 1000); 
-                    setTimeout(fetchLatestSales, 1000);
+            .then(res => {
+                if(res.status === 'success') {
+                    // Satırı görsel olarak hemen kaldır (Optimistic UI)
+                    const row = btnElement.closest('tr');
+                    row.style.transition = 'all 0.5s';
+                    row.style.opacity = '0';
+                    setTimeout(() => row.remove(), 500);
+                    
+                    // Global listeden de sil ki sayfa değişince geri gelmesin
+                    globalRecords = globalRecords.filter(r => r.rowIndex !== data.rowIndex);
+                    
+                    // Veriyi arkada güncelle
+                    setTimeout(refreshData, 2000);
                 } else {
-                    alert("Silme hatası: " + result.message);
+                    alert("Hata: " + res.message);
+                    btnElement.innerHTML = originalContent;
+                    btnElement.disabled = false;
                 }
             })
-            .catch(err => alert("Hata: " + err.message));
+            .catch(err => {
+                alert("Bağlantı hatası: " + err);
+                btnElement.innerHTML = originalContent;
+                btnElement.disabled = false;
+            });
         }
+
+        // --- MODAL İŞLEMLERİ ---
+        function openEditModal(index) {
+            const data = globalRecords[index];
+            if(!data) return;
+
+            document.getElementById('modalRowIndex').value = data.rowIndex;
+            document.getElementById('modalSheetName').value = data.sheetName;
+            document.getElementById('modalDate').value = data.date;
+            document.getElementById('modalBranch').value = data.branch;
+            document.getElementById('modalName').value = data.name;
+            document.getElementById('modalContact').value = data.contact;
+            document.getElementById('modalCategory').value = data.category;
+            document.getElementById('modalProduct').value = data.product;
+            document.getElementById('modalStatus').value = data.status || 'Aranmadı';
+            
+            const modal = document.getElementById('editModal');
+            modal.classList.remove('hidden');
+            // Animasyon için küçük bir timeout
+            setTimeout(() => {
+                modal.querySelector('div').classList.remove('scale-95', 'opacity-0');
+                modal.querySelector('div').classList.add('scale-100', 'opacity-100');
+            }, 10);
+        }
+
+        function closeEditModal() {
+            const modal = document.getElementById('editModal');
+            modal.querySelector('div').classList.add('scale-95', 'opacity-0');
+            modal.querySelector('div').classList.remove('scale-100', 'opacity-100');
+            setTimeout(() => modal.classList.add('hidden'), 200);
+        }
+
+        document.getElementById('editForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const btn = e.target.querySelector('button[type="submit"]');
+            const originalHTML = btn.innerHTML;
+            btn.innerHTML = '<span class="loader border-t-white w-4 h-4 mr-2"></span> Kaydediliyor...';
+            btn.disabled = true;
+            
+            const formData = {
+                rowIndex: document.getElementById('modalRowIndex').value,
+                sheetName: document.getElementById('modalSheetName').value,
+                date: document.getElementById('modalDate').value,
+                branch: document.getElementById('modalBranch').value,
+                name: document.getElementById('modalName').value,
+                contact: document.getElementById('modalContact').value,
+                category: document.getElementById('modalCategory').value,
+                product: document.getElementById('modalProduct').value,
+                status: document.getElementById('modalStatus').value,
+                media: '', isOrder: 'Hayır', amount: '', negativeReason: ''
+            };
+
+            fetch(GOOGLE_APPS_SCRIPT_WEB_APP_URL, {
+                method: "POST",
+                headers: { "Content-Type": "text/plain;charset=utf-8" },
+                body: JSON.stringify({ action: 'updateCustomer', data: formData })
+            })
+            .then(() => {
+                closeEditModal();
+                refreshData(); 
+                alert("Kayıt güncellendi.");
+            })
+            .catch(err => alert("Hata: " + err))
+            .finally(() => {
+                btn.innerHTML = originalHTML;
+                btn.disabled = false;
+            });
+        });
     </script>
 </body>
 </html>
