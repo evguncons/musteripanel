@@ -454,21 +454,22 @@
                 
                 const formattedDate = dateVal.replace('T', ' '); // Backend formatı
 
+                // Telefon numarası temizleme işlemi: Boşlukları ve +90'ı kaldır
+                let rawContact = row.querySelector('.inp-contact').value;
+                let cleanContact = rawContact.replace(/\s/g, '').replace(/^\+90/, '');
+
                 if(!branch || !name) {
                     row.style.border = '1px solid #ef4444';
                     isValid = false;
                 } else {
                     row.style.border = '1px solid #f1f5f9';
                     
-                    // --- İSTENEN DEĞİŞİKLİK: İSME EMOJİ EKLEME ---
-                    // Google Sheets'te panelden eklendiğini belli etmek için ⚠️ emojisi ekleniyor.
-                    const nameWithEmoji = name.trim() + " ⚠️";
-
+                    // DEĞİŞİKLİK: Emoji kaldırıldı, sadece isim gönderiliyor.
                     dataToSend.push({
                         date: formattedDate,
                         branch: branch,
-                        name: nameWithEmoji, // Emoji eklenmiş hali gönderiliyor
-                        contact: row.querySelector('.inp-contact').value,
+                        name: name.trim(), 
+                        contact: cleanContact,
                         media: row.querySelector('.inp-media').value,
                         category: row.querySelector('.inp-category').value,
                         product: row.querySelector('.inp-product').value,
