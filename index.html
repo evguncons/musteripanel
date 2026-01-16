@@ -170,7 +170,7 @@
                     <h1 class="text-xl lg:text-2xl font-bold text-slate-800 tracking-tight">HEDEF AVM ONLİNE SATIŞ YÖNLENDİRME</h1>
                     <div class="flex items-center gap-2 mt-1">
                         <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                        <p class="text-xs text-slate-500 font-medium uppercase tracking-wider">Sistem Aktif • v2.8 (Geri Yüklendi)</p>
+                        <p class="text-xs text-slate-500 font-medium uppercase tracking-wider">Sistem Aktif • v3.5 (Silme Eklendi)</p>
                     </div>
                 </div>
             </div>
@@ -278,7 +278,7 @@
     </div>
 
     <!-- EDIT MODAL -->
-    <div id="editModal" class="fixed inset-0 modal-overlay z-50 hidden flex items-end md:items-center justify-center p-0 md:p-4">
+    <div id="editModal" class="fixed inset-0 modal-overlay z-50 hidden flex items-end md:items-center justify-center p-0 md:p-4 bg-slate-900/50 backdrop-blur-sm transition-all">
         <div class="bg-white rounded-t-3xl md:rounded-2xl shadow-2xl w-full max-w-xl transform transition-all border border-slate-100 flex flex-col h-[85vh] md:h-auto overflow-hidden">
             <div class="px-6 py-5 border-b border-slate-100 bg-slate-50 flex justify-between items-center">
                 <div class="flex items-center gap-3">
@@ -328,31 +328,22 @@
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
                         <div class="space-y-1.5">
                             <label class="text-xs font-bold text-slate-500 uppercase ml-1">Kategori</label>
-                           <select id="modalCategory" class="modern-input">
-
-    <option>Mobilya</option>
-
-    <option>Baza+Yatak+Başlık</option>
-
-    <option>Bebek ve Çocuk</option>
-
-    <option>Beyaz Eşya</option>
-
-    <option>Elektrikli Ev Aletleri</option>
-
-    <option>Elektrikli-Benzinli Araç</option> <option>Elektronik</option>
-
-    <option>Ev Dekorasyonu</option>
-
-    <option>Halı</option>
-
-    <option>Kişisel Aksesuar</option> <option>Mobilya Aksesuarı</option> <option>Tekstil</option>
-
-    <option>Züccaciye</option>
-
-    <option>Ayakkabı</option>
-
-</select>
+                            <select id="modalCategory" class="modern-input">
+                                <option>Mobilya</option>
+                                <option>Baza+Yatak+Başlık</option>
+                                <option>Bebek ve Çocuk</option>
+                                <option>Beyaz Eşya</option>
+                                <option>Elektrikli Ev Aletleri</option>
+                                <option>Elektrikli-Benzinli Araç</option>
+                                <option>Elektronik</option>
+                                <option>Ev Dekorasyonu</option>
+                                <option>Halı</option>
+                                <option>Kişisel Aksesuar</option>
+                                <option>Mobilya Aksesuarı</option>
+                                <option>Tekstil</option>
+                                <option>Züccaciye</option>
+                                <option>Ayakkabı</option>
+                            </select>
                         </div>
                         <div class="space-y-1.5">
                             <label class="text-xs font-bold text-slate-500 uppercase ml-1">Ürün Modeli</label>
@@ -364,13 +355,29 @@
 
             <div class="p-6 border-t bg-slate-50 flex flex-col md:flex-row justify-end gap-3 shrink-0">
                 <button onclick="closeEditModal()" class="btn-modern btn-ghost order-2 md:order-1">İşlemi İptal Et</button>
-                <button type="submit" form="editForm" class="btn-modern btn-primary px-10 order-1 md:order-2">Güncelle ve Kaydet</button>
+                <button type="submit" form="editForm" id="editSubmitBtn" class="btn-modern btn-primary px-10 order-1 md:order-2">Güncelle ve Kaydet</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- DELETE CONFIRMATION MODAL -->
+    <div id="deleteModal" class="fixed inset-0 modal-overlay z-[60] hidden flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm transition-all">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6 text-center">
+            <div class="w-12 h-12 bg-rose-100 text-rose-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                <i class="fas fa-trash-alt text-xl"></i>
+            </div>
+            <h3 class="text-lg font-bold text-slate-800 mb-2">Kaydı Silmek İstiyor musunuz?</h3>
+            <p class="text-sm text-slate-500 mb-6">Bu işlem geri alınamaz ve ilgili kayıt tablodan kalıcı olarak silinir.</p>
+            <input type="hidden" id="deleteIndex">
+            <div class="flex gap-3 justify-center">
+                <button onclick="closeDeleteModal()" class="btn-modern btn-ghost bg-slate-100 hover:bg-slate-200">Vazgeç</button>
+                <button onclick="confirmDelete()" id="btnConfirmDelete" class="btn-modern btn-primary bg-rose-500 hover:bg-rose-600 text-white shadow-rose-200">Evet, Sil</button>
             </div>
         </div>
     </div>
 
     <script>
-        const GOOGLE_APPS_SCRIPT_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbwQ7j5NSTaojKhdVKPehsYKqZSCljBBzvywmCf8S7ZXSAYjz3OsXUOMG-9NnMZdRzht/exec'; 
+        const GOOGLE_APPS_SCRIPT_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbwRSKYdXIHm2A6uts8MJE0v6snp3rsSVm4Qk5yQRd9chXtGoMUCQGXZ37X05QUJY2Aq/exec'; 
         
         let branchList = [];
         let globalRecords = [];
@@ -453,27 +460,19 @@
                     <label class="xl:hidden text-[10px] font-bold text-slate-400 uppercase">Kategori</label>
                     <select class="modern-input inp-category">
                          <option>Mobilya</option>
-
-    <option>Baza+Yatak+Başlık</option>
-
-    <option>Bebek ve Çocuk</option>
-
-    <option>Beyaz Eşya</option>
-
-    <option>Elektrikli Ev Aletleri</option>
-
-    <option>Elektrikli-Benzinli Araç</option> <option>Elektronik</option>
-
-    <option>Ev Dekorasyonu</option>
-
-    <option>Halı</option>
-
-    <option>Kişisel Aksesuar</option> <option>Mobilya Aksesuarı</option> <option>Tekstil</option>
-
-    <option>Züccaciye</option>
-
-    <option>Ayakkabı</option>
-
+                         <option>Baza+Yatak+Başlık</option>
+                         <option>Bebek ve Çocuk</option>
+                         <option>Beyaz Eşya</option>
+                         <option>Elektrikli Ev Aletleri</option>
+                         <option>Elektrikli-Benzinli Araç</option> 
+                         <option>Elektronik</option>
+                         <option>Ev Dekorasyonu</option>
+                         <option>Halı</option>
+                         <option>Kişisel Aksesuar</option> 
+                         <option>Mobilya Aksesuarı</option> 
+                         <option>Tekstil</option>
+                         <option>Züccaciye</option>
+                         <option>Ayakkabı</option>
                     </select>
                 </div>
                 <div class="space-y-1">
@@ -563,7 +562,6 @@
                     document.getElementById('inputContainer').innerHTML = ''; 
                     addInputRow();
                     refreshData();
-                    // Custom non-blocking notify would be here
                 }
             } catch(e) {
                 alert("Veri gönderilirken bir hata oluştu.");
@@ -577,19 +575,32 @@
         async function fetchRecentRecords() {
             try {
                 const response = await fetch(`${GOOGLE_APPS_SCRIPT_WEB_APP_URL}?action=getRecentRecords&t=${new Date().getTime()}`);
+                
+                if (!response.ok) throw new Error('Network response was not ok');
+                
                 const data = await response.json();
                 if (data.records) {
                     globalRecords = data.records; 
                     renderTable();
+                } else {
+                    renderTableError("Veri alınamadı veya liste boş.");
                 }
-            } catch(e) { console.error("Records fetch failed", e); }
+            } catch(e) { 
+                console.error("Records fetch failed", e); 
+                renderTableError("Bağlantı Hatası: Lütfen URL'i kontrol edin.");
+            }
+        }
+
+        function renderTableError(msg) {
+             const tbody = document.getElementById('crmTableBody');
+             tbody.innerHTML = `<tr><td colspan="5" class="text-center text-rose-500 py-16 font-medium"><i class="fas fa-exclamation-triangle mr-2"></i> ${msg}</td></tr>`;
         }
 
         function renderTable() {
             const tbody = document.getElementById('crmTableBody');
             tbody.innerHTML = '';
             
-            if(globalRecords.length === 0) {
+            if(!globalRecords || !Array.isArray(globalRecords) || globalRecords.length === 0) {
                 tbody.innerHTML = '<tr><td colspan="5" class="text-center text-slate-400 py-16 font-medium">Kayıtlı işlem bulunamadı.</td></tr>';
                 return;
             }
@@ -599,37 +610,48 @@
                 row.className = 'group';
                 
                 const statusBadge = data.status === 'Arandı' ? 'badge-success' : 'badge-gray';
-                const cleanBranch = data.branch.replace(/ Şubesi/gi, '');
+                const cleanBranch = data.branch ? data.branch.replace(/ Şubesi/gi, '') : '-';
+
+                let dateDisplay = data.date || '';
+                dateDisplay = dateDisplay.replace('T', ' '); 
+                let datePart = dateDisplay.split(' ')[0] || '-';
+                let timePart = dateDisplay.split(' ')[1] || '';
+                if(timePart.length > 5) timePart = timePart.substring(0, 5);
 
                 row.innerHTML = `
                     <td data-label="Tarih">
                         <div class="flex flex-col">
-                            <span class="font-bold text-slate-700">${data.date.split(' ')[0]}</span>
-                            <span class="text-[10px] text-slate-400 font-bold">${data.date.split(' ')[1]}</span>
+                            <span class="font-bold text-slate-700">${datePart}</span>
+                            <span class="text-[10px] text-slate-400 font-bold">${timePart}</span>
                         </div>
                     </td>
                     <td data-label="Şube / Durum">
                         <div class="flex flex-col gap-1.5 items-end md:items-start">
                             <span class="text-xs font-bold text-slate-600 bg-slate-100 px-2 py-0.5 rounded">${cleanBranch}</span>
-                            <span class="badge ${statusBadge}">${data.status}</span>
+                            <span class="badge ${statusBadge}">${data.status || '-'}</span>
                         </div>
                     </td>
                     <td data-label="Müşteri Bilgisi">
                         <div class="flex flex-col">
-                            <span class="font-bold text-slate-800">${data.name}</span>
-                            <span class="text-xs text-slate-500 font-medium">${data.contact}</span>
+                            <span class="font-bold text-slate-800">${data.name || '-'}</span>
+                            <span class="text-xs text-slate-500 font-medium">${data.contact || '-'}</span>
                         </div>
                     </td>
                     <td data-label="Ürün Detayı">
                         <div class="flex flex-col">
-                            <span class="text-xs font-bold text-indigo-600">${data.category}</span>
+                            <span class="text-xs font-bold text-indigo-600">${data.category || '-'}</span>
                             <span class="text-xs text-slate-400 truncate max-w-[150px]">${data.product || 'Belirtilmedi'}</span>
                         </div>
                     </td>
                     <td class="text-right">
-                        <button onclick="openEditModal(${index})" class="btn-action btn-edit opacity-100 md:opacity-0 group-hover:opacity-100 transition-opacity">
-                            <i class="fas fa-pen"></i>
-                        </button>
+                        <div class="flex items-center justify-end gap-2">
+                            <button onclick="openEditModal(${index})" class="w-8 h-8 flex items-center justify-center rounded-lg bg-indigo-50 text-indigo-600 hover:bg-indigo-100 transition-colors" title="Düzenle">
+                                <i class="fas fa-pen text-xs"></i>
+                            </button>
+                            <button onclick="openDeleteModal(${index})" class="w-8 h-8 flex items-center justify-center rounded-lg bg-rose-50 text-rose-500 hover:bg-rose-100 transition-colors" title="Sil">
+                                <i class="fas fa-trash text-xs"></i>
+                            </button>
+                        </div>
                     </td>
                 `;
                 tbody.appendChild(row);
@@ -690,7 +712,7 @@
 
         document.getElementById('editForm').addEventListener('submit', async (e) => {
             e.preventDefault();
-            const btn = e.target.querySelector('button[type="submit"]');
+            const btn = document.getElementById('editSubmitBtn');
             const originalHTML = btn.innerHTML;
             btn.innerHTML = '<span class="loader border-t-white mr-2"></span> Güncelleniyor...';
             btn.disabled = true;
@@ -725,6 +747,53 @@
                 btn.disabled = false;
             }
         });
+
+        // --- DELETE FUNCTIONS ---
+        function openDeleteModal(index) {
+            document.getElementById('deleteIndex').value = index;
+            document.getElementById('deleteModal').classList.remove('hidden');
+        }
+
+        function closeDeleteModal() {
+            document.getElementById('deleteModal').classList.add('hidden');
+        }
+
+        async function confirmDelete() {
+            const index = document.getElementById('deleteIndex').value;
+            const record = globalRecords[index];
+            const btn = document.getElementById('btnConfirmDelete');
+            const originalHTML = btn.innerHTML;
+
+            btn.innerHTML = '<span class="loader border-t-white w-4 h-4 mr-2"></span> Siliniyor...';
+            btn.disabled = true;
+
+            try {
+                const response = await fetch(GOOGLE_APPS_SCRIPT_WEB_APP_URL, {
+                    method: "POST",
+                    headers: { "Content-Type": "text/plain;charset=utf-8" },
+                    body: JSON.stringify({
+                        action: 'deleteCustomer',
+                        data: {
+                            sheetName: record.sheetName,
+                            rowIndex: record.rowIndex,
+                            branch: record.branch 
+                        }
+                    })
+                });
+                const result = await response.json();
+                if(result.status === 'success') {
+                    closeDeleteModal();
+                    refreshData();
+                } else {
+                    alert("Silme başarısız: " + (result.message || 'Bilinmeyen hata'));
+                }
+            } catch(e) {
+                alert("Silme işleminde hata oluştu.");
+            } finally {
+                btn.innerHTML = originalHTML;
+                btn.disabled = false;
+            }
+        }
     </script>
 </body>
 </html>
