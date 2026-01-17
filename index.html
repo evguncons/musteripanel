@@ -189,7 +189,7 @@
                     <h1 class="text-xl font-black text-slate-800 tracking-tight leading-none">HEDEF AVM</h1>
                     <div class="flex items-center gap-2 mt-0.5">
                         <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                        <span class="text-xs font-bold text-slate-400">CRM Panel v13.4</span>
+                        <span class="text-xs font-bold text-slate-400">CRM Panel v13.5</span>
                     </div>
                 </div>
             </div>
@@ -211,7 +211,6 @@
                 <h2 class="text-lg font-bold text-slate-800 flex items-center gap-2">
                     <i class="fas fa-user-plus text-brand-600"></i> Müşteri Kayıt
                 </h2>
-                <!-- Removed Add Button from here -->
             </div>
             
             <div class="p-5 bg-white">
@@ -236,32 +235,7 @@
             <!-- LEFT COLUMN: Stats & Records (8 Cols) -->
             <div class="lg:col-span-8 space-y-6">
                 
-                <!-- PERFORMANCE STATS - REVISED GRID LAYOUT -->
-                <div class="card-base p-5 bg-white">
-                    <div class="flex items-center gap-3 mb-4 pb-3 border-b border-slate-100">
-                        <div class="w-8 h-8 rounded-lg bg-amber-100 text-amber-600 flex items-center justify-center text-sm shadow-sm">
-                            <i class="fas fa-trophy"></i>
-                        </div>
-                        <div>
-                            <h3 class="text-base font-bold text-slate-800">Şube Performansları</h3>
-                            <p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider">BU AYKİ DURUM</p>
-                        </div>
-                    </div>
-                    
-                    <!-- Desktop Header - Fixed Grid -->
-                    <div class="hidden md:grid grid-cols-12 px-4 py-2 mb-2 text-[10px] font-extrabold text-slate-400 uppercase tracking-wider bg-slate-50 rounded-lg border border-slate-100">
-                        <div class="col-span-5">Şube</div>
-                        <div class="col-span-2 text-center">Arandı</div>
-                        <div class="col-span-2 text-center">Beklemede</div>
-                        <div class="col-span-3 text-right">Ciro</div>
-                    </div>
-
-                    <div id="branchStatsBody" class="space-y-2">
-                        <div class="text-center py-6 text-xs text-slate-400">Veriler Yükleniyor...</div>
-                    </div>
-                </div>
-
-                <!-- RECORDS LIST - TABLE -->
+                <!-- RECORDS LIST - TABLE (MOVED UP) -->
                 <div class="card-base flex flex-col min-h-[600px] bg-white">
                     <!-- Toolbar -->
                     <div class="px-5 py-4 border-b border-slate-100 flex flex-col gap-4">
@@ -318,6 +292,32 @@
                         <div class="flex items-center gap-1" id="paginationControls"></div>
                     </div>
                 </div>
+
+                <!-- PERFORMANCE STATS - REVISED GRID LAYOUT (MOVED DOWN) -->
+                <div class="card-base p-5 bg-white">
+                    <div class="flex items-center gap-3 mb-4 pb-3 border-b border-slate-100">
+                        <div class="w-8 h-8 rounded-lg bg-amber-100 text-amber-600 flex items-center justify-center text-sm shadow-sm">
+                            <i class="fas fa-trophy"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-base font-bold text-slate-800">Şube Performansları</h3>
+                            <p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider">BU AYKİ DURUM</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Desktop Header - Fixed Grid -->
+                    <div class="hidden md:grid grid-cols-12 px-4 py-2 mb-2 text-[10px] font-extrabold text-slate-400 uppercase tracking-wider bg-slate-50 rounded-lg border border-slate-100">
+                        <div class="col-span-5">Şube</div>
+                        <div class="col-span-2 text-center">Arandı</div>
+                        <div class="col-span-2 text-center">Beklemede</div>
+                        <div class="col-span-3 text-right">Ciro</div>
+                    </div>
+
+                    <div id="branchStatsBody" class="space-y-2">
+                        <div class="text-center py-6 text-xs text-slate-400">Veriler Yükleniyor...</div>
+                    </div>
+                </div>
+
             </div>
 
             <!-- RIGHT COLUMN: Sales (4 Cols) -->
@@ -437,7 +437,7 @@
             await fetchBranches();
             addInputRow(); 
             refreshData();
-            setInterval(refreshData, 60000);
+            setInterval(refreshData, 5000); // 5 seconds
         });
 
         function refreshData() {
@@ -453,7 +453,7 @@
                 
                 if (data.records) {
                     allRecordsData = data.records;
-                    filterRecords();
+                    filterRecords(false); // Do not reset page on auto refresh
                 }
                 if (data.stats) renderBranchStats(data.stats);
                 if (data.sales) renderSales(data.sales);
@@ -555,14 +555,14 @@
                                 <h4 class="font-bold text-slate-800 text-sm truncate mr-2">${s.name}</h4>
                                 <span class="text-[11px] font-black text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-100">${amountFormatted}</span>
                             </div>
-                            <p class="text-[11px] text-slate-500 font-medium mt-0.5 whitespace-normal break-words">${s.product || s.category}</p>
+                            <p class="text-[11px] text-slate-500 font-medium mt-0.5 truncate">${s.product || s.category}</p>
                         </div>
                     </div>
                 `;
             }).join('');
         }
 
-        function filterRecords() {
+        function filterRecords(resetPage = true) {
             const searchVal = document.getElementById('searchName').value.toLowerCase();
             const branchVal = document.getElementById('filterBranch').value;
             const dateVal = document.getElementById('filterDate').value;
@@ -578,7 +578,13 @@
                 return matchName && matchBranch && matchDate;
             });
 
-            currentPage = 1; 
+            if(resetPage) {
+                currentPage = 1;
+            } else {
+                // Ensure page is valid after update
+                const maxPage = Math.ceil(filteredData.length / rowsPerPage) || 1;
+                if (currentPage > maxPage) currentPage = maxPage;
+            }
             renderTable();
         }
 
