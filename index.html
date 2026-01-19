@@ -53,7 +53,7 @@
             box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.1);
         }
 
-        /* STATS LIST ITEM */
+        /* STATS LIST ITEM & CLICKABLE ROW */
         .stat-item {
             transition: all 0.2s ease;
         }
@@ -61,6 +61,8 @@
             border-color: #3b82f6;
             box-shadow: 0 2px 8px -2px rgba(0, 0, 0, 0.05);
         }
+        .clickable-row { cursor: pointer; }
+        .clickable-row:hover { background-color: #f0f9ff; border-color: #bae6fd; }
 
         /* TABLE ROW DESIGN */
         .custom-table-row {
@@ -98,6 +100,7 @@
             border-radius: 0.75rem;
             outline: none;
             transition: all 0.2s;
+            height: 42px;
         }
         .input-field:focus {
             background-color: #ffffff;
@@ -183,7 +186,7 @@
                     <h1 class="text-2xl font-black text-slate-800 tracking-tight leading-none">HEDEF AVM</h1>
                     <div class="flex items-center gap-2 mt-1">
                         <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                        <span class="text-sm font-bold text-slate-400">CRM Panel v18.6</span>
+                        <span class="text-sm font-bold text-slate-400">CRM Panel v19.3</span>
                     </div>
                 </div>
             </div>
@@ -255,8 +258,30 @@
 
         <!-- BOTTOM AREA -->
         <div class="grid grid-cols-1 gap-8">
-            <!-- BRANCH PERFORMANCE -->
+            <!-- BRANCH PERFORMANCE & GLOBAL STATS -->
             <section class="card-base p-8 bg-white">
+                <!-- GLOBAL STATS HEADER -->
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8 p-6 bg-slate-50 rounded-2xl border border-slate-200">
+                    <div class="text-center border-r border-slate-200 last:border-0">
+                        <p class="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest mb-1">TOPLAM ARANAN</p>
+                        <h4 class="text-2xl font-black text-slate-700" id="globalTotalAranan">0</h4>
+                    </div>
+                    <div class="text-center border-r border-slate-200 last:border-0">
+                        <p class="text-[10px] font-extrabold text-blue-500 uppercase tracking-widest mb-1">TOPLAM SATIŞ</p>
+                        <h4 class="text-2xl font-black text-blue-600" id="globalTotalSales">0</h4>
+                    </div>
+                    <div class="text-center border-r border-slate-200 last:border-0 hidden md:block">
+                         <p class="text-[10px] font-extrabold text-purple-500 uppercase tracking-widest mb-1">ADET LİDERİ</p>
+                         <h4 class="text-sm font-bold text-purple-700 mt-1 truncate px-2" id="globalTopVolCat">-</h4>
+                         <span class="text-xs text-purple-400" id="globalTopVolCount">(0)</span>
+                    </div>
+                     <div class="text-center">
+                         <p class="text-[10px] font-extrabold text-emerald-500 uppercase tracking-widest mb-1">CİRO LİDERİ</p>
+                         <h4 class="text-sm font-bold text-emerald-700 mt-1 truncate px-2" id="globalTopRevCat">-</h4>
+                         <span class="text-xs text-emerald-400" id="globalTopRevAmount">(₺0)</span>
+                    </div>
+                </div>
+
                 <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6 pb-4 border-b border-slate-100">
                     <div class="flex items-center gap-4">
                         <div class="w-12 h-12 rounded-2xl bg-amber-100 text-amber-600 flex items-center justify-center text-xl shadow-sm border border-amber-200"><i class="fas fa-trophy"></i></div>
@@ -288,6 +313,44 @@
                     <div class="flex items-center justify-center py-16 col-span-full"><div class="loader"></div></div>
                 </div>
             </section>
+        </div>
+    </div>
+
+    <!-- BRANCH DETAIL MODAL (ADDED BACK) -->
+    <div id="branchDetailModal" class="fixed inset-0 z-[70] hidden flex items-center justify-center bg-slate-900/80 backdrop-blur-sm p-4 transition-all duration-300">
+        <div class="card-base w-full max-w-2xl shadow-2xl border-0 bg-white overflow-hidden transform scale-100 transition-transform">
+            <div class="px-8 py-6 border-b border-slate-100 bg-indigo-50 flex justify-between items-center">
+                <div class="flex items-center gap-4">
+                    <div class="w-12 h-12 rounded-xl bg-white text-indigo-600 flex items-center justify-center shadow-sm text-xl"><i class="fas fa-store"></i></div>
+                    <div><h3 class="text-xl font-black text-indigo-900" id="modalBranchTitle">Şube Adı</h3><p class="text-xs font-bold text-indigo-400 uppercase tracking-wider">DETAYLI ANALİZ</p></div>
+                </div>
+                <button onclick="document.getElementById('branchDetailModal').classList.add('hidden')" class="w-10 h-10 rounded-full flex items-center justify-center bg-white text-slate-400 hover:bg-rose-50 hover:text-rose-500 transition-all"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="p-8 space-y-8">
+                <!-- KPI Grid -->
+                <div class="grid grid-cols-3 gap-4">
+                    <div class="p-4 bg-slate-50 rounded-2xl text-center border border-slate-100">
+                        <span class="block text-2xl font-black text-slate-800" id="detailTotalCalls">0</span>
+                        <span class="text-[10px] font-bold text-slate-400 uppercase">Toplam Arama</span>
+                    </div>
+                     <div class="p-4 bg-emerald-50 rounded-2xl text-center border border-emerald-100">
+                        <span class="block text-2xl font-black text-emerald-600" id="detailSalesCount">0</span>
+                        <span class="text-[10px] font-bold text-emerald-400 uppercase">Satış Adedi</span>
+                    </div>
+                     <div class="p-4 bg-blue-50 rounded-2xl text-center border border-blue-100">
+                        <span class="block text-2xl font-black text-blue-600" id="detailConversion">%0</span>
+                        <span class="text-[10px] font-bold text-blue-400 uppercase">Dönüşüm</span>
+                    </div>
+                </div>
+
+                <!-- Top Categories -->
+                <div>
+                    <h4 class="text-sm font-bold text-slate-800 uppercase tracking-wide mb-4 flex items-center gap-2"><i class="fas fa-tags text-indigo-500"></i> En Çok Satan Kategoriler</h4>
+                    <div id="detailTopCategories" class="space-y-3">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -366,6 +429,7 @@
         let branchList = [];
         let allRecordsData = []; 
         let filteredData = [];
+        let branchStatsData = []; // Store for detail view
         let currentPage = 1;
         const rowsPerPage = 10; 
         
@@ -373,7 +437,7 @@
             await fetchBranches();
             addInputRow(); 
             refreshData();
-            setInterval(refreshData, 5000); // 5 seconds
+            setInterval(refreshData, 15000); 
         });
 
         function refreshData() {
@@ -394,8 +458,22 @@
                     allRecordsData = data.records;
                     filterRecords(false); 
                 }
-                if (data.stats) renderBranchStats(data.stats);
+                if (data.stats) { 
+                    branchStatsData = data.stats; 
+                    renderBranchStats(data.stats); 
+                }
                 if (data.sales) renderSales(data.sales);
+                
+                // NEW: Populate Global Stats
+                if (data.global) {
+                    document.getElementById('globalTotalAranan').textContent = data.global.totalAranan;
+                    document.getElementById('globalTotalSales').textContent = data.global.totalSales;
+                    document.getElementById('globalTopVolCat').textContent = data.global.topVolCat;
+                    document.getElementById('globalTopVolCount').textContent = `(${data.global.topVolCount} Adet)`;
+                    document.getElementById('globalTopRevCat').textContent = data.global.topRevCat;
+                    document.getElementById('globalTopRevAmount').textContent = new Intl.NumberFormat('tr-TR', { style: 'currency', currency: 'TRY', maximumFractionDigits: 0 }).format(data.global.topRevAmount);
+                }
+
             } catch(e) { console.error("Data fetch error", e); }
         }
 
@@ -445,8 +523,12 @@
             stats.forEach(stat => {
                 const cleanName = stat.branch.replace(/ Şubesi/gi, '');
                 const formattedRevenue = new Intl.NumberFormat('tr-TR', { style: 'currency', currency: 'TRY', maximumFractionDigits: 0 }).format(stat.totalRevenue);
+                const salesCnt = stat.salesCount || 0;
+                
                 const div = document.createElement('div');
-                div.className = "stat-item grid grid-cols-2 md:grid-cols-12 items-center gap-3 p-4 bg-white border border-slate-100 rounded-2xl mb-3 shadow-sm hover:border-brand-200 hover:shadow-md transition-all";
+                div.className = "stat-item grid grid-cols-2 md:grid-cols-12 items-center gap-3 p-4 bg-white border border-slate-100 rounded-2xl mb-3 shadow-sm hover:border-brand-200 hover:shadow-md transition-all clickable-row";
+                div.onclick = () => openBranchDetails(stat.branch);
+                
                 div.innerHTML = `
                     <div class="col-span-2 md:col-span-5 flex items-center gap-4">
                         <span class="w-10 h-10 rounded-xl bg-slate-100 text-slate-500 font-black flex items-center justify-center text-xs border border-slate-200 shrink-0">${cleanName.substring(0,2).toUpperCase()}</span>
@@ -469,6 +551,50 @@
             });
         }
 
+        // --- BRANCH DETAIL LOGIC ---
+        function openBranchDetails(branchName) {
+            const stat = branchStatsData.find(s => s.branch === branchName);
+            if(!stat) return;
+
+            const branchRecords = allRecordsData.filter(r => r.branch === branchName && (r.order && (r.order.toLowerCase().includes('evet') || r.order.toLowerCase().includes('satış'))));
+            const catCounts = {};
+            branchRecords.forEach(r => {
+                const cat = r.category || 'Diğer';
+                catCounts[cat] = (catCounts[cat] || 0) + 1;
+            });
+            const sortedCats = Object.entries(catCounts).sort((a,b) => b[1] - a[1]).slice(0, 3);
+
+            document.getElementById('modalBranchTitle').textContent = branchName;
+            document.getElementById('detailTotalCalls').textContent = stat.arandi;
+            document.getElementById('detailSalesCount').textContent = stat.salesCount || 0;
+            const conv = stat.arandi > 0 ? ((stat.salesCount || 0) / stat.arandi * 100).toFixed(1) : 0;
+            document.getElementById('detailConversion').textContent = `%${conv}`;
+
+            const catContainer = document.getElementById('detailTopCategories');
+            catContainer.innerHTML = '';
+            
+            if(sortedCats.length === 0) {
+                catContainer.innerHTML = '<p class="text-sm text-slate-400 italic">Henüz satış verisi yok.</p>';
+            } else {
+                sortedCats.forEach(([cat, count]) => {
+                    const pct = ((count / (stat.salesCount || 1)) * 100).toFixed(0);
+                    catContainer.innerHTML += `
+                        <div class="flex items-center justify-between p-3 bg-white border border-slate-100 rounded-xl">
+                            <span class="font-bold text-slate-700 text-sm">${cat}</span>
+                            <div class="flex items-center gap-3">
+                                <div class="w-24 h-2 bg-slate-100 rounded-full overflow-hidden">
+                                    <div class="h-full bg-indigo-500 rounded-full" style="width:${pct}%"></div>
+                                </div>
+                                <span class="font-bold text-indigo-600 text-xs">${count} Adet</span>
+                            </div>
+                        </div>
+                    `;
+                });
+            }
+
+            document.getElementById('branchDetailModal').classList.remove('hidden');
+        }
+
         function renderSales(sales) {
             const container = document.getElementById('latestSalesContainer');
             if (!sales || sales.length === 0) {
@@ -481,24 +607,39 @@
                 let dateBadge = '';
                 if(s.timestamp) {
                     let d = new Date(s.timestamp);
-                    if(!isNaN(d.getTime())) dateBadge = `<span class="text-[10px] text-slate-400 font-bold ml-auto">${d.toLocaleDateString('tr-TR', {day:'numeric', month:'short'})}</span>`;
+                    if(!isNaN(d.getTime())) {
+                        dateBadge = `<span class="text-[10px] text-slate-400 font-bold ml-auto">${d.toLocaleDateString('tr-TR', {day:'numeric', month:'short'})}</span>`;
+                    }
                 }
+
                 return `
                     <div class="flex flex-col gap-3 p-5 rounded-2xl bg-white border border-slate-100 hover:border-emerald-400 hover:shadow-lg transition-all group cursor-default h-full relative overflow-hidden">
                         <div class="absolute top-0 right-0 w-16 h-16 bg-emerald-50 rounded-bl-full -mr-8 -mt-8 z-0"></div>
+                        
                         <div class="flex justify-between items-start relative z-10">
-                            <div class="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-600 flex items-center justify-center shrink-0 border border-emerald-200 shadow-sm"><i class="fas fa-check text-sm"></i></div>
+                            <div class="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-600 flex items-center justify-center shrink-0 border border-emerald-200 shadow-sm">
+                                <i class="fas fa-check text-sm"></i>
+                            </div>
                             ${dateBadge}
                         </div>
+                        
                         <div class="flex-1 min-w-0 relative z-10">
-                            <div class="mb-2"><span class="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest block mb-1">${cleanBranch}</span><h4 class="font-bold text-slate-800 text-sm truncate" title="${s.name}">${s.name}</h4></div>
-                            <div class="flex justify-between items-end border-t border-dashed border-slate-100 pt-3 mt-2"><p class="text-[11px] text-slate-500 font-medium whitespace-normal break-words leading-tight max-w-[60%]">${s.product || s.category}</p><span class="text-xs font-black text-emerald-700 bg-emerald-50 px-2 py-1 rounded-lg border border-emerald-100 shadow-sm">${amountFormatted}</span></div>
+                            <div class="mb-2">
+                                <span class="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest block mb-1">${cleanBranch}</span>
+                                <h4 class="font-bold text-slate-800 text-sm truncate" title="${s.name}">${s.name}</h4>
+                            </div>
+                            
+                            <div class="flex justify-between items-end border-t border-dashed border-slate-100 pt-3 mt-2">
+                                <p class="text-[11px] text-slate-500 font-medium whitespace-normal break-words leading-tight max-w-[60%]">${s.product || s.category}</p>
+                                <span class="text-xs font-black text-emerald-700 bg-emerald-50 px-2 py-1 rounded-lg border border-emerald-100 shadow-sm">${amountFormatted}</span>
+                            </div>
                         </div>
                     </div>
                 `;
             }).join('');
         }
 
+        // ... (Filter, Clear, RenderTable, Pagination, AddInputRow, Submit, Edit/Delete functions remain same)
         function filterRecords(resetPage = true) {
             const searchVal = document.getElementById('searchName').value.toLowerCase();
             const branchVal = document.getElementById('filterBranch').value;
@@ -507,17 +648,10 @@
                 const matchName = item.name.toLowerCase().includes(searchVal);
                 const matchBranch = branchVal === 'all' || item.branch === branchVal;
                 let matchDate = true;
-                if (dateVal) {
-                    const itemDateStr = item.date.substring(0, 10);
-                    matchDate = itemDateStr === dateVal;
-                }
+                if (dateVal) { const itemDateStr = item.date.substring(0, 10); matchDate = itemDateStr === dateVal; }
                 return matchName && matchBranch && matchDate;
             });
             if(resetPage) currentPage = 1;
-            else {
-                const maxPage = Math.ceil(filteredData.length / rowsPerPage) || 1;
-                if (currentPage > maxPage) currentPage = maxPage;
-            }
             renderTable();
         }
 
@@ -533,11 +667,7 @@
             const totalRecords = filteredData.length;
             document.getElementById('totalRecordsBadge').textContent = `${totalRecords}`;
             tbody.innerHTML = '';
-            if (totalRecords === 0) {
-                tbody.innerHTML = '<tr><td colspan="8" class="text-center py-16 text-slate-400 text-sm italic">Kayıt bulunamadı.</td></tr>';
-                renderPagination(0);
-                return;
-            }
+            if (totalRecords === 0) { tbody.innerHTML = '<tr><td colspan="8" class="text-center py-16 text-slate-400 text-sm italic">Kayıt bulunamadı.</td></tr>'; renderPagination(0); return; }
             const startIndex = (currentPage - 1) * rowsPerPage;
             const endIndex = startIndex + rowsPerPage;
             const pageData = filteredData.slice(startIndex, endIndex);
@@ -553,6 +683,7 @@
                 if(row.amount > 0) {
                     amountText = new Intl.NumberFormat('tr-TR', { style: 'currency', currency: 'TRY', maximumFractionDigits: 0 }).format(row.amount);
                 }
+                
                 let dateDisplay = row.date.replace('T', ' ');
                 const timeParts = dateDisplay.split(':');
                 if(timeParts.length === 3) dateDisplay = `${timeParts[0]}:${timeParts[1]}`;
@@ -602,8 +733,7 @@
             const now = new Date();
             const offsetMs = now.getTimezoneOffset() * 60 * 1000;
             const msLocal = now.getTime() - offsetMs;
-            const dateLocal = new Date(msLocal);
-            return dateLocal.toISOString().slice(0, 16);
+            return new Date(msLocal).toISOString().slice(0, 16);
         }
 
         function addInputRow() {
