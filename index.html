@@ -28,6 +28,7 @@
     <style>
         body { background-color: #f8fafc; color: #334155; -webkit-tap-highlight-color: transparent; font-size: 14px; }
         
+        /* CARD BASE */
         .card-base {
             background: white;
             border-radius: 1.25rem;
@@ -36,19 +37,23 @@
             overflow: hidden;
         }
 
+        /* FORM ENTRY CARD */
         .entry-card {
             background: #ffffff;
-            border: 2px solid #e2e8f0;
-            border-radius: 1rem;
-            padding: 1.5rem;
-            margin-bottom: 1rem;
+            border: 1px solid #cbd5e1;
+            border-radius: 0.75rem;
+            padding: 1rem;
+            margin-bottom: 0.75rem;
+            position: relative;
             transition: all 0.2s ease;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.03);
         }
         .entry-card:hover {
             border-color: #3b82f6; 
-            box-shadow: 0 8px 16px -4px rgba(59, 130, 246, 0.1);
+            box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.1);
         }
 
+        /* STATS LIST ITEM */
         .stat-item {
             transition: all 0.2s ease;
         }
@@ -57,6 +62,7 @@
             box-shadow: 0 2px 8px -2px rgba(0, 0, 0, 0.05);
         }
 
+        /* TABLE ROW DESIGN */
         .custom-table-row {
             transition: all 0.1s ease;
             border-bottom: 1px solid #f1f5f9;
@@ -70,6 +76,7 @@
             font-size: 0.875rem;
         }
 
+        /* INPUTS */
         .input-label {
             display: block;
             font-size: 0.7rem; 
@@ -106,8 +113,12 @@
             background-size: 1.25em 1.25em;
         }
 
+        /* BUTTONS */
         .btn {
-            display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
             padding: 0.75rem 1.5rem; font-weight: 700; font-size: 0.9rem; border-radius: 0.75rem;
             transition: all 0.2s; cursor: pointer;
             height: 42px;
@@ -117,13 +128,16 @@
         .btn-secondary { background-color: white; color: #475569; border: 1px solid #cbd5e1; }
         .btn-secondary:hover { background-color: #f8fafc; border-color: #94a3b8; color: #1e293b; }
 
+        /* CUSTOM SCROLLBAR */
         ::-webkit-scrollbar { width: 8px; height: 8px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; border: 2px solid #f8fafc; }
 
+        /* LOADER */
         .loader { border: 3px solid #f1f5f9; border-top: 3px solid #0ea5e9; border-radius: 50%; width: 1.5rem; height: 1.5rem; animation: spin 1s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
+        /* RESPONSIVE TABLE */
         @media (max-width: 1024px) {
             .resp-table thead { display: none; }
             .resp-table tbody tr {
@@ -169,7 +183,7 @@
                     <h1 class="text-2xl font-black text-slate-800 tracking-tight leading-none">HEDEF AVM</h1>
                     <div class="flex items-center gap-2 mt-1">
                         <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                        <span class="text-sm font-bold text-slate-400">CRM Panel v18.3</span>
+                        <span class="text-sm font-bold text-slate-400">CRM Panel v18.6</span>
                     </div>
                 </div>
             </div>
@@ -243,9 +257,15 @@
         <div class="grid grid-cols-1 gap-8">
             <!-- BRANCH PERFORMANCE -->
             <section class="card-base p-8 bg-white">
-                <div class="flex items-center gap-4 mb-6 pb-4 border-b border-slate-100">
-                    <div class="w-12 h-12 rounded-2xl bg-amber-100 text-amber-600 flex items-center justify-center text-xl shadow-sm border border-amber-200"><i class="fas fa-trophy"></i></div>
-                    <div><h3 class="text-xl font-bold text-slate-800">Şube Performansları</h3><p class="text-xs text-slate-400 font-bold uppercase tracking-wider">BU AYKİ DURUM</p></div>
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6 pb-4 border-b border-slate-100">
+                    <div class="flex items-center gap-4">
+                        <div class="w-12 h-12 rounded-2xl bg-amber-100 text-amber-600 flex items-center justify-center text-xl shadow-sm border border-amber-200"><i class="fas fa-trophy"></i></div>
+                        <div><h3 class="text-xl font-bold text-slate-800">Şube Performansları</h3><p class="text-xs text-slate-400 font-bold uppercase tracking-wider">BU AYKİ DURUM</p></div>
+                    </div>
+                    <div class="bg-emerald-50 px-5 py-3 rounded-2xl border border-emerald-100 text-right min-w-[180px] self-end md:self-auto">
+                        <span class="block text-[10px] font-extrabold text-emerald-600/70 uppercase tracking-widest mb-0.5">BU AY TOPLAM CİRO</span>
+                        <span id="totalMonthRevenue" class="block text-2xl font-black text-emerald-700 tracking-tight">₺0,00</span>
+                    </div>
                 </div>
                 <div class="hidden md:grid grid-cols-12 px-6 py-3 mb-3 text-xs font-extrabold text-slate-400 uppercase tracking-wider bg-slate-50 rounded-xl border border-slate-200">
                     <div class="col-span-5">Şube Adı</div><div class="col-span-2 text-center">Arandı</div><div class="col-span-2 text-center">Beklemede</div><div class="col-span-3 text-right">Toplam Ciro</div>
@@ -353,7 +373,7 @@
             await fetchBranches();
             addInputRow(); 
             refreshData();
-            setInterval(refreshData, 3000); // 3 saniyede bir güncelle
+            setInterval(refreshData, 5000); // 5 seconds
         });
 
         function refreshData() {
@@ -364,7 +384,11 @@
 
         async function fetchDashboardData() {
             try {
-                const response = await fetch(`${GOOGLE_APPS_SCRIPT_WEB_APP_URL}?action=getDashboardData`);
+                // Add timestamp to prevent caching
+                const response = await fetch(`${GOOGLE_APPS_SCRIPT_WEB_APP_URL}?action=getDashboardData&t=${new Date().getTime()}`, {
+                    method: 'GET',
+                    mode: 'cors'
+                });
                 const data = await response.json();
                 if (data.records) {
                     allRecordsData = data.records;
@@ -377,7 +401,10 @@
 
         async function fetchBranches() {
             try {
-                const response = await fetch(`${GOOGLE_APPS_SCRIPT_WEB_APP_URL}?action=getLeaderboard`);
+                const response = await fetch(`${GOOGLE_APPS_SCRIPT_WEB_APP_URL}?action=getLeaderboard&t=${new Date().getTime()}`, {
+                    method: 'GET',
+                    mode: 'cors'
+                });
                 const data = await response.json();
                 if(data.leaderboard) {
                     branchList = data.leaderboard.map(b => b.branch);
@@ -402,7 +429,19 @@
                 container.innerHTML = '<div class="text-center py-8 text-slate-400">Veri bulunamadı</div>';
                 return;
             }
+            
+            // SIRALAMA
             stats.sort((a, b) => b.totalRevenue - a.totalRevenue);
+
+            // TOPLAM CİRO HESAPLAMA
+            let totalMonthRevenue = 0;
+            stats.forEach(s => totalMonthRevenue += (s.totalRevenue || 0));
+
+            // Ekrana Yazdırma
+            const formattedTotal = new Intl.NumberFormat('tr-TR', { style: 'currency', currency: 'TRY', maximumFractionDigits: 0 }).format(totalMonthRevenue);
+            const totalEl = document.getElementById('totalMonthRevenue');
+            if(totalEl) totalEl.textContent = formattedTotal;
+
             stats.forEach(stat => {
                 const cleanName = stat.branch.replace(/ Şubesi/gi, '');
                 const formattedRevenue = new Intl.NumberFormat('tr-TR', { style: 'currency', currency: 'TRY', maximumFractionDigits: 0 }).format(stat.totalRevenue);
