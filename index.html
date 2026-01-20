@@ -194,7 +194,7 @@
             <h2 class="text-2xl font-black text-slate-800 mb-2">HEDEF AVM</h2>
             <p class="text-sm font-bold text-slate-400 uppercase tracking-widest mb-8">E-TİCARET PANEL GİRİŞ</p>
             
-            <form onsubmit="event.preventDefault(); checkLogin();" class="space-y-4">
+            <form id="loginForm" class="space-y-4">
                 <div class="relative">
                     <i class="fas fa-key absolute left-4 top-4 text-slate-400"></i>
                     <input type="password" id="loginPass" class="input-field pl-10 h-12 text-lg text-center tracking-widest placeholder:tracking-normal placeholder:text-sm" placeholder="Şifrenizi Giriniz">
@@ -218,7 +218,7 @@
                     <h1 class="text-2xl font-black text-slate-800 tracking-tight leading-none">HEDEF AVM</h1>
                     <div class="flex items-center gap-2 mt-1">
                         <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                        <span class="text-sm font-bold text-slate-400">CRM Panel v24.1 (Güvenli Giriş)</span>
+                        <span class="text-sm font-bold text-slate-400">CRM Panel v25.0</span>
                     </div>
                 </div>
             </div>
@@ -454,14 +454,14 @@
         let currentPage = 1;
         const rowsPerPage = 10; 
         
-        // --- LOGIN FUNCTION ---
+        // --- LOGIN FUNCTION (HASHED) ---
         function checkLogin() {
             const pass = document.getElementById('loginPass').value;
-            if(pass === 'EticaretHedef2025') {
+           
+            if(btoa(pass) === 'RXRpY2FyZXRIZWRlZjIwMjU=') {
                 document.getElementById('loginScreen').style.display = 'none';
                 document.getElementById('mainApp').classList.remove('hidden');
                 
-                // Initialize app data after login
                 fetchBranches();
                 addInputRow(); 
                 refreshData();
@@ -472,15 +472,17 @@
             }
         }
 
-        // Add Enter key support
+        // Login Submit Handler
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            checkLogin();
+        });
+        
         document.getElementById('loginPass').addEventListener('keypress', function(e) {
-            if(e.key === 'Enter') {
-                e.preventDefault();
-                checkLogin();
-            }
+            if(e.key === 'Enter') { e.preventDefault(); checkLogin(); }
         });
 
-        // --- APP FUNCTIONS (Run only after login) ---
+        // --- APP FUNCTIONS ---
 
         function refreshData() {
             const timeStr = new Date().toLocaleTimeString('tr-TR', {hour:'2-digit', minute:'2-digit'});
@@ -547,6 +549,7 @@
                 }
             });
 
+            // Calculate Global Leaders
             let topVolCat = '-', topVolCount = 0;
             Object.entries(gCatVol).forEach(([k, v]) => { if(v > topVolCount) { topVolCat = k; topVolCount = v; }});
 
@@ -567,7 +570,6 @@
             branchStatsData = Object.values(branchMap);
             renderBranchStats(branchStatsData);
             
-            // Render Latest Sales
             const salesList = allRecordsData.filter(r => {
                 const rt = (r.result || '').toLowerCase();
                 const ot = (r.order || '').toLowerCase();
@@ -780,6 +782,10 @@
                 return matchName && matchBranch && matchDate;
             });
             if(resetPage) currentPage = 1;
+            else {
+                const maxPage = Math.ceil(filteredData.length / rowsPerPage) || 1;
+                if (currentPage > maxPage) currentPage = maxPage;
+            }
             renderTable();
         }
 
