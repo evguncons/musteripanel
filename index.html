@@ -218,7 +218,7 @@
                     <h1 class="text-2xl font-black text-slate-800 tracking-tight leading-none">HEDEF AVM</h1>
                     <div class="flex items-center gap-2 mt-1">
                         <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                        <span class="text-sm font-bold text-slate-400">CRM Panel v25.0</span>
+                        <span class="text-sm font-bold text-slate-400">CRM Panel v25.1</span>
                     </div>
                 </div>
             </div>
@@ -457,8 +457,8 @@
         // --- LOGIN FUNCTION (HASHED) ---
         function checkLogin() {
             const pass = document.getElementById('loginPass').value;
-           
-            if(btoa(pass) === 'RXRpY2FyZXRIZWRlZjIwMjU=') {
+            // '134679' in Base64 is 'MTM0Njc5'
+            if(btoa(pass) === 'MTM0Njc5') {
                 document.getElementById('loginScreen').style.display = 'none';
                 document.getElementById('mainApp').classList.remove('hidden');
                 
@@ -770,6 +770,7 @@
             }).join('');
         }
 
+        // ... (Remaining functions filterRecords, clearFilters, renderTable, Pagination, AddInputRow, Submit, Edit/Delete functions remain same)
         function filterRecords(resetPage = true) {
             const searchVal = document.getElementById('searchName').value.toLowerCase();
             const branchVal = document.getElementById('filterBranch').value;
