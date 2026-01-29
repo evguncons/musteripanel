@@ -218,7 +218,7 @@
                     <h1 class="text-2xl font-black text-slate-800 tracking-tight leading-none">HEDEF AVM</h1>
                     <div class="flex items-center gap-2 mt-1">
                         <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                        <span class="text-sm font-bold text-slate-400">CRM Panel v25.1</span>
+                        <span class="text-sm font-bold text-slate-400">CRM Panel v25.3 (Edit Fix)</span>
                     </div>
                 </div>
             </div>
@@ -257,13 +257,22 @@
                 <div class="flex flex-col sm:flex-row justify-between items-center gap-4">
                     <div class="flex items-center gap-3">
                         <div class="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center border border-indigo-100"><i class="fas fa-list-ul text-lg"></i></div>
-                        <div><h3 class="text-lg font-bold text-slate-800">İşlem Listesi</h3><p class="text-xs text-slate-400 font-bold uppercase tracking-wide">TÜM DETAYLAR</p></div>
+                        <div><h3 class="text-lg font-bold text-slate-800">İşlem Listesi <span class="text-xs text-brand-500 ml-1">(Son 3 Ay)</span></h3><p class="text-xs text-slate-400 font-bold uppercase tracking-wide">TÜM DETAYLAR</p></div>
                     </div>
                     <span class="text-sm font-bold bg-slate-100 text-slate-600 px-4 py-2 rounded-xl border border-slate-200" id="totalRecordsBadge">0 Kayıt</span>
                 </div>
-                <div class="p-5 bg-slate-50 rounded-2xl border border-slate-200 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                    <div><label class="input-label mb-1">Arama</label><div class="relative"><i class="fas fa-search absolute left-4 top-3.5 text-slate-400"></i><input type="text" id="searchName" placeholder="Müşteri Ara..." class="input-field pl-10" onkeyup="filterRecords()"></div></div>
+                
+                <!-- FILTERS -->
+                <div class="p-5 bg-slate-50 rounded-2xl border border-slate-200 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+                    <div class="lg:col-span-2"><label class="input-label mb-1">Arama</label><div class="relative"><i class="fas fa-search absolute left-4 top-3.5 text-slate-400"></i><input type="text" id="searchName" placeholder="Müşteri Ara..." class="input-field pl-10" onkeyup="filterRecords()"></div></div>
                     <div><label class="input-label mb-1">Şube</label><select id="filterBranch" class="input-field select-field" onchange="filterRecords()"><option value="all">Tüm Şubeler</option></select></div>
+                    <div><label class="input-label mb-1">Durum</label>
+                        <select id="filterStatus" class="input-field select-field" onchange="filterRecords()">
+                            <option value="all">Tüm Durumlar</option>
+                            <option value="Arandı">Arandı</option>
+                            <option value="Aranmadı">Aranmadı</option>
+                        </select>
+                    </div>
                     <div><label class="input-label mb-1">Tarih</label><input type="date" id="filterDate" class="input-field" onchange="filterRecords()"></div>
                     <div class="flex items-end"><button onclick="clearFilters()" class="btn btn-secondary w-full"><i class="fas fa-eraser"></i> Filtreyi Temizle</button></div>
                 </div>
@@ -288,7 +297,7 @@
         <div class="grid grid-cols-1 gap-8">
             <!-- BRANCH PERFORMANCE & GLOBAL STATS -->
             <section class="card-base p-8 bg-white">
-                <!-- UPDATED GLOBAL STATS HEADER -->
+                <!-- GLOBAL STATS HEADER -->
                 <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
                     <div class="p-6 bg-slate-50 rounded-2xl border border-slate-200 flex flex-col items-center justify-center text-center hover:bg-slate-100 transition-colors">
                         <p class="text-xs md:text-sm font-extrabold text-slate-500 uppercase tracking-widest mb-2">TOPLAM ARANAN</p>
@@ -310,7 +319,7 @@
                     </div>
                 </div>
 
-                <!-- TOP 3 PODIUM (With Skeleton Loading & Custom Badges) -->
+                <!-- TOP 3 PODIUM -->
                 <div id="top3Container" class="flex justify-center items-end gap-2 md:gap-4 mb-12 mt-4 min-h-[200px]">
                     <!-- Skeleton Loader -->
                     <div class="w-1/4 h-36 bg-slate-100 rounded-t-2xl animate-pulse"></div>
@@ -401,13 +410,45 @@
                 <div><label class="input-label">Müşteri Adı Soyadı</label><input type="text" id="modalName" class="input-field"></div>
                 <div class="grid grid-cols-2 gap-5">
                     <div><label class="input-label">İletişim</label><input type="text" id="modalContact" class="input-field"></div>
-                    <div><label class="input-label">Durum</label><select id="modalStatus" class="input-field select-field"><option>Aranmadı</option><option>Arandı</option></select></div>
+                    <div><label class="input-label">Durum</label>
+                        <select id="modalStatus" class="input-field select-field">
+                            <option value="Aranmadı">Aranmadı</option>
+                            <option value="Arandı">Arandı</option>
+                        </select>
+                    </div>
                 </div>
                 <div class="grid grid-cols-2 gap-5">
-                    <div><label class="input-label">Kategori</label><select id="modalCategory" class="select-field input-field"><option>Mobilya</option><option>Baza+Yatak+Başlık</option><option>Beyaz Eşya</option><option>Elektrikli Ev Aletleri</option><option>Elektrikli-Benzinli Araç</option><option>Elektronik</option><option>Ev Dekorasyonu</option><option>Halı</option><option>Kişisel Aksesuar</option><option>Mobilya Aksesuarı</option><option>Tekstil</option><option>Züccaciye</option><option>Ayakkabı</option></select></div>
+                    <div><label class="input-label">Kategori</label><select id="modalCategory" class="select-field input-field">
+                        <option>Mobilya</option>
+                        <option>Baza+Yatak+Başlık</option>
+                        <option>Bebek ve Çocuk</option>
+                        <option>Beyaz Eşya</option>
+                        <option>Elektrikli Ev Aletleri</option>
+                        <option>Elektrikli-Benzinli Araç</option>
+                        <option>Elektronik</option>
+                        <option>Ev Dekorasyonu</option>
+                        <option>Halı</option>
+                        <option>Kişisel Aksesuar</option>
+                        <option>Mobilya Aksesuarı</option>
+                        <option>Tekstil</option>
+                        <option>Züccaciye</option>
+                        <option>Ayakkabı</option>
+                    </select></div>
                     <div><label class="input-label">Ürün</label><input type="text" id="modalProduct" class="input-field"></div>
                 </div>
                 <div class="p-5 bg-slate-50 rounded-xl border border-slate-200 grid grid-cols-1 gap-4">
+                     <!-- Added Media Field to Edit Modal -->
+                    <div>
+                         <label class="input-label text-slate-500">Medya (Geliş Kanalı)</label>
+                         <select id="modalMedia" class="input-field select-field">
+                            <option>Instagram</option>
+                            <option>Whatsapp</option>
+                            <option>Facebook</option>
+                            <option>Çağrı</option>
+                            <option>Web Sitesi Form</option>
+                         </select>
+                    </div>
+
                     <div>
                         <label class="input-label text-brand-600">Görüşme Sonucu</label>
                         <select id="modalResult" class="input-field select-field">
@@ -752,7 +793,11 @@
                 let dateBadge = '';
                 if(s.timestamp) {
                     let d = new Date(s.timestamp);
-                    if(!isNaN(d.getTime())) dateBadge = `<span class="text-[10px] text-slate-400 font-bold ml-auto">${d.toLocaleDateString('tr-TR', {day:'numeric', month:'short'})}</span>`;
+                    if(!isNaN(d.getTime())) {
+                        const dateStr = d.toLocaleDateString('tr-TR', {day:'numeric', month:'short'});
+                        const timeStr = d.toLocaleTimeString('tr-TR', {hour:'2-digit', minute:'2-digit'});
+                        dateBadge = `<span class="text-[10px] text-slate-400 font-bold ml-auto">${dateStr} ${timeStr}</span>`;
+                    }
                 }
                 return `
                     <div class="flex flex-col gap-3 p-5 rounded-2xl bg-white border border-slate-100 hover:border-emerald-400 hover:shadow-lg transition-all group cursor-default h-full relative overflow-hidden">
@@ -775,12 +820,24 @@
             const searchVal = document.getElementById('searchName').value.toLowerCase();
             const branchVal = document.getElementById('filterBranch').value;
             const dateVal = document.getElementById('filterDate').value;
+            const statusVal = document.getElementById('filterStatus').value; // Added Status Filter
+
             filteredData = allRecordsData.filter(item => {
-                const matchName = item.name.toLowerCase().includes(searchVal);
+                const matchName = (item.name || '').toLowerCase().includes(searchVal);
                 const matchBranch = branchVal === 'all' || item.branch === branchVal;
                 let matchDate = true;
                 if (dateVal) { const itemDateStr = item.date.substring(0, 10); matchDate = itemDateStr === dateVal; }
-                return matchName && matchBranch && matchDate;
+                
+                // Status Filter Logic
+                let matchStatus = true;
+                if (statusVal !== 'all') {
+                    // Normalize item status for comparison
+                    const s = (item.status || '').toLowerCase();
+                    if (statusVal === 'Arandı') matchStatus = s === 'arandı';
+                    else if (statusVal === 'Aranmadı') matchStatus = s !== 'arandı';
+                }
+
+                return matchName && matchBranch && matchDate && matchStatus;
             });
             if(resetPage) currentPage = 1;
             else {
@@ -794,6 +851,7 @@
             document.getElementById('searchName').value = '';
             document.getElementById('filterBranch').value = 'all';
             document.getElementById('filterDate').value = '';
+            document.getElementById('filterStatus').value = 'all'; // Reset status filter
             filterRecords();
         }
 
@@ -812,7 +870,7 @@
                 tr.className = "desktop-table-row group transition-colors hover:bg-slate-50";
                 const cleanBranch = row.branch.replace(/ Şubesi/gi, '');
                 let statusBadge = `<span class="inline-flex items-center px-2.5 py-1 rounded-lg text-[11px] font-bold bg-slate-100 text-slate-500 border border-slate-200 shadow-sm">${row.status}</span>`;
-                if(row.status.toLowerCase() === 'arandı') statusBadge = `<span class="inline-flex items-center px-2.5 py-1 rounded-lg text-[11px] font-bold bg-brand-50 text-brand-700 border border-brand-200 shadow-sm">${row.status}</span>`;
+                if((row.status || '').toLowerCase() === 'arandı') statusBadge = `<span class="inline-flex items-center px-2.5 py-1 rounded-lg text-[11px] font-bold bg-brand-50 text-brand-700 border border-brand-200 shadow-sm">${row.status}</span>`;
                 let resultText = row.result || '-';
                 let amountText = '-';
                 if(row.amount > 0) {
@@ -885,7 +943,22 @@
                     <div class="lg:col-span-2"><label class="input-label">Medya</label><select class="input-field select-field inp-media"><option>Instagram</option><option>Whatsapp</option><option>Facebook</option><option>Çağrı</option><option>Web Sitesi Form</option></select></div>
                 </div>
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
-                    <div><label class="input-label">Kategori</label><select class="input-field select-field inp-category"><option>Mobilya</option><option>Baza+Yatak+Başlık</option><option>Beyaz Eşya</option><option>Elektrikli Ev Aletleri</option><option>Elektrikli-Benzinli Araç</option><option>Elektronik</option><option>Ev Dekorasyonu</option><option>Halı</option><option>Kişisel Aksesuar</option><option>Mobilya Aksesuarı</option><option>Tekstil</option><option>Züccaciye</option><option>Ayakkabı</option></select></div>
+                    <div><label class="input-label">Kategori</label><select class="input-field select-field inp-category">
+                        <option>Mobilya</option>
+                        <option>Baza+Yatak+Başlık</option>
+                        <option>Bebek ve Çocuk</option>
+                        <option>Beyaz Eşya</option>
+                        <option>Elektrikli Ev Aletleri</option>
+                        <option>Elektrikli-Benzinli Araç</option>
+                        <option>Elektronik</option>
+                        <option>Ev Dekorasyonu</option>
+                        <option>Halı</option>
+                        <option>Kişisel Aksesuar</option>
+                        <option>Mobilya Aksesuarı</option>
+                        <option>Tekstil</option>
+                        <option>Züccaciye</option>
+                        <option>Ayakkabı</option>
+                    </select></div>
                     <div><label class="input-label">Ürün</label><input type="text" class="input-field inp-product"></div>
                     <div class="flex gap-3 items-end">
                         <div class="flex-1"><label class="input-label">Durum</label><select class="input-field select-field inp-status"><option>Aranmadı</option><option>Arandı</option></select></div>
@@ -943,12 +1016,14 @@
             document.getElementById('modalBranch').value = record.branch;
             document.getElementById('modalName').value = record.name;
             document.getElementById('modalContact').value = record.contact;
-            document.getElementById('modalStatus').value = record.status; 
+            document.getElementById('modalStatus').value = (record.status || 'Aranmadı').toLowerCase() === 'arandı' ? 'Arandı' : 'Aranmadı'; 
             document.getElementById('modalCategory').value = record.category;
             document.getElementById('modalProduct').value = record.product;
             document.getElementById('modalResult').value = record.result || '';
             document.getElementById('modalOrder').value = record.order || 'Hayır';
             document.getElementById('modalAmount').value = record.amount || '';
+            document.getElementById('modalMedia').value = record.media || 'Instagram';
+            
             document.getElementById('editModal').classList.remove('hidden');
         }
 
@@ -982,7 +1057,8 @@
                     product: document.getElementById('modalProduct').value,
                     result: document.getElementById('modalResult').value,
                     order: document.getElementById('modalOrder').value,
-                    amount: document.getElementById('modalAmount').value
+                    amount: document.getElementById('modalAmount').value,
+                    media: document.getElementById('modalMedia').value
                 }
             };
             try {
