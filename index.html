@@ -103,24 +103,28 @@
         </header>
 
         <!-- DASHBOARD STATS -->
-        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 md:gap-6">
             <div class="card-base p-6 border-l-4 border-l-brand-500 shadow-sm">
-                <p class="text-sm font-bold text-slate-400 uppercase tracking-widest mb-2">Toplam Aranan</p>
-                <h3 class="text-4xl font-black text-slate-800" id="globalTotalAranan">0</h3>
+                <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">Toplam Yönlendirme</p>
+                <h3 class="text-4xl font-black text-slate-800" id="globalTotalRecords">0</h3>
+            </div>
+            <div class="card-base p-6 border-l-4 border-l-indigo-400 shadow-sm">
+                <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">Toplam Aranan</p>
+                <h3 class="text-4xl font-black text-indigo-600" id="globalTotalAranan">0</h3>
             </div>
             <div class="card-base p-6 border-l-4 border-l-emerald-500 shadow-sm">
-                <p class="text-sm font-bold text-slate-400 uppercase tracking-widest mb-2">Toplam Satış</p>
+                <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">Toplam Satış</p>
                 <h3 class="text-4xl font-black text-emerald-600" id="globalTotalSales">0</h3>
             </div>
             <div class="card-base p-6 border-l-4 border-l-amber-500 shadow-sm">
-                <p class="text-sm font-bold text-slate-400 uppercase tracking-widest mb-2">Adet Lideri</p>
+                <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">Adet Lideri</p>
                 <h3 class="text-lg font-bold text-slate-700 truncate mb-1" id="globalTopVolCat">-</h3>
                 <span class="text-sm text-amber-600 font-extrabold uppercase" id="globalTopVolCount">0 Adet</span>
             </div>
-            <div class="card-base p-6 border-l-4 border-l-indigo-500 shadow-sm">
-                <p class="text-sm font-bold text-slate-400 uppercase tracking-widest mb-2">Ciro Lideri</p>
+            <div class="card-base p-6 border-l-4 border-l-rose-500 shadow-sm">
+                <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">Ciro Lideri</p>
                 <h3 class="text-lg font-bold text-slate-700 truncate mb-1" id="globalTopRevCat">-</h3>
-                <span class="text-sm text-indigo-600 font-extrabold uppercase" id="globalTopRevAmount">₺0</span>
+                <span class="text-sm text-rose-600 font-extrabold uppercase" id="globalTopRevAmount">₺0</span>
             </div>
         </div>
 
@@ -151,10 +155,7 @@
                     </div>
                 </div>
             </div>
-            <!-- PODIUM -->
-            <div id="top3Container" class="flex justify-center items-end gap-3 md:gap-8 mb-16 mt-16 min-h-[300px] overflow-visible pb-4 px-2">
-                <!-- JS -->
-            </div>
+            <div id="top3Container" class="flex justify-center items-end gap-3 md:gap-8 mb-16 mt-16 min-h-[300px] overflow-visible pb-4 px-2"></div>
             <div class="space-y-4" id="branchStatsBody">
                 <div class="text-center py-10"><div class="loader mx-auto"></div></div>
             </div>
@@ -169,11 +170,10 @@
                          <span class="bg-brand-50 text-brand-700 px-4 py-1.5 rounded-full text-sm font-bold border border-brand-100 shadow-sm" id="totalRecordsBadge">0 Kayıt</span>
                     </div>
                 </div>
-                <!-- FILTERS -->
                 <div class="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-5 gap-4">
                     <div class="md:col-span-2">
-                        <label class="input-label">Müşteri Arama</label>
-                        <input type="text" id="searchName" placeholder="İsim soyisim..." class="input-field" onkeyup="filterRecords()">
+                        <label class="input-label">Müşteri Arama (Ad Soyad veya Numara)</label>
+                        <input type="text" id="searchName" placeholder="İsim veya telefon yazınız..." class="input-field" onkeyup="filterRecords()">
                     </div>
                     <div>
                         <label class="input-label">Şube</label>
@@ -230,7 +230,6 @@
         </section>
     </div>
 
-    <!-- MODALS & SCRIPT -->
     <script>
         const API_URL = 'https://script.google.com/macros/s/AKfycbwRSKYdXIHm2A6uts8MJE0v6snp3rsSVm4Qk5yQRd9chXtGoMUCQGXZ37X05QUJY2Aq/exec';
         const CATEGORIES = ["Mobilya", "Baza+Yatak+Başlık", "Bebek ve Çocuk", "Beyaz Eşya", "Elektrikli Ev Aletleri", "Elektrikli-Benzinli Araç", "Elektronik", "Ev Dekorasyonu", "Halı", "Kişisel Aksesuar", "Mobilya Aksesuarı", "Tekstil", "Züccaciye", "Ayakkabı"];
@@ -257,7 +256,7 @@
             await fetchBranches();
             addInputRow();
             refreshData();
-            setInterval(refreshData, 5000); // 5 Saniyede bir güncelleme
+            setInterval(refreshData, 5000); 
         }
 
         function populatePeriodSelector() {
@@ -294,13 +293,11 @@
             try {
                 const res = await fetch(`${API_URL}?action=getDashboardData&period=${encodeURIComponent(period)}&t=${Date.now()}`);
                 const data = await res.json();
-                
                 allRecordsData = (data.records || []).sort((a, b) => {
                     const dateA = new Date(a.date.replace(' ', 'T'));
                     const dateB = new Date(b.date.replace(' ', 'T'));
                     return dateB - dateA;
                 });
-
                 updateStats(data.global);
                 renderBranchPerformance(data.stats);
                 renderLatestSales(data.sales || []);
@@ -310,6 +307,7 @@
 
         function updateStats(global) {
             if(!global) return;
+            document.getElementById('globalTotalRecords').textContent = global.totalRecords || 0;
             document.getElementById('globalTotalAranan').textContent = global.totalAranan || 0;
             document.getElementById('globalTotalSales').textContent = global.totalSales || 0;
             document.getElementById('globalTopVolCat').textContent = global.topVolCat || '-';
@@ -408,10 +406,10 @@
             const branch = document.getElementById('filterBranch').value;
             const status = document.getElementById('filterStatus').value;
             filteredData = allRecordsData.filter(r => {
-                const matchName = (r.name || '').toLowerCase().includes(search);
+                const matchSearch = (r.name || '').toLowerCase().includes(search) || (r.contact || '').toLowerCase().includes(search);
                 const matchBranch = branch === 'all' || r.branch === branch;
                 const matchStatus = status === 'all' || (status === 'Arandı' && (r.status || '').toLowerCase() === 'arandı') || (status === 'Aranmadı' && (r.status || '').toLowerCase() !== 'arandı');
-                return matchName && matchBranch && matchStatus;
+                return matchSearch && matchBranch && matchStatus;
             });
             renderTable();
         }
@@ -460,20 +458,25 @@
             const div = document.createElement('div');
             div.className = "entry-card bg-white shadow-sm border-2 border-slate-100";
             const bOpts = branchList.map(b => `<option value="${b}">${b}</option>`).join('');
+            
+            const now = new Date();
+            const tzOffset = now.getTimezoneOffset() * 60000;
+            const localISOTime = (new Date(now - tzOffset)).toISOString().slice(0, 16);
+
             div.innerHTML = `
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-6 mb-6">
-                    <div class="lg:col-span-2"><label class="input-label">Tarih</label><input type="datetime-local" class="input-field" value="${new Date().toISOString().slice(0,16)}"></div>
+                    <div class="lg:col-span-2"><label class="input-label">Tarih</label><input type="datetime-local" class="input-field" value="${localISOTime}"></div>
                     <div class="lg:col-span-3"><label class="input-label">Şube</label><select class="input-field select-field inp-branch">${bOpts}</select></div>
-                    <div class="lg:col-span-3"><label class="input-label">Müşteri</label><input type="text" class="input-field inp-name"></div>
-                    <div class="lg:col-span-2"><label class="input-label">İletişim</label><input type="text" class="input-field inp-contact"></div>
+                    <div class="lg:col-span-3"><label class="input-label">Müşteri</label><input type="text" class="input-field inp-name" placeholder="Ad Soyad"></div>
+                    <div class="lg:col-span-2"><label class="input-label">İletişim</label><input type="text" class="input-field inp-contact" placeholder="Telefon"></div>
                     <div class="lg:col-span-2"><label class="input-label">Medya</label><select class="input-field select-field inp-media">${MEDIA_CHANNELS.map(m=>`<option value="${m}">${m}</option>`).join('')}</select></div>
                 </div>
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6 items-end">
                     <div><label class="input-label">Kategori</label><select class="input-field select-field inp-category">${CATEGORIES.map(c=>`<option value="${c}">${c}</option>`).join('')}</select></div>
-                    <div><label class="input-label">Ürün</label><input type="text" class="input-field inp-product"></div>
+                    <div><label class="input-label">Ürün</label><input type="text" class="input-field inp-product" placeholder="Ürün Bilgisi"></div>
                     <div class="flex gap-4">
                         <select class="input-field select-field inp-status flex-1"><option value="aranmadı">Aranmadı</option><option value="arandı">Arandı</option></select>
-                        <button onclick="this.parentElement.parentElement.parentElement.remove()" class="w-14 h-14 rounded-xl bg-rose-50 text-rose-500 flex items-center justify-center"><i class="fas fa-trash-alt"></i></button>
+                        <button onclick="this.parentElement.parentElement.parentElement.remove()" class="w-14 h-14 rounded-xl bg-rose-50 text-rose-500 flex items-center justify-center shrink-0 border border-rose-100 hover:bg-rose-100"><i class="fas fa-trash-alt"></i></button>
                     </div>
                 </div>
             `;
@@ -503,7 +506,7 @@
             try {
                 await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'addCustomersBulk', data: data }) });
                 document.getElementById('inputContainer').innerHTML = ''; addInputRow(); refreshData();
-            } catch(e) { alert("Hata"); }
+            } catch(e) { alert("Sunucu ile bağlantı hatası oluştu."); }
             finally { btn.disabled = false; }
         }
     </script>
