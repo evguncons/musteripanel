@@ -36,14 +36,8 @@
         .loader { border: 3px solid #f1f5f9; border-top: 3px solid #0ea5e9; border-radius: 50%; width: 1.75rem; height: 1.75rem; animation: spin 1s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         
-        .crown-icon {
-            filter: drop-shadow(0 6px 12px rgba(234, 179, 8, 0.6));
-            animation: float 3s ease-in-out infinite;
-        }
-        @keyframes float {
-            0%, 100% { transform: translateY(0px); }
-            50% { transform: translateY(-12px); }
-        }
+        .crown-icon { filter: drop-shadow(0 6px 12px rgba(234, 179, 8, 0.6)); animation: float 3s ease-in-out infinite; }
+        @keyframes float { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-12px); } }
 
         @media (max-width: 1024px) {
             .resp-table thead { display: none; }
@@ -85,9 +79,7 @@
                     <h1 class="text-2xl font-black text-slate-800 leading-none tracking-tight">HEDEF AVM CRM</h1>
                     <div class="flex items-center gap-2 mt-2">
                         <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                        <select id="currentPeriod" onchange="refreshData()" class="bg-transparent border-none text-xs font-bold text-slate-500 uppercase tracking-wider outline-none cursor-pointer p-0 hover:text-brand-600 transition-colors">
-                            <!-- JS ile doldurulacak -->
-                        </select>
+                        <select id="currentPeriod" onchange="refreshData()" class="bg-transparent border-none text-xs font-bold text-slate-500 uppercase tracking-wider outline-none cursor-pointer p-0 hover:text-brand-600 transition-colors"></select>
                     </div>
                 </div>
             </div>
@@ -96,9 +88,7 @@
                     <span class="block text-[10px] font-black text-slate-400 uppercase tracking-widest">SON VERİ</span>
                     <span id="lastUpdateTime" class="block text-sm font-bold text-slate-700 font-mono">--:--</span>
                 </div>
-                <button onclick="refreshData()" class="btn btn-secondary !h-12 !px-6 text-sm font-bold">
-                    <i class="fas fa-sync-alt text-brand-500"></i> Yenile
-                </button>
+                <button onclick="refreshData()" class="btn btn-secondary !h-12 !px-6 text-sm font-bold"><i class="fas fa-sync-alt text-brand-500"></i> Yenile</button>
             </div>
         </header>
 
@@ -113,27 +103,24 @@
                 <h3 class="text-4xl font-black text-indigo-600" id="globalTotalAranan">0</h3>
             </div>
             <div class="card-base p-6 border-l-4 border-l-emerald-500 shadow-sm">
-                <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">Toplam Satış</p>
+                <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">Satış Adedi</p>
                 <h3 class="text-4xl font-black text-emerald-600" id="globalTotalSales">0</h3>
             </div>
+            <div class="card-base p-6 border-l-4 border-l-rose-500 shadow-sm bg-rose-50/20">
+                <p class="text-xs font-bold text-rose-500 uppercase tracking-widest mb-2">Aylık Toplam Ciro</p>
+                <h3 class="text-2xl font-black text-rose-700" id="globalTotalRevenue">₺0</h3>
+            </div>
             <div class="card-base p-6 border-l-4 border-l-amber-500 shadow-sm">
-                <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">Adet Lideri</p>
+                <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">Adet Lideri (Kategori)</p>
                 <h3 class="text-lg font-bold text-slate-700 truncate mb-1" id="globalTopVolCat">-</h3>
                 <span class="text-sm text-amber-600 font-extrabold uppercase" id="globalTopVolCount">0 Adet</span>
-            </div>
-            <div class="card-base p-6 border-l-4 border-l-rose-500 shadow-sm">
-                <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">Ciro Lideri</p>
-                <h3 class="text-lg font-bold text-slate-700 truncate mb-1" id="globalTopRevCat">-</h3>
-                <span class="text-sm text-rose-600 font-extrabold uppercase" id="globalTopRevAmount">₺0</span>
             </div>
         </div>
 
         <!-- NEW ENTRY -->
         <section class="card-base shadow-sm border-t-4 border-t-brand-500">
             <div class="px-8 py-5 border-b border-slate-100 bg-slate-50/50 flex items-center justify-between">
-                <h2 class="text-xl font-bold text-slate-800 flex items-center gap-3">
-                    <i class="fas fa-user-plus text-brand-500"></i> Yeni Müşteri Kaydı
-                </h2>
+                <h2 class="text-xl font-bold text-slate-800 flex items-center gap-3"><i class="fas fa-user-plus text-brand-500"></i> Yeni Müşteri Kaydı</h2>
             </div>
             <div class="p-6 md:p-8">
                 <div id="inputContainer" class="space-y-6"></div>
@@ -146,67 +133,56 @@
 
         <!-- PERFORMANCE SECTION -->
         <section class="card-base p-6 md:p-10 bg-white !overflow-visible">
-            <div class="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-12">
-                <div class="flex items-center gap-4">
-                    <div class="w-14 h-14 rounded-2xl bg-amber-100 text-amber-600 flex items-center justify-center shadow-sm text-2xl"><i class="fas fa-trophy"></i></div>
-                    <div>
-                        <h3 class="text-3xl font-black text-slate-800 tracking-tight">Şube Performans Ligi</h3>
-                        <p class="text-sm font-bold text-slate-400 uppercase tracking-widest mt-1">Bu Ayın En İyileri</p>
-                    </div>
+            <div class="flex items-center gap-4 mb-12">
+                <div class="w-14 h-14 rounded-2xl bg-amber-100 text-amber-600 flex items-center justify-center shadow-sm text-2xl"><i class="fas fa-trophy"></i></div>
+                <div>
+                    <h3 class="text-3xl font-black text-slate-800 tracking-tight">Şube Performans Ligi</h3>
+                    <p class="text-sm font-bold text-slate-400 uppercase tracking-widest mt-1">Bu Ayın En İyileri</p>
                 </div>
             </div>
             <div id="top3Container" class="flex justify-center items-end gap-3 md:gap-8 mb-16 mt-16 min-h-[300px] overflow-visible pb-4 px-2"></div>
-            <div class="space-y-4" id="branchStatsBody">
-                <div class="text-center py-10"><div class="loader mx-auto"></div></div>
-            </div>
+            <div class="space-y-4" id="branchStatsBody"><div class="text-center py-10"><div class="loader mx-auto"></div></div></div>
         </section>
 
         <!-- RECORD LIST -->
         <section class="card-base shadow-sm">
             <div class="p-8 border-b border-slate-100 bg-slate-50/50">
-                <div class="flex flex-col md:flex-row justify-between gap-6 mb-8">
-                    <h3 class="text-2xl font-black text-slate-800 tracking-tight">Müşteri İşlem Listesi</h3>
-                    <div class="flex gap-3">
-                         <span class="bg-brand-50 text-brand-700 px-4 py-1.5 rounded-full text-sm font-bold border border-brand-100 shadow-sm" id="totalRecordsBadge">0 Kayıt</span>
-                    </div>
-                </div>
+                <h3 class="text-2xl font-black text-slate-800 tracking-tight mb-8">Müşteri İşlem Listesi</h3>
                 <div class="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-5 gap-4">
                     <div class="md:col-span-2">
-                        <label class="input-label">Müşteri Arama (Ad Soyad veya Numara)</label>
-                        <input type="text" id="searchName" placeholder="İsim veya telefon yazınız..." class="input-field" onkeyup="filterRecords()">
+                        <label class="input-label">Arama (İsim veya Telefon)</label>
+                        <input type="text" id="searchName" placeholder="Müşteri ara..." class="input-field" onkeyup="filterRecords()">
                     </div>
                     <div>
                         <label class="input-label">Şube</label>
                         <select id="filterBranch" class="input-field select-field" onchange="filterRecords()"><option value="all">Tüm Şubeler</option></select>
                     </div>
                     <div>
-                        <label class="input-label">Arama Durumu</label>
+                        <label class="input-label">Durum</label>
                         <select id="filterStatus" class="input-field select-field" onchange="filterRecords()">
-                            <option value="all">Tüm Durumlar</option>
-                            <option value="Arandı">Arandı</option>
-                            <option value="Aranmadı">Aranmadı</option>
+                            <option value="all">Hepsi</option><option value="Arandı">Arandı</option><option value="Aranmadı">Aranmadı</option>
                         </select>
                     </div>
-                    <div class="flex items-end"><button onclick="clearFilters()" class="btn btn-secondary w-full text-sm">Temizle</button></div>
+                    <div class="flex items-end"><button onclick="clearFilters()" class="btn btn-secondary w-full text-sm">Sıfırla</button></div>
                 </div>
             </div>
             <div class="overflow-x-auto">
                 <table class="w-full text-left resp-table">
                     <thead class="bg-slate-50 border-b border-slate-200">
                         <tr>
-                            <th class="px-8 py-5 text-xs font-black text-slate-400 uppercase tracking-widest">Tarih / Saat</th>
-                            <th class="px-8 py-5 text-xs font-black text-slate-400 uppercase tracking-widest">Şube</th>
-                            <th class="px-8 py-5 text-xs font-black text-slate-400 uppercase tracking-widest">Müşteri</th>
-                            <th class="px-8 py-5 text-xs font-black text-slate-400 uppercase tracking-widest">Durum</th>
-                            <th class="px-8 py-5 text-xs font-black text-slate-400 uppercase tracking-widest">Sonuç</th>
-                            <th class="px-8 py-5 text-xs font-black text-slate-400 uppercase tracking-widest text-right">Tutar</th>
-                            <th class="px-8 py-5 text-xs font-black text-slate-400 uppercase tracking-widest text-right">İşlem</th>
+                            <th class="px-8 py-5 text-xs font-black text-slate-400 uppercase">Tarih</th>
+                            <th class="px-8 py-5 text-xs font-black text-slate-400 uppercase">Şube</th>
+                            <th class="px-8 py-5 text-xs font-black text-slate-400 uppercase">Müşteri</th>
+                            <th class="px-8 py-5 text-xs font-black text-slate-400 uppercase">Durum</th>
+                            <th class="px-8 py-5 text-xs font-black text-slate-400 uppercase">Sonuç</th>
+                            <th class="px-8 py-5 text-xs font-black text-slate-400 uppercase text-right">Tutar</th>
+                            <th class="px-8 py-5 text-xs font-black text-slate-400 uppercase text-right">İşlem</th>
                         </tr>
                     </thead>
                     <tbody id="crmTableBody" class="divide-y divide-slate-100"></tbody>
                 </table>
             </div>
-            <div class="p-6 bg-slate-50 border-t border-slate-200 flex flex-col sm:flex-row justify-between items-center gap-4">
+            <div class="p-6 border-t border-slate-200 flex justify-between items-center bg-slate-50">
                 <span class="text-sm font-bold text-slate-500" id="paginationInfo">Sayfa 1 / 1</span>
                 <div class="flex gap-3" id="paginationControls"></div>
             </div>
@@ -216,31 +192,75 @@
         <section class="card-base shadow-sm border-t-4 border-t-emerald-500">
             <div class="p-8 border-b border-slate-100 bg-gradient-to-b from-emerald-50/30 to-transparent flex flex-col sm:flex-row justify-between items-center gap-4">
                 <div class="flex items-center gap-4">
-                    <div class="w-14 h-14 rounded-2xl bg-emerald-100 text-emerald-600 flex items-center justify-center shadow-sm text-2xl border border-emerald-200"><i class="fas fa-shopping-bag"></i></div>
+                    <div class="w-14 h-14 rounded-2xl bg-emerald-100 text-emerald-600 flex items-center justify-center shadow-sm text-2xl"><i class="fas fa-shopping-bag"></i></div>
                     <div>
                         <h3 class="text-2xl font-black text-slate-800 tracking-tight">Son Satışlar</h3>
-                        <p class="text-xs font-bold text-slate-500 uppercase tracking-widest mt-1">Global Satış Akışı</p>
+                        <p class="text-xs font-bold text-slate-500 uppercase tracking-widest mt-1">Canlı Satış Akışı</p>
                     </div>
                 </div>
-                <span class="text-xs font-black bg-emerald-600 text-white px-4 py-2 rounded-xl shadow-lg shadow-emerald-200 animate-pulse flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-white"></span> CANLI AKIŞ</span>
+                <span class="text-xs font-black bg-emerald-600 text-white px-4 py-2 rounded-xl shadow-lg animate-pulse flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-white"></span> CANLI AKIŞ</span>
             </div>
-            <div id="latestSalesContainer" class="p-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 max-h-[800px] overflow-y-auto custom-scrollbar">
-                <div class="flex items-center justify-center py-20 col-span-full"><div class="loader"></div></div>
-            </div>
+            <div id="latestSalesContainer" class="p-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 max-h-[800px] overflow-y-auto"></div>
         </section>
+    </div>
+
+    <!-- EDIT MODAL -->
+    <div id="editModal" class="fixed inset-0 z-[60] hidden flex items-center justify-center bg-slate-900/70 backdrop-blur-sm p-4">
+        <div class="card-base w-full max-w-2xl shadow-2xl bg-white max-h-[90vh] overflow-y-auto border-0">
+            <div class="px-8 py-6 border-b border-slate-100 flex justify-between items-center bg-slate-50 sticky top-0 z-10">
+                <div class="flex items-center gap-3"><i class="fas fa-edit text-brand-500 text-xl"></i><h3 class="text-xl font-black text-slate-800">KAYIT DÜZENLE</h3></div>
+                <button onclick="closeEditModal()" class="w-10 h-10 rounded-full flex items-center justify-center bg-white border border-slate-200 text-slate-400 hover:text-rose-500 transition-all"><i class="fas fa-times"></i></button>
+            </div>
+            <form id="editForm" class="p-8 space-y-6">
+                <input type="hidden" id="modalRowIndex"><input type="hidden" id="modalSheetName">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div><label class="input-label">Tarih</label><input type="text" id="modalDate" class="input-field bg-slate-100 font-bold" readonly></div>
+                    <div><label class="input-label">Şube</label><input type="text" id="modalBranch" class="input-field bg-slate-100 font-bold" readonly></div>
+                </div>
+                <div><label class="input-label">Müşteri Ad Soyad</label><input type="text" id="modalName" class="input-field"></div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div><label class="input-label">İletişim</label><input type="text" id="modalContact" class="input-field"></div>
+                    <div><label class="input-label">Arama Durumu</label>
+                        <select id="modalStatus" class="input-field select-field">
+                            <option value="aranmadı">Aranmadı</option><option value="arandı">Arandı</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div><label class="input-label">Kategori</label><select id="modalCategory" class="input-field select-field"></select></div>
+                    <div><label class="input-label">Medya (Geliş Kanalı)</label><select id="modalMedia" class="input-field select-field"></select></div>
+                </div>
+                <div><label class="input-label">Ürün Bilgisi</label><input type="text" id="modalProduct" class="input-field"></div>
+                <div class="p-6 bg-blue-50/50 rounded-2xl space-y-5 border border-blue-100">
+                    <div><label class="input-label text-blue-800 font-black">Görüşme Sonucu</label>
+                        <select id="modalResult" class="input-field select-field border-blue-200 bg-white">
+                            <option value="">Seçiniz...</option>
+                            <option value="Müşteri Mağazaya Gelecek">Müşteri Mağazaya Gelecek</option>
+                            <option value="Bilgi verildi, olumsuz">Bilgi verildi, olumsuz</option>
+                            <option value="Satışa Döndü">Satışa Döndü</option>
+                            <option value="Tekrar Aranacak">Tekrar Aranacak</option>
+                        </select>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                        <div><label class="input-label text-emerald-800 font-black">Sipariş Durumu</label><select id="modalOrder" class="input-field select-field border-emerald-200 bg-white font-bold text-emerald-700"><option value="Hayır">Hayır</option><option value="Evet,Satış Yapıldı">Evet,Satış Yapıldı</option></select></div>
+                        <div><label class="input-label text-emerald-800 font-black">Satış Tutarı (TL)</label><input type="number" id="modalAmount" class="input-field font-black text-emerald-700 border-emerald-200 bg-white" placeholder="0.00"></div>
+                    </div>
+                </div>
+                <div class="flex flex-col-reverse sm:flex-row justify-end gap-4 pt-6 border-t border-slate-100">
+                    <button type="button" onclick="closeEditModal()" class="btn btn-secondary px-10">Vazgeç</button>
+                    <button type="submit" id="editSubmitBtn" class="btn btn-primary px-12 text-lg">Güncelle</button>
+                </div>
+            </form>
+        </div>
     </div>
 
     <script>
         const API_URL = 'https://script.google.com/macros/s/AKfycbwRSKYdXIHm2A6uts8MJE0v6snp3rsSVm4Qk5yQRd9chXtGoMUCQGXZ37X05QUJY2Aq/exec';
         const CATEGORIES = ["Mobilya", "Baza+Yatak+Başlık", "Bebek ve Çocuk", "Beyaz Eşya", "Elektrikli Ev Aletleri", "Elektrikli-Benzinli Araç", "Elektronik", "Ev Dekorasyonu", "Halı", "Kişisel Aksesuar", "Mobilya Aksesuarı", "Tekstil", "Züccaciye", "Ayakkabı"];
-        const MEDIA_CHANNELS = ["Instagram", "Whatsapp", "Facebook", "Çağrı", "Web Sitesi Form"];
+        const MEDIA_CHANNELS = ["Instagram", "Whatsapp", "Facebook", "Çağrı", "Web Sitesi Form", "SMS LİNK"];
         const TR_MONTHS = ['OCAK', 'ŞUBAT', 'MART', 'NİSAN', 'MAYIS', 'HAZİRAN', 'TEMMUZ', 'AĞUSTOS', 'EYLÜL', 'EKİM', 'KASIM', 'ARALIK'];
 
-        let allRecordsData = [];
-        let filteredData = [];
-        let branchList = [];
-        let currentPage = 1;
-        const rowsPerPage = 12;
+        let allRecordsData = [], filteredData = [], branchList = [], currentPage = 1, rowsPerPage = 12;
 
         document.getElementById('loginForm').addEventListener('submit', (e) => {
             e.preventDefault();
@@ -260,15 +280,14 @@
         }
 
         function populatePeriodSelector() {
-            const selector = document.getElementById('currentPeriod');
-            const now = new Date();
+            const s = document.getElementById('currentPeriod');
+            const n = new Date();
             for (let i = -6; i <= 2; i++) {
-                let d = new Date(now.getFullYear(), now.getMonth() + i, 1);
-                let val = `${TR_MONTHS[d.getMonth()]} ${d.getFullYear()}`;
-                let opt = document.createElement('option');
-                opt.value = val; opt.textContent = val;
-                if (i === 0) opt.selected = true;
-                selector.appendChild(opt);
+                let d = new Date(n.getFullYear(), n.getMonth() + i, 1);
+                let v = `${TR_MONTHS[d.getMonth()]} ${d.getFullYear()}`;
+                let o = document.createElement('option'); o.value = v; o.textContent = v;
+                if(i===0) o.selected = true;
+                s.appendChild(o);
             }
         }
 
@@ -283,8 +302,8 @@
         }
 
         function refreshData() {
-            const now = new Date();
-            document.getElementById('lastUpdateTime').textContent = now.toLocaleTimeString('tr-TR', {hour:'2-digit', minute:'2-digit'});
+            const n = new Date();
+            document.getElementById('lastUpdateTime').textContent = n.toLocaleTimeString('tr-TR', {hour:'2-digit', minute:'2-digit'});
             fetchData();
         }
 
@@ -293,33 +312,30 @@
             try {
                 const res = await fetch(`${API_URL}?action=getDashboardData&period=${encodeURIComponent(period)}&t=${Date.now()}`);
                 const data = await res.json();
-                allRecordsData = (data.records || []).sort((a, b) => {
-                    const dateA = new Date(a.date.replace(' ', 'T'));
-                    const dateB = new Date(b.date.replace(' ', 'T'));
-                    return dateB - dateA;
-                });
+                allRecordsData = (data.records || []).sort((a, b) => new Date(b.date.replace(' ', 'T')) - new Date(a.date.replace(' ', 'T')));
                 updateStats(data.global);
                 renderBranchPerformance(data.stats);
                 renderLatestSales(data.sales || []);
                 filterRecords();
-            } catch(e) { console.error("Fetch hatası:", e); }
+            } catch(e) {}
         }
 
         function updateStats(global) {
             if(!global) return;
+            const fmt = (n) => new Intl.NumberFormat('tr-TR', { style: 'currency', currency: 'TRY', maximumFractionDigits: 0 }).format(n);
+            
             document.getElementById('globalTotalRecords').textContent = global.totalRecords || 0;
             document.getElementById('globalTotalAranan').textContent = global.totalAranan || 0;
-            document.getElementById('globalTotalSales').textContent = global.totalSales || 0;
+            document.getElementById('globalTotalSales').textContent = global.totalSalesCount || 0;
+            document.getElementById('globalTotalRevenue').textContent = fmt(global.totalRevenue || 0);
+            
             document.getElementById('globalTopVolCat').textContent = global.topVolCat || '-';
             document.getElementById('globalTopVolCount').textContent = `${global.topVolCount || 0} Adet`;
-            document.getElementById('globalTopRevCat').textContent = global.topRevCat || '-';
-            document.getElementById('globalTopRevAmount').textContent = new Intl.NumberFormat('tr-TR', { style: 'currency', currency: 'TRY', maximumFractionDigits: 0 }).format(global.topRevAmount || 0);
         }
 
         function renderBranchPerformance(stats) {
             if(!stats) return;
-            const container = document.getElementById('branchStatsBody');
-            const podium = document.getElementById('top3Container');
+            const container = document.getElementById('branchStatsBody'), podium = document.getElementById('top3Container');
             const sorted = [...stats].sort((a,b) => b.totalRevenue - a.totalRevenue);
             
             podium.innerHTML = '';
@@ -328,187 +344,171 @@
             if (sorted[0]) podiumOrder.push({ data: sorted[0], rank: 1 });
             if (sorted[2]) podiumOrder.push({ data: sorted[2], rank: 3 });
 
-            const podiumStyles = {
+            const styles = {
                 1: { bg: 'bg-gradient-to-b from-yellow-50/50 to-white', border: 'border-yellow-400', text: 'text-yellow-700', badge: 'bg-yellow-400', height: 'h-64', icon: 'https://www.upload.ee/image/18996886/king-crown-3d-icon-png-download-5666815.webp' },
                 2: { bg: 'bg-gradient-to-b from-slate-50/50 to-white', border: 'border-slate-300', text: 'text-slate-600', badge: 'bg-slate-400', height: 'h-52', icon: 'https://www.upload.ee/image/18997018/Ads_z_tasar_m__40_.png' },
                 3: { bg: 'bg-gradient-to-b from-orange-50/50 to-white', border: 'border-orange-300', text: 'text-orange-700', badge: 'bg-orange-400', height: 'h-44', icon: 'https://www.upload.ee/image/18997016/Ads_z_tasar_m__39_.png' }
             };
 
             podiumOrder.forEach(item => {
-                const s = item.data; const rank = item.rank; const style = podiumStyles[rank];
+                const s = item.data, r = item.rank, st = styles[r];
                 podium.innerHTML += `
-                    <div class="relative flex flex-col items-center justify-end p-6 rounded-t-3xl border-t-4 border-x border-b ${style.border} ${style.bg} ${style.height} w-full min-w-[140px] md:max-w-[300px] shadow-sm text-center transition-all hover:scale-105 !overflow-visible">
-                        <div class="absolute -top-20 left-1/2 -translate-x-1/2 w-28 h-28 flex items-center justify-center z-20 !overflow-visible">
-                            <img src="${style.icon}" class="w-full h-full object-contain drop-shadow-xl ${rank===1?'crown-icon':''}">
-                        </div>
-                        <div class="mb-auto mt-12 w-full">
-                             <div class="w-9 h-9 mx-auto rounded-full flex items-center justify-center ${style.badge} text-white font-black text-base mb-3 shadow-sm border-2 border-white">${rank}</div>
-                             <h4 class="font-black text-slate-800 text-base md:text-lg leading-tight truncate px-1">${s.branch.replace(' Şubesi','')}</h4>
-                        </div>
-                        <div class="w-full border-t border-dashed border-slate-200/50 pt-4 mt-4">
-                            <span class="block font-black ${style.text} text-lg md:text-xl tracking-tight">${new Intl.NumberFormat('tr-TR').format(s.totalRevenue)}₺</span>
-                        </div>
+                    <div class="relative flex flex-col items-center justify-end p-6 rounded-t-3xl border-t-4 border-x border-b ${st.border} ${st.bg} ${st.height} w-full min-w-[140px] md:max-w-[300px] shadow-sm text-center transition-all hover:scale-105 !overflow-visible">
+                        <div class="absolute -top-20 left-1/2 -translate-x-1/2 w-28 h-28 flex items-center justify-center z-20 !overflow-visible"><img src="${st.icon}" class="w-full h-full object-contain drop-shadow-xl ${r===1?'crown-icon':''}"></div>
+                        <div class="mb-auto mt-12 w-full"><div class="w-9 h-9 mx-auto rounded-full flex items-center justify-center ${st.badge} text-white font-black text-base mb-3 border-2 border-white">${r}</div><h4 class="font-black text-slate-800 text-base md:text-lg truncate px-1">${s.branch.replace(' Şubesi','')}</h4></div>
+                        <div class="w-full border-t border-dashed border-slate-200/50 pt-4 mt-4"><span class="block font-black ${st.text} text-lg md:text-xl">${new Intl.NumberFormat('tr-TR').format(s.totalRevenue)}₺</span></div>
                     </div>
                 `;
             });
 
             container.innerHTML = sorted.map((s, i) => `
                 <div class="flex items-center justify-between p-6 bg-white border border-slate-100 rounded-2xl shadow-sm hover:border-brand-200 transition-all">
-                    <div class="flex items-center gap-6">
-                        <span class="text-base font-black text-slate-300 w-8">#${i+1}</span>
-                        <span class="text-lg font-bold text-slate-700">${s.branch}</span>
-                    </div>
+                    <div class="flex items-center gap-6"><span class="text-base font-black text-slate-300 w-8">#${i+1}</span><span class="text-lg font-bold text-slate-700">${s.branch}</span></div>
                     <div class="flex items-center gap-12">
-                        <div class="text-right hidden sm:block">
-                            <p class="text-[11px] font-black text-slate-400 uppercase tracking-widest mb-1">Arama Durumu</p>
-                            <p class="text-base font-bold text-slate-600"><span class="text-brand-600">${s.arandi}</span> / <span class="text-slate-400">${s.aranmadi}</span></p>
-                        </div>
-                        <div class="text-right border-l border-slate-100 pl-8">
-                            <p class="text-xl font-black text-slate-800">${new Intl.NumberFormat('tr-TR', { style:'currency', currency:'TRY', maximumFractionDigits:0 }).format(s.totalRevenue)}</p>
-                        </div>
+                        <div class="text-right hidden sm:block"><p class="text-[11px] font-black text-slate-400 uppercase mb-1">Arama Durumu</p><p class="text-base font-bold text-slate-600"><span class="text-brand-600">${s.arandi}</span> / <span class="text-slate-400">${s.aranmadi}</span></p></div>
+                        <div class="text-right border-l border-slate-100 pl-8"><p class="text-xl font-black text-slate-800">${new Intl.NumberFormat('tr-TR', { style:'currency', currency:'TRY', maximumFractionDigits:0 }).format(s.totalRevenue)}</p></div>
                     </div>
                 </div>
             `).join('');
         }
 
         function renderLatestSales(sales) {
-            const container = document.getElementById('latestSalesContainer');
-            if (sales.length === 0) {
-                container.innerHTML = '<div class="py-20 text-center col-span-full text-slate-400 italic">Henüz satış kaydı yok.</div>';
-                return;
-            }
-            container.innerHTML = sales.map(s => {
-                const amountFormatted = new Intl.NumberFormat('tr-TR', { style: 'currency', currency: 'TRY', maximumFractionDigits: 0 }).format(s.amount);
+            const c = document.getElementById('latestSalesContainer');
+            if (sales.length === 0) { c.innerHTML = '<div class="py-20 text-center col-span-full text-slate-400 italic">Satış kaydı yok.</div>'; return; }
+            c.innerHTML = sales.map(s => {
+                const a = new Intl.NumberFormat('tr-TR', { style: 'currency', currency: 'TRY', maximumFractionDigits: 0 }).format(s.amount);
                 const d = new Date(s.timestamp);
-                const dateText = isNaN(d.getTime()) ? '' : `<span class="text-[10px] text-slate-400 font-bold ml-auto uppercase">${d.toLocaleDateString('tr-TR', {day:'numeric', month:'short'})} ${d.toLocaleTimeString('tr-TR', {hour:'2-digit', minute:'2-digit'})}</span>`;
+                const dt = isNaN(d.getTime()) ? '' : `<span class="text-[10px] text-slate-400 font-bold ml-auto">${d.toLocaleDateString('tr-TR', {day:'numeric', month:'short'})} ${d.toLocaleTimeString('tr-TR', {hour:'2-digit', minute:'2-digit'})}</span>`;
                 return `
                     <div class="flex flex-col gap-4 p-6 rounded-2xl bg-white border border-slate-100 hover:border-emerald-400 hover:shadow-xl transition-all relative overflow-hidden">
                         <div class="absolute top-0 right-0 w-20 h-20 bg-emerald-50 rounded-bl-full -mr-10 -mt-10 z-0"></div>
-                        <div class="flex justify-between items-start relative z-10">
-                            <div class="w-11 h-11 rounded-xl bg-emerald-100 text-emerald-600 flex items-center justify-center shrink-0 border border-emerald-200 shadow-sm"><i class="fas fa-check text-sm"></i></div>
-                            ${dateText}
-                        </div>
-                        <div class="flex-1 min-w-0 relative z-10 mt-2">
-                            <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-1">${s.branch.replace(' Şubesi','')}</span>
-                            <h4 class="font-bold text-slate-800 text-base truncate">${s.name}</h4>
-                            <div class="flex justify-between items-end border-t border-dashed border-slate-100 pt-4 mt-3">
-                                <p class="text-xs text-slate-500 truncate max-w-[50%]">${s.product || s.category}</p>
-                                <span class="text-sm font-black text-emerald-700 bg-emerald-50 px-3 py-1.5 rounded-lg border border-emerald-100">${amountFormatted}</span>
-                            </div>
-                        </div>
+                        <div class="flex justify-between items-start relative z-10"><div class="w-11 h-11 rounded-xl bg-emerald-100 text-emerald-600 flex items-center justify-center shrink-0 border border-emerald-200"><i class="fas fa-check"></i></div>${dt}</div>
+                        <div class="flex-1 min-w-0 relative z-10 mt-2"><span class="text-[10px] font-black text-slate-400 uppercase block mb-1">${s.branch.replace(' Şubesi','')}</span><h4 class="font-bold text-slate-800 truncate">${s.name}</h4><div class="flex justify-between items-end border-t border-dashed border-slate-100 pt-4 mt-3"><p class="text-xs text-slate-500 truncate max-w-[50%]">${s.product || s.category}</p><span class="text-sm font-black text-emerald-700 bg-emerald-50 px-3 py-1.5 rounded-lg border border-emerald-100">${a}</span></div></div>
                     </div>
                 `;
             }).join('');
         }
 
         function filterRecords() {
-            const search = document.getElementById('searchName').value.toLowerCase();
-            const branch = document.getElementById('filterBranch').value;
-            const status = document.getElementById('filterStatus').value;
+            const s = document.getElementById('searchName').value.toLowerCase(), b = document.getElementById('filterBranch').value, st = document.getElementById('filterStatus').value;
             filteredData = allRecordsData.filter(r => {
-                const matchSearch = (r.name || '').toLowerCase().includes(search) || (r.contact || '').toLowerCase().includes(search);
-                const matchBranch = branch === 'all' || r.branch === branch;
-                const matchStatus = status === 'all' || (status === 'Arandı' && (r.status || '').toLowerCase() === 'arandı') || (status === 'Aranmadı' && (r.status || '').toLowerCase() !== 'arandı');
-                return matchSearch && matchBranch && matchStatus;
+                const ms = (r.name || '').toLowerCase().includes(s) || (r.contact || '').toLowerCase().includes(s);
+                const mb = b === 'all' || r.branch === b;
+                const mst = st === 'all' || (st === 'Arandı' && (r.status || '').toLowerCase() === 'arandı') || (st === 'Aranmadı' && (r.status || '').toLowerCase() !== 'arandı');
+                return ms && mb && mst;
             });
             renderTable();
         }
 
         function renderTable() {
-            const tbody = document.getElementById('crmTableBody');
-            document.getElementById('totalRecordsBadge').textContent = `${filteredData.length} Kayıt`;
-            const start = (currentPage - 1) * rowsPerPage;
-            const pageData = filteredData.slice(start, start + rowsPerPage);
-            if (pageData.length === 0) { tbody.innerHTML = '<tr><td colspan="7" class="py-24 text-center text-slate-400">Kayıt yok.</td></tr>'; return; }
-            tbody.innerHTML = pageData.map(r => `
+            const tb = document.getElementById('crmTableBody'), st = (currentPage - 1) * rowsPerPage, pd = filteredData.slice(st, st + rowsPerPage);
+            if (pd.length === 0) { tb.innerHTML = '<tr><td colspan="7" class="py-24 text-center text-slate-400">Kayıt yok.</td></tr>'; return; }
+            tb.innerHTML = pd.map((r, i) => `
                 <tr class="hover:bg-slate-50 transition-colors">
-                    <td data-label="Tarih / Saat" class="px-8 py-6 text-sm font-bold text-slate-600">${r.date}</td>
+                    <td data-label="Tarih" class="px-8 py-6 text-sm font-bold text-slate-600">${r.date}</td>
                     <td data-label="Şube" class="px-8 py-6"><span class="text-[12px] font-black text-indigo-600 bg-indigo-50 px-3 py-2 rounded-lg border border-indigo-100 uppercase">${r.branch.replace(' Şubesi','')}</span></td>
-                    <td data-label="Müşteri" class="px-8 py-6 font-bold text-slate-800 text-base">${r.name}</td>
+                    <td data-label="Müşteri" class="px-8 py-6 font-bold text-slate-800">${r.name}</td>
                     <td data-label="Durum" class="px-8 py-6"><span class="px-4 py-2 rounded-xl text-[12px] font-black border uppercase ${(r.status||'').toLowerCase()==='arandı'?'bg-brand-50 text-brand-700':'bg-slate-100 text-slate-500'}">${r.status}</span></td>
-                    <td data-label="Sonuç" class="px-8 py-6 text-sm max-w-[200px] truncate">${r.result || '-'}</td>
-                    <td data-label="Tutar" class="px-8 py-6 text-right font-black text-slate-800 text-base">${r.amount > 0 ? new Intl.NumberFormat('tr-TR').format(r.amount) + ' ₺' : '-'}</td>
-                    <td data-label="İşlem" class="px-8 py-6 text-right">
-                        <button onclick="setupEdit(${allRecordsData.indexOf(r)})" class="w-11 h-11 rounded-xl border border-slate-200 text-slate-400 hover:text-brand-600 transition-all"><i class="fas fa-pen text-sm"></i></button>
-                    </td>
+                    <td data-label="Sonuç" class="px-8 py-6 text-sm truncate max-w-[200px]">${r.result || '-'}</td>
+                    <td data-label="Tutar" class="px-8 py-6 text-right font-black text-slate-800">${r.amount > 0 ? new Intl.NumberFormat('tr-TR').format(r.amount) + ' ₺' : '-'}</td>
+                    <td class="px-8 py-6 text-right"><button onclick="setupEdit(${allRecordsData.indexOf(r)})" class="w-11 h-11 rounded-xl border border-slate-200 text-slate-400 hover:text-brand-600"><i class="fas fa-pen"></i></button></td>
                 </tr>
             `).join('');
             renderPagination();
         }
 
         function renderPagination() {
-            const totalPages = Math.ceil(filteredData.length / rowsPerPage);
-            const container = document.getElementById('paginationControls');
-            document.getElementById('paginationInfo').textContent = `Sayfa ${currentPage} / ${totalPages || 1}`;
-            container.innerHTML = '';
-            if(totalPages > 1) {
-                const prev = document.createElement('button'); prev.innerHTML = '<i class="fas fa-chevron-left"></i>';
-                prev.className = `w-12 h-12 flex items-center justify-center rounded-xl border ${currentPage === 1 ? 'text-slate-200 bg-slate-50' : 'text-slate-600'}`;
-                prev.onclick = () => { if(currentPage>1){ currentPage--; renderTable(); } };
-                container.appendChild(prev);
-                const next = document.createElement('button'); next.innerHTML = '<i class="fas fa-chevron-right"></i>';
-                next.className = `w-12 h-12 flex items-center justify-center rounded-xl border ${currentPage === totalPages ? 'text-slate-200 bg-slate-50' : 'text-slate-600'}`;
-                next.onclick = () => { if(currentPage<totalPages){ currentPage++; renderTable(); } };
-                container.appendChild(next);
+            const tp = Math.ceil(filteredData.length / rowsPerPage), c = document.getElementById('paginationControls');
+            document.getElementById('paginationInfo').textContent = `Sayfa ${currentPage} / ${tp || 1}`;
+            c.innerHTML = '';
+            if(tp > 1) {
+                const p = document.createElement('button'); p.innerHTML = '<i class="fas fa-chevron-left"></i>';
+                p.className = `w-12 h-12 flex items-center justify-center rounded-xl border ${currentPage === 1 ? 'text-slate-200' : 'text-slate-600'}`;
+                p.onclick = () => { if(currentPage>1){ currentPage--; renderTable(); } };
+                c.appendChild(p);
+                const n = document.createElement('button'); n.innerHTML = '<i class="fas fa-chevron-right"></i>';
+                n.className = `w-12 h-12 flex items-center justify-center rounded-xl border ${currentPage === tp ? 'text-slate-200' : 'text-slate-600'}`;
+                n.onclick = () => { if(currentPage<tp){ currentPage++; renderTable(); } };
+                c.appendChild(n);
             }
         }
 
         function addInputRow() {
-            const container = document.getElementById('inputContainer');
-            const div = document.createElement('div');
+            const container = document.getElementById('inputContainer'), div = document.createElement('div'), bOpts = branchList.map(b => `<option value="${b}">${b}</option>`).join('');
+            const n = new Date(); const tz = n.getTimezoneOffset() * 60000; const local = (new Date(n - tz)).toISOString().slice(0, 16);
             div.className = "entry-card bg-white shadow-sm border-2 border-slate-100";
-            const bOpts = branchList.map(b => `<option value="${b}">${b}</option>`).join('');
-            
-            const now = new Date();
-            const tzOffset = now.getTimezoneOffset() * 60000;
-            const localISOTime = (new Date(now - tzOffset)).toISOString().slice(0, 16);
-
             div.innerHTML = `
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-6 mb-6">
-                    <div class="lg:col-span-2"><label class="input-label">Tarih</label><input type="datetime-local" class="input-field" value="${localISOTime}"></div>
+                    <div class="lg:col-span-2"><label class="input-label">Tarih</label><input type="datetime-local" class="input-field" value="${local}"></div>
                     <div class="lg:col-span-3"><label class="input-label">Şube</label><select class="input-field select-field inp-branch">${bOpts}</select></div>
-                    <div class="lg:col-span-3"><label class="input-label">Müşteri</label><input type="text" class="input-field inp-name" placeholder="Ad Soyad"></div>
-                    <div class="lg:col-span-2"><label class="input-label">İletişim</label><input type="text" class="input-field inp-contact" placeholder="Telefon"></div>
+                    <div class="lg:col-span-3"><label class="input-label">Müşteri</label><input type="text" class="input-field inp-name"></div>
+                    <div class="lg:col-span-2"><label class="input-label">İletişim</label><input type="text" class="input-field inp-contact"></div>
                     <div class="lg:col-span-2"><label class="input-label">Medya</label><select class="input-field select-field inp-media">${MEDIA_CHANNELS.map(m=>`<option value="${m}">${m}</option>`).join('')}</select></div>
                 </div>
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6 items-end">
                     <div><label class="input-label">Kategori</label><select class="input-field select-field inp-category">${CATEGORIES.map(c=>`<option value="${c}">${c}</option>`).join('')}</select></div>
-                    <div><label class="input-label">Ürün</label><input type="text" class="input-field inp-product" placeholder="Ürün Bilgisi"></div>
-                    <div class="flex gap-4">
-                        <select class="input-field select-field inp-status flex-1"><option value="aranmadı">Aranmadı</option><option value="arandı">Arandı</option></select>
-                        <button onclick="this.parentElement.parentElement.parentElement.remove()" class="w-14 h-14 rounded-xl bg-rose-50 text-rose-500 flex items-center justify-center shrink-0 border border-rose-100 hover:bg-rose-100"><i class="fas fa-trash-alt"></i></button>
-                    </div>
-                </div>
-            `;
+                    <div><label class="input-label">Ürün Bilgisi</label><input type="text" class="input-field inp-product"></div>
+                    <div class="flex gap-4"><select class="input-field select-field inp-status flex-1"><option value="aranmadı">Aranmadı</option><option value="arandı">Arandı</option></select>
+                    <button onclick="this.parentElement.parentElement.parentElement.remove()" class="w-14 h-14 rounded-xl bg-rose-50 text-rose-500 flex items-center justify-center shrink-0 border border-rose-100"><i class="fas fa-trash-alt"></i></button></div>
+                </div>`;
             container.appendChild(div);
         }
 
         async function submitAllRows() {
-            const rows = document.querySelectorAll('#inputContainer > .entry-card');
-            const data = [];
+            const rows = document.querySelectorAll('#inputContainer > .entry-card'), data = [];
             rows.forEach(r => {
-                const b = r.querySelector('.inp-branch').value;
-                const n = r.querySelector('.inp-name').value;
-                if(b && n) {
-                    data.push({
-                        date: r.querySelector('input[type="datetime-local"]').value.replace('T',' '),
-                        branch: b, name: n,
-                        contact: r.querySelector('.inp-contact').value,
-                        media: r.querySelector('.inp-media').value,
-                        category: r.querySelector('.inp-category').value,
-                        product: r.querySelector('.inp-product').value,
-                        status: r.querySelector('.inp-status').value
-                    });
-                }
+                const b = r.querySelector('.inp-branch').value, n = r.querySelector('.inp-name').value;
+                if(b && n) data.push({ date: r.querySelector('input[type="datetime-local"]').value.replace('T',' '), branch: b, name: n, contact: r.querySelector('.inp-contact').value, media: r.querySelector('.inp-media').value, category: r.querySelector('.inp-category').value, product: r.querySelector('.inp-product').value, status: r.querySelector('.inp-status').value });
             });
             if(data.length === 0) return;
             const btn = document.getElementById('submitBtn'); btn.disabled = true;
-            try {
-                await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'addCustomersBulk', data: data }) });
-                document.getElementById('inputContainer').innerHTML = ''; addInputRow(); refreshData();
-            } catch(e) { alert("Sunucu ile bağlantı hatası oluştu."); }
-            finally { btn.disabled = false; }
+            try { await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'addCustomersBulk', data: data }) }); document.getElementById('inputContainer').innerHTML = ''; addInputRow(); refreshData(); } catch(e) { alert("Hata"); } finally { btn.disabled = false; }
         }
+
+        window.setupEdit = (idx) => {
+            const r = allRecordsData[idx];
+            document.getElementById('modalRowIndex').value = r.rowIndex;
+            document.getElementById('modalSheetName').value = r.sheetName;
+            document.getElementById('modalDate').value = r.date;
+            document.getElementById('modalBranch').value = r.branch;
+            document.getElementById('modalName').value = r.name;
+            document.getElementById('modalContact').value = r.contact;
+            document.getElementById('modalStatus').value = (r.status || '').toLowerCase();
+            document.getElementById('modalCategory').innerHTML = CATEGORIES.map(c => `<option value="${c}" ${r.category === c ? 'selected' : ''}>${c}</option>`).join('');
+            document.getElementById('modalMedia').innerHTML = MEDIA_CHANNELS.map(m => `<option value="${m}" ${r.media === m ? 'selected' : ''}>${m}</option>`).join('');
+            document.getElementById('modalProduct').value = r.product || '';
+            document.getElementById('modalResult').value = r.result || '';
+            document.getElementById('modalOrder').value = r.order || 'Hayır';
+            document.getElementById('modalAmount').value = r.amount || '';
+            document.getElementById('editModal').classList.remove('hidden');
+        };
+
+        document.getElementById('editForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('editSubmitBtn'); btn.disabled = true;
+            const data = {
+                action: 'updateCustomer',
+                data: {
+                    rowIndex: document.getElementById('modalRowIndex').value,
+                    sheetName: document.getElementById('modalSheetName').value,
+                    date: document.getElementById('modalDate').value,
+                    branch: document.getElementById('modalBranch').value,
+                    name: document.getElementById('modalName').value,
+                    contact: document.getElementById('modalContact').value,
+                    status: document.getElementById('modalStatus').value,
+                    category: document.getElementById('modalCategory').value,
+                    media: document.getElementById('modalMedia').value,
+                    product: document.getElementById('modalProduct').value,
+                    result: document.getElementById('modalResult').value,
+                    order: document.getElementById('modalOrder').value,
+                    amount: document.getElementById('modalAmount').value
+                }
+            };
+            try { await fetch(API_URL, { method: 'POST', body: JSON.stringify(data) }); closeEditModal(); refreshData(); } catch(e) {} finally { btn.disabled = false; }
+        });
+
+        window.closeEditModal = () => document.getElementById('editModal').classList.add('hidden');
+        function clearFilters() { document.getElementById('searchName').value = ''; document.getElementById('filterBranch').value = 'all'; document.getElementById('filterStatus').value = 'all'; filterRecords(); }
     </script>
 </body>
 </html>
