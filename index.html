@@ -256,11 +256,18 @@
 
     <script>
         const API_URL = 'https://script.google.com/macros/s/AKfycbwRSKYdXIHm2A6uts8MJE0v6snp3rsSVm4Qk5yQRd9chXtGoMUCQGXZ37X05QUJY2Aq/exec';
+        
+        const BRANCHES = [
+            "İnegöl Şubesi", "Paşabahçe Şubesi", "Çekmeköy Şubesi", "İzmit Şubesi", 
+            "Gölcük Şubesi", "Körfez Şubesi", "Derince Şubesi", "Sultanbeyli Şubesi", 
+            "Yenidoğan Şubesi", "Kavacık Şubesi", "Çayırova Şubesi", "Gebze Şubesi"
+        ];
+        
         const CATEGORIES = ["Mobilya", "Baza+Yatak+Başlık", "Bebek ve Çocuk", "Beyaz Eşya", "Elektrikli Ev Aletleri", "Elektrikli-Benzinli Araç", "Elektronik", "Ev Dekorasyonu", "Halı", "Kişisel Aksesuar", "Mobilya Aksesuarı", "Tekstil", "Züccaciye", "Ayakkabı"];
         const MEDIA_CHANNELS = ["Instagram", "Whatsapp", "Facebook", "Çağrı", "Web Sitesi Form", "SMS LİNK"];
         const TR_MONTHS = ['OCAK', 'ŞUBAT', 'MART', 'NİSAN', 'MAYIS', 'HAZİRAN', 'TEMMUZ', 'AĞUSTOS', 'EYLÜL', 'EKİM', 'KASIM', 'ARALIK'];
 
-        let allRecordsData = [], filteredData = [], branchList = [], currentPage = 1, rowsPerPage = 12;
+        let allRecordsData = [], filteredData = [], branchList = BRANCHES, currentPage = 1, rowsPerPage = 12;
 
         document.getElementById('loginForm').addEventListener('submit', (e) => {
             e.preventDefault();
@@ -273,10 +280,16 @@
 
         async function initApp() {
             populatePeriodSelector();
-            await fetchBranches();
+            initBranchFilters();
             addInputRow();
             refreshData();
             setInterval(refreshData, 5000); 
+        }
+
+        function initBranchFilters() {
+            const filter = document.getElementById('filterBranch');
+            filter.innerHTML = '<option value="all">Tüm Şubeler</option>';
+            branchList.forEach(b => filter.innerHTML += `<option value="${b}">${b}</option>`);
         }
 
         function populatePeriodSelector() {
@@ -297,6 +310,7 @@
                 const data = await res.json();
                 branchList = data.leaderboard.map(b => b.branch);
                 const filter = document.getElementById('filterBranch');
+                filter.innerHTML = '<option value="all">Tüm Şubeler</option>';
                 branchList.forEach(b => filter.innerHTML += `<option value="${b}">${b}</option>`);
             } catch(e) {}
         }
@@ -374,7 +388,7 @@
 
         function renderLatestSales(sales) {
             const c = document.getElementById('latestSalesContainer');
-            if (sales.length === 0) { c.innerHTML = '<div class="py-20 text-center col-span-full text-slate-400 italic">Satış kaydı yok.</div>'; return; }
+            if (sales.length === 0) { c.innerHTML = '<div class="py-20 text-center col-span-full text-slate-400 font-bold italic">Satış kaydı yok.</div>'; return; }
             c.innerHTML = sales.map(s => {
                 const a = new Intl.NumberFormat('tr-TR', { style: 'currency', currency: 'TRY', maximumFractionDigits: 0 }).format(s.amount);
                 const d = new Date(s.timestamp);
