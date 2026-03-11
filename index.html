@@ -21,6 +21,8 @@
                         'card': '0 0 0 1px rgba(0,0,0,0.03), 0 2px 8px rgba(0,0,0,0.04)',
                         'input': '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
                         'gold': '0 20px 40px -5px rgba(234, 179, 8, 0.25)',
+                        'silver': '0 10px 30px -5px rgba(148, 163, 184, 0.2)',
+                        'bronze': '0 10px 30px -5px rgba(217, 119, 6, 0.2)'
                     }
                 }
             }
@@ -29,6 +31,7 @@
     <style>
         body { background-color: #f8fafc; color: #334155; -webkit-tap-highlight-color: transparent; font-size: 14px; }
         
+        /* CARD BASE */
         .card-base {
             background: white;
             border-radius: 1.25rem;
@@ -37,6 +40,7 @@
             overflow: hidden;
         }
 
+        /* FORM ENTRY CARD */
         .entry-card {
             background: #ffffff;
             border: 1px solid #cbd5e1;
@@ -52,6 +56,16 @@
             box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.1);
         }
 
+        /* STATS LIST ITEM */
+        .stat-item {
+            transition: all 0.2s ease;
+        }
+        .stat-item:hover {
+            border-color: #3b82f6;
+            box-shadow: 0 2px 8px -2px rgba(0, 0, 0, 0.05);
+        }
+
+        /* TABLE ROW DESIGN */
         .custom-table-row {
             transition: all 0.1s ease;
             border-bottom: 1px solid #f1f5f9;
@@ -65,6 +79,7 @@
             font-size: 0.875rem;
         }
 
+        /* INPUTS */
         .input-label {
             display: block;
             font-size: 0.7rem; 
@@ -102,6 +117,7 @@
             background-size: 1.25em 1.25em;
         }
 
+        /* BUTTONS */
         .btn {
             display: inline-flex;
             align-items: center;
@@ -116,10 +132,12 @@
         .btn-secondary { background-color: white; color: #475569; border: 1px solid #cbd5e1; }
         .btn-secondary:hover { background-color: #f8fafc; border-color: #94a3b8; color: #1e293b; }
 
+        /* CUSTOM SCROLLBAR */
         ::-webkit-scrollbar { width: 8px; height: 8px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; border: 2px solid #f8fafc; }
 
+        /* LOADER */
         .loader { border: 3px solid #f1f5f9; border-top: 3px solid #0ea5e9; border-radius: 50%; width: 1.5rem; height: 1.5rem; animation: spin 1s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         
@@ -133,6 +151,7 @@
             100% { transform: translateY(0px); }
         }
 
+        /* RESPONSIVE TABLE */
         @media (max-width: 1024px) {
             .resp-table thead { display: none; }
             .resp-table tbody tr {
@@ -164,7 +183,7 @@
         .desktop-table-row:hover { background-color: #fcfcfc; }
     </style>
 </head>
-<body class="pb-12 min-h-screen bg-slate-50 font-sans">
+<body class="pb-12 min-h-screen bg-slate-100 font-sans">
 
     <!-- LOGIN SCREEN -->
     <div id="loginScreen" class="fixed inset-0 z-[100] bg-slate-100 flex items-center justify-center p-4">
@@ -189,7 +208,7 @@
     <!-- MAIN APP (Hidden initially) -->
     <div id="mainApp" class="hidden max-w-[1600px] mx-auto px-4 md:px-8 pt-8 space-y-8">
         
-        <!-- DÜZELTİLMİŞ HEADER (FİLTRE BÖLÜMÜ GERİ GELDİ) -->
+        <!-- HEADER -->
         <header class="flex flex-col md:flex-row justify-between items-center gap-6 bg-white py-4 px-6 rounded-3xl border border-slate-200 shadow-sm sticky top-4 z-40">
             <div class="flex items-center gap-4 w-full md:w-auto">
                 <div class="w-12 h-12 bg-brand-600 rounded-xl flex items-center justify-center text-white shrink-0 shadow-md">
@@ -201,7 +220,6 @@
                         <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
                         <div class="relative flex items-center">
                             <select id="currentPeriod" onchange="refreshData()" class="appearance-none bg-transparent border-none text-xs font-extrabold text-slate-500 uppercase tracking-widest outline-none cursor-pointer pr-4 hover:text-brand-600 transition-colors z-10">
-                                <!-- JS ile Doldurulacak (MART 2026 vb.) -->
                             </select>
                             <i class="fas fa-chevron-down absolute right-0 text-[10px] text-slate-400 pointer-events-none z-0"></i>
                         </div>
@@ -220,29 +238,24 @@
             </div>
         </header>
 
-        <!-- DÜZELTİLMİŞ DASHBOARD STATS (ORİJİNAL GÖRÜNÜM) -->
+        <!-- DASHBOARD STATS -->
         <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 md:gap-5">
-            <!-- 1. Yönlendirme -->
             <div class="bg-white rounded-2xl p-5 border border-slate-200 border-l-4 border-l-brand-500 shadow-sm transition-all hover:shadow-md">
                 <p class="text-[10px] md:text-xs font-extrabold text-slate-400 uppercase tracking-widest mb-1 md:mb-2">Toplam Yönlendirme</p>
                 <h3 class="text-3xl md:text-4xl font-black text-slate-800" id="globalTotalRecords">0</h3>
             </div>
-            <!-- 2. Aranan -->
             <div class="bg-white rounded-2xl p-5 border border-slate-200 border-l-4 border-l-indigo-400 shadow-sm transition-all hover:shadow-md">
                 <p class="text-[10px] md:text-xs font-extrabold text-slate-400 uppercase tracking-widest mb-1 md:mb-2">Toplam Aranan</p>
                 <h3 class="text-3xl md:text-4xl font-black text-indigo-600" id="globalTotalAranan">0</h3>
             </div>
-            <!-- 3. Satış Adedi -->
             <div class="bg-white rounded-2xl p-5 border border-slate-200 border-l-4 border-l-emerald-500 shadow-sm transition-all hover:shadow-md">
                 <p class="text-[10px] md:text-xs font-extrabold text-slate-400 uppercase tracking-widest mb-1 md:mb-2">Satış Adedi</p>
                 <h3 class="text-3xl md:text-4xl font-black text-emerald-600" id="globalTotalSales">0</h3>
             </div>
-            <!-- 4. Ciro -->
             <div class="bg-white rounded-2xl p-5 border border-slate-200 border-l-4 border-l-rose-500 shadow-sm transition-all hover:shadow-md bg-rose-50/10">
                 <p class="text-[10px] md:text-xs font-extrabold text-rose-500 uppercase tracking-widest mb-1 md:mb-2">Aylık Toplam Ciro</p>
                 <h3 class="text-2xl md:text-3xl font-black text-rose-700 tracking-tight" id="globalTotalRevenue">₺0</h3>
             </div>
-            <!-- 5. Lider -->
             <div class="bg-white rounded-2xl p-5 border border-slate-200 border-l-4 border-l-amber-500 shadow-sm transition-all hover:shadow-md">
                 <p class="text-[10px] md:text-xs font-extrabold text-slate-400 uppercase tracking-widest mb-1 md:mb-2">Adet Lideri (Kategori)</p>
                 <h3 class="text-lg md:text-xl font-bold text-slate-800 truncate mb-1" id="globalTopVolCat">-</h3>
@@ -306,6 +319,7 @@
                             <option value="Aranmadı">Aranmadı</option>
                         </select>
                     </div>
+                    <div><label class="input-label mb-1">Tarih</label><input type="date" id="filterDate" class="input-field" onchange="filterRecords()"></div>
                     <div class="flex items-end"><button onclick="clearFilters()" class="btn btn-secondary w-full"><i class="fas fa-eraser"></i> Sıfırla</button></div>
                 </div>
             </div>
@@ -485,7 +499,6 @@
         let currentPage = 1;
         const rowsPerPage = 10; 
 
-        // Sayfa Yüklendiğinde Filtreleri Hazırla (Giriş yapılmadan önce bile düzgün görünmesi için)
         document.addEventListener('DOMContentLoaded', () => {
             populatePeriodSelector();
             initBranchFilters();
@@ -557,7 +570,11 @@
                 });
                 const data = await response.json();
                 if (data.records) {
-                    allRecordsData = (data.records || []).sort((a, b) => new Date(b.date.replace(' ', 'T')) - new Date(a.date.replace(' ', 'T')));
+                    allRecordsData = (data.records || []).sort((a, b) => {
+                        const tA = a.timestamp ? new Date(a.timestamp).getTime() : 0;
+                        const tB = b.timestamp ? new Date(b.timestamp).getTime() : 0;
+                        return tB - tA;
+                    });
                     updateStats(data.global); 
                     renderBranchPerformance(data.stats);
                     renderSales(data.sales || []);
@@ -716,17 +733,11 @@
                 const cleanBranch = s.branch.replace(/ Şubesi/gi, '');
                 let dateBadge = '';
                 if(s.timestamp) { 
-                    const dp = s.timestamp.split(' ');
-                    if(dp.length >= 2) {
-                        const dateStr = dp[0];
-                        const timeParts = dp[1].split(':');
-                        const timeStr = timeParts.length >= 2 ? `${timeParts[0]}:${timeParts[1]}` : dp[1];
+                    let d = new Date(s.timestamp);
+                    if(!isNaN(d.getTime())) {
+                        const dateStr = d.toLocaleDateString('tr-TR', {day:'numeric', month:'short'});
+                        const timeStr = d.toLocaleTimeString('tr-TR', {hour:'2-digit', minute:'2-digit'});
                         dateBadge = `<span class="text-[10px] text-slate-400 font-bold ml-auto">${dateStr} ${timeStr}</span>`;
-                    } else {
-                        let d = new Date(s.timestamp);
-                        if(!isNaN(d.getTime())) {
-                             dateBadge = `<span class="text-[10px] text-slate-400 font-bold ml-auto">${d.toLocaleDateString('tr-TR', {day:'numeric', month:'short'})} ${d.toLocaleTimeString('tr-TR', {hour:'2-digit', minute:'2-digit'})}</span>`;
-                        }
                     }
                 }
                 return `
@@ -754,8 +765,14 @@
             filteredData = allRecordsData.filter(item => {
                 const matchName = (item.name || '').toLowerCase().includes(searchVal) || (item.contact || '').toLowerCase().includes(searchVal);
                 const matchBranch = branchVal === 'all' || item.branch === branchVal;
+                
                 let matchDate = true;
-                if (dateVal) { const itemDateStr = item.date.substring(0, 10); matchDate = itemDateStr === dateVal; }
+                if (dateVal) { 
+                    const [y, m, d] = dateVal.split('-');
+                    const trDateVal = `${d}.${m}.${y}`;
+                    const itemDateStr = (item.date || '').substring(0, 10); 
+                    matchDate = itemDateStr === trDateVal; 
+                }
                 
                 let matchStatus = true;
                 if (statusVal !== 'all') {
@@ -804,12 +821,10 @@
                     amountText = new Intl.NumberFormat('tr-TR', { style: 'currency', currency: 'TRY', maximumFractionDigits: 0 }).format(row.amount);
                 }
                 
-                let dateDisplay = row.date.replace('T', ' ');
-                const timeParts = dateDisplay.split(':');
-                if(timeParts.length >= 2) dateDisplay = `${timeParts[0]}:${timeParts[1]}`;
+                let dateDisplay = row.date || '-';
 
                 tr.innerHTML = `
-                    <td data-label="Tarih" class="table-cell whitespace-nowrap text-slate-600 font-bold text-xs">${dateDisplay.substring(0,16)}</td>
+                    <td data-label="Tarih" class="table-cell whitespace-nowrap text-slate-600 font-bold text-xs">${dateDisplay}</td>
                     <td data-label="Şube" class="table-cell whitespace-nowrap"><span class="bg-indigo-50 text-indigo-700 px-2.5 py-1 rounded-lg text-[10px] font-extrabold uppercase border border-indigo-100 tracking-wide">${cleanBranch}</span></td>
                     <td data-label="Müşteri" class="table-cell font-bold text-slate-800 text-sm">${row.name}</td>
                     <td data-label="Durum" class="table-cell">${statusBadge}</td>
@@ -907,7 +922,12 @@
                 if(!branch || !name) { row.style.borderColor = '#f43f5e'; error = true; }
                 else {
                     row.style.borderColor = '#e2e8f0';
-                    let formattedDate = dateVal.replace('T', ' ');
+                    
+                    // Tarihi yerel standarda çevir
+                    const dp = dateVal.split('T');
+                    const [y, m, d] = dp[0].split('-');
+                    const formattedDate = `${d}.${m}.${y} ${dp[1]}`;
+                    
                     dataToSend.push({
                         date: formattedDate,
                         branch: branch,
