@@ -14,10 +14,10 @@
 body{background:#f1f5f9;color:#334155;font-family:'Plus Jakarta Sans',sans-serif;font-size:15px;-webkit-tap-highlight-color:transparent;margin:0}
 .card{background:#fff;border-radius:1.25rem;border:1px solid #e2e8f0;box-shadow:0 1px 4px rgba(0,0,0,.04);overflow:hidden}
 .inp-label{display:block;font-size:.72rem;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:#64748b;margin-bottom:.3rem}
-.inp{width:100%;padding:.65rem 1rem;font-size:.9375rem;font-weight:500;color:#1e293b;background:#f8fafc;border:1px solid #cbd5e1;border-radius:.75rem;outline:none;transition:all .2s;height:42px;font-family:'Plus Jakarta Sans',sans-serif}
+.inp{width:100%;padding:.55rem 1rem;font-size:.9375rem;font-weight:500;color:#1e293b;background:#f8fafc;border:1px solid #cbd5e1;border-radius:.75rem;outline:none;transition:all .2s;height:46px;font-family:'Plus Jakarta Sans',sans-serif}
 .inp:focus{background:#fff;border-color:#0ea5e9;box-shadow:0 0 0 3px rgba(14,165,233,.1)}
 .inp::placeholder{color:#94a3b8;font-weight:400}
-select.inp{appearance:none;background-image:url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%2364748b' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");background-position:right .75rem center;background-repeat:no-repeat;background-size:1.1em;cursor:pointer}
+select.inp{appearance:none;line-height:1.5;background-image:url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%2364748b' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");background-position:right .75rem center;background-repeat:no-repeat;background-size:1.1em;cursor:pointer}
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:.4rem;padding:.6rem 1.25rem;font-weight:700;font-size:.9375rem;border-radius:.75rem;transition:all .2s;cursor:pointer;height:40px;border:none;font-family:'Plus Jakarta Sans',sans-serif;white-space:nowrap}
 .btn-primary{background:#0ea5e9;color:#fff;box-shadow:0 4px 12px rgba(14,165,233,.25)}
 .btn-primary:hover{background:#0284c7;transform:translateY(-1px)}
@@ -124,7 +124,7 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3csvg xmlns
   .kpi-card{padding:1.25rem 1.5rem}
   .nav-tab{font-size:.875rem;padding:.5rem 1rem}
   .btn{font-size:.9375rem;height:42px}
-  .inp{font-size:.9375rem;height:42px}
+  .inp{font-size:.9375rem;height:46px}
   .chart-wrap{height:240px}
   .sec-header{padding:1.1rem 1.4rem}
   .sec-icon{width:38px;height:38px;font-size:.9rem}
@@ -863,39 +863,48 @@ function renderPagination(total){
 function exportPDF(){
   var period=document.getElementById('currentPeriod')?document.getElementById('currentPeriod').value:'';
   var now=new Date();
-  var dateStr=now.toLocaleDateString('tr-TR');
-  var fmt=function(n){return String.fromCharCode(8378)+new Intl.NumberFormat('tr-TR',{maximumFractionDigits:0}).format(n||0);};
+  var dateStr=now.toLocaleDateString('tr-TR',{day:'2-digit',month:'2-digit',year:'numeric'});
+  var TL='\u20ba';
+  var fmt=function(n){return TL+new Intl.NumberFormat('tr-TR',{maximumFractionDigits:0}).format(n||0);};
 
-  var kpis=[
-    {label:'Toplam Yonlendirme',val:document.getElementById('globalTotalRecords').textContent,color:'#0ea5e9'},
-    {label:'Toplam Aranan',val:document.getElementById('globalTotalAranan').textContent,color:'#6366f1'},
-    {label:'Satis Adedi',val:document.getElementById('globalTotalSales').textContent,color:'#10b981'},
-    {label:'Aylik Ciro',val:document.getElementById('globalTotalRevenue').textContent,color:'#f59e0b'},
-    {label:'Donusum Orani',val:document.getElementById('globalConvRate').textContent,color:'#ef4444'},
-    {label:'Ort. Sepet',val:document.getElementById('globalAvgBasket').textContent,color:'#8b5cf6'}
+  // KPI verileri
+  var kpiData=[
+    {label:'Toplam Yonlendirme', val:document.getElementById('globalTotalRecords').textContent, color:'#0ea5e9', bg:'#eff9ff'},
+    {label:'Toplam Aranan',      val:document.getElementById('globalTotalAranan').textContent,  color:'#6366f1', bg:'#f0f0ff'},
+    {label:'Satis Adedi',        val:document.getElementById('globalTotalSales').textContent,   color:'#10b981', bg:'#f0fdf4'},
+    {label:'Aylik Ciro',         val:document.getElementById('globalTotalRevenue').textContent, color:'#f59e0b', bg:'#fffbeb'},
+    {label:'Donusum Orani',      val:document.getElementById('globalConvRate').textContent,     color:'#ef4444', bg:'#fff5f5'},
+    {label:'Ortalama Sepet',     val:document.getElementById('globalAvgBasket').textContent,    color:'#8b5cf6', bg:'#faf5ff'}
   ];
 
-  var kpiHTML=kpis.map(function(k){
-    return '<div style="flex:1;background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:14px 12px;border-left:4px solid '+k.color+';min-width:120px">'
-      +'<div style="font-size:9px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px">'+k.label+'</div>'
-      +'<div style="font-size:20px;font-weight:800;color:#0f172a;line-height:1">'+k.val+'</div>'
+  var kpiHTML=kpiData.map(function(k){
+    return '<div style="flex:1;min-width:120px;background:'+k.bg+';border:1px solid '+k.color+'33;border-radius:10px;padding:14px 16px;border-left:4px solid '+k.color+'">'
+      +'<div style="font-size:10px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px">'+k.label+'</div>'
+      +'<div style="font-size:22px;font-weight:800;color:#0f172a;line-height:1">'+k.val+'</div>'
       +'</div>';
   }).join('');
 
+  // Şube performans tablosu - Yönlendirilen + Aranan + Satış + Dönüşüm + Ciro
   var branchHTML=branchStatsData.map(function(s,i){
-    var clean=s.branch.replace(/ Subesi/gi,'').replace(/ Şubesi/gi,'');
+    var clean=s.branch.replace(/ \u015eubesi/gi,'');
+    var total=(s.arandi||0)+(s.aranmadi||0);
     var conv=s.arandi>0?((s.salesCount||0)/s.arandi*100).toFixed(1):0;
-    var cc=parseFloat(conv)>20?'#059669':parseFloat(conv)>10?'#d97706':'#ef4444';
+    var convColor=parseFloat(conv)>20?'#059669':parseFloat(conv)>10?'#d97706':'#ef4444';
     var bg=i%2===0?'#ffffff':'#f8fafc';
     return '<tr style="background:'+bg+'">'
-      +'<td style="padding:8px 12px;font-weight:600;color:#0f172a">#'+(i+1)+' '+clean+'</td>'
-      +'<td style="padding:8px 12px;text-align:center;color:#0ea5e9;font-weight:700">'+s.arandi+'</td>'
-      +'<td style="padding:8px 12px;text-align:center;color:#059669;font-weight:700">'+(s.salesCount||0)+'</td>'
-      +'<td style="padding:8px 12px;text-align:center;color:'+cc+';font-weight:800">%'+conv+'</td>'
-      +'<td style="padding:8px 12px;text-align:right;font-weight:800;color:#0f172a;font-family:monospace">'+fmt(s.totalRevenue)+'</td>'
+      +'<td style="padding:10px 14px;font-weight:700;color:#0f172a;font-size:13px">'
+        +'<span style="display:inline-block;width:22px;height:22px;background:#e0f2fe;border-radius:50%;text-align:center;line-height:22px;font-size:11px;font-weight:800;color:#0284c7;margin-right:8px">'+(i+1)+'</span>'
+        +clean
+      +'</td>'
+      +'<td style="padding:10px 14px;text-align:center;font-weight:700;color:#334155;font-size:13px">'+total+'</td>'
+      +'<td style="padding:10px 14px;text-align:center;font-weight:700;color:#0ea5e9;font-size:13px">'+s.arandi+'</td>'
+      +'<td style="padding:10px 14px;text-align:center;font-weight:700;color:#059669;font-size:13px">'+(s.salesCount||0)+'</td>'
+      +'<td style="padding:10px 14px;text-align:center;font-weight:800;color:'+convColor+';font-size:14px">%'+conv+'</td>'
+      +'<td style="padding:10px 14px;text-align:right;font-weight:800;color:#0f172a;font-size:13px;font-family:monospace">'+fmt(s.totalRevenue)+'</td>'
       +'</tr>';
   }).join('');
 
+  // Kategori tablosu
   var sorted=buildCatStats();
   var totalVol=sorted.reduce(function(s,e){return s+e[1].volume;},0);
   var CAT_COLORS=['#3b82f6','#10b981','#f59e0b','#ef4444','#8b5cf6','#06b6d4','#f97316','#ec4899','#84cc16','#14b8a6','#6366f1','#e11d48','#0ea5e9','#d97706'];
@@ -906,14 +915,21 @@ function exportPDF(){
     var avg=v.sales>0?fmt(Math.round(v.revenue/v.sales)):'-';
     var cc=parseFloat(conv)>20?'#059669':parseFloat(conv)>10?'#d97706':'#ef4444';
     var bg=i%2===0?'#ffffff':'#f8fafc';
+    var dot='<span style="display:inline-block;width:10px;height:10px;border-radius:3px;background:'+CAT_COLORS[i%CAT_COLORS.length]+';margin-right:8px;vertical-align:middle"></span>';
     return '<tr style="background:'+bg+'">'
-      +'<td style="padding:8px 12px"><span style="display:inline-block;width:9px;height:9px;border-radius:2px;background:'+CAT_COLORS[i%CAT_COLORS.length]+';margin-right:8px;vertical-align:middle"></span><span style="font-weight:600;color:#0f172a">'+cat+'</span></td>'
-      +'<td style="padding:8px 12px;text-align:center;font-weight:700;color:#334155">'+v.volume+'</td>'
-      +'<td style="padding:8px 12px;text-align:center;font-weight:700;color:#059669">'+v.sales+'</td>'
-      +'<td style="padding:8px 12px;text-align:center;font-weight:800;color:'+cc+'">%'+conv+'</td>'
-      +'<td style="padding:8px 12px;text-align:right;font-weight:700;color:#d97706;font-family:monospace">'+fmt(v.revenue)+'</td>'
-      +'<td style="padding:8px 12px;text-align:center;color:#64748b;font-family:monospace">'+avg+'</td>'
-      +'<td style="padding:8px 12px;text-align:center;color:#94a3b8;font-family:monospace">%'+share+'</td>'
+      +'<td style="padding:9px 14px;font-weight:600;color:#0f172a;font-size:13px">'+dot+cat+'</td>'
+      +'<td style="padding:9px 14px;text-align:center;font-weight:700;color:#334155;font-size:13px">'+v.volume+'</td>'
+      +'<td style="padding:9px 14px;text-align:center;font-weight:700;color:#059669;font-size:13px">'+v.sales+'</td>'
+      +'<td style="padding:9px 14px;text-align:center;font-weight:800;color:'+cc+';font-size:14px">%'+conv+'</td>'
+      +'<td style="padding:9px 14px;text-align:right;font-weight:700;color:#d97706;font-size:13px;font-family:monospace">'+fmt(v.revenue)+'</td>'
+      +'<td style="padding:9px 14px;text-align:right;color:#64748b;font-size:12px;font-family:monospace">'+avg+'</td>'
+      +'<td style="padding:9px 14px;text-align:center;font-size:12px">'
+        +'<div style="display:flex;align-items:center;gap:6px;justify-content:center">'
+        +'<div style="background:#e2e8f0;border-radius:4px;height:8px;width:60px;overflow:hidden">'
+        +'<div style="background:'+CAT_COLORS[i%CAT_COLORS.length]+';height:100%;width:'+share+'%"></div></div>'
+        +'<span style="color:#64748b;font-weight:700;min-width:28px">%'+share+'</span>'
+        +'</div>'
+      +'</td>'
       +'</tr>';
   }).join('');
 
@@ -921,57 +937,87 @@ function exportPDF(){
     +'<title>HEDEF AVM CRM - '+period+' Raporu</title>'
     +'<style>'
     +'*{box-sizing:border-box;margin:0;padding:0}'
-    +'body{font-family:Arial,sans-serif;font-size:13px;color:#334155;background:#fff}'
+    +'body{font-family:Arial,Helvetica,sans-serif;font-size:13px;color:#334155;background:#fff;-webkit-print-color-adjust:exact;print-color-adjust:exact}'
     +'table{width:100%;border-collapse:collapse}'
-    +'th{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;padding:9px 12px;text-align:left}'
-    +'td{font-size:12px;border-bottom:1px solid #f1f5f9}'
-    +'.sec{font-size:14px;font-weight:700;color:#0f172a;margin:22px 0 8px;padding-bottom:6px;border-bottom:2px solid #e2e8f0}'
+    +'th{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;padding:10px 14px;text-align:left;white-space:nowrap}'
+    +'td{border-bottom:1px solid #f1f5f9;vertical-align:middle}'
+    +'tr:last-child td{border-bottom:none}'
+    +'.section{margin-bottom:28px}'
+    +'.sec-title{font-size:15px;font-weight:800;color:#0f172a;margin-bottom:12px;padding-bottom:8px;border-bottom:2px solid #e2e8f0;display:flex;align-items:center;gap:8px}'
+    +'.sec-title::before{content:"";display:inline-block;width:4px;height:18px;background:#0ea5e9;border-radius:2px}'
+    +'.tbl-wrap{border:1px solid #e2e8f0;border-radius:10px;overflow:hidden}'
     +'@media print{'
     +'.no-print{display:none!important}'
     +'thead{display:table-header-group}'
     +'tr{page-break-inside:avoid}'
-    +'.pb{page-break-before:always;padding-top:10px}'
+    +'.new-page{page-break-before:always}'
     +'}'
     +'</style></head><body>'
-    +'<div class="no-print" style="position:fixed;top:0;left:0;right:0;background:#0ea5e9;color:#fff;text-align:center;padding:10px 20px;font-weight:700;font-size:13px;z-index:999;display:flex;align-items:center;justify-content:center;gap:12px">'
-    +'<span>PDF kaydetmek icin Ctrl+P (veya Cmd+P) basilin ve "PDF olarak kaydet" secin</span>'
-    +'<button onclick="window.print()" style="background:#fff;color:#0ea5e9;border:none;padding:6px 16px;border-radius:6px;font-weight:700;cursor:pointer;font-size:12px">Yazdir / PDF</button>'
-    +'<button onclick="window.close()" style="background:rgba(255,255,255,.2);color:#fff;border:none;padding:6px 12px;border-radius:6px;font-weight:700;cursor:pointer;font-size:12px">X Kapat</button>'
+
+    // Yazdır butonu
+    +'<div class="no-print" style="position:fixed;top:0;left:0;right:0;background:#0f172a;color:#fff;padding:10px 20px;display:flex;align-items:center;justify-content:space-between;z-index:999;font-size:13px">'
+    +'<span style="font-weight:700">HEDEF AVM CRM &nbsp;|&nbsp; '+period+' Performans Raporu</span>'
+    +'<div style="display:flex;gap:8px">'
+    +'<button onclick="window.print()" style="background:#0ea5e9;color:#fff;border:none;padding:7px 18px;border-radius:6px;font-weight:700;cursor:pointer;font-size:13px">&#x1F5A8; Yazdir / PDF Kaydet</button>'
+    +'<button onclick="window.close()" style="background:#475569;color:#fff;border:none;padding:7px 14px;border-radius:6px;font-weight:700;cursor:pointer;font-size:13px">Kapat</button>'
+    +'</div></div>'
+
+    +'<div style="max-width:960px;margin:0 auto;padding:50px 30px 40px">'
+
+    // Başlık
+    +'<div style="background:linear-gradient(135deg,#0ea5e9 0%,#6366f1 100%);border-radius:14px;padding:26px 30px;margin-bottom:28px;color:#fff">'
+    +'<div style="font-size:28px;font-weight:800;letter-spacing:-.5px;margin-bottom:6px">HEDEF AVM CRM</div>'
+    +'<div style="font-size:13px;font-weight:600;opacity:.9;text-transform:uppercase;letter-spacing:.1em;margin-bottom:4px">Performans Raporu &mdash; '+period+'</div>'
+    +'<div style="font-size:12px;opacity:.7">Olusturulma Tarihi: '+dateStr+'</div>'
     +'</div>'
-    +'<div style="max-width:940px;margin:0 auto;padding:55px 28px 28px">'
-    +'<div style="background:linear-gradient(135deg,#0ea5e9,#6366f1);border-radius:14px;padding:24px 28px;margin-bottom:24px;color:#fff">'
-    +'<div style="font-size:26px;font-weight:800;margin-bottom:4px">HEDEF AVM CRM</div>'
-    +'<div style="font-size:12px;font-weight:600;opacity:.85;text-transform:uppercase;letter-spacing:.08em">Performans Raporu - '+period+'</div>'
-    +'<div style="font-size:11px;opacity:.7;margin-top:4px">Rapor Tarihi: '+dateStr+'</div>'
+
+    // KPI
+    +'<div class="section">'
+    +'<div class="sec-title">Genel Ozet</div>'
+    +'<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px">'+kpiData.slice(0,3).map(function(k){return '<div style="background:'+k.bg+';border:1px solid '+k.color+'33;border-radius:10px;padding:14px 16px;border-left:4px solid '+k.color+'"><div style="font-size:10px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px">'+k.label+'</div><div style="font-size:22px;font-weight:800;color:#0f172a;line-height:1">'+k.val+'</div></div>';}).join('')+'</div>'
+    +'<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:12px">'+kpiData.slice(3,6).map(function(k){return '<div style="background:'+k.bg+';border:1px solid '+k.color+'33;border-radius:10px;padding:14px 16px;border-left:4px solid '+k.color+'"><div style="font-size:10px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px">'+k.label+'</div><div style="font-size:22px;font-weight:800;color:#0f172a;line-height:1">'+k.val+'</div></div>';}).join('')+'</div>'
     +'</div>'
-    +'<div class="sec">Genel Ozet</div>'
-    +'<div style="display:flex;gap:10px;margin-bottom:24px;flex-wrap:wrap">'+kpiHTML+'</div>'
-    +'<div class="sec">Sube Performans Tablosu</div>'
-    +'<div style="border:1px solid #e2e8f0;border-radius:10px;overflow:hidden;margin-bottom:24px">'
-    +'<table><thead style="background:#0284c7"><tr>'
-    +'<th style="color:#fff">Sube</th>'
-    +'<th style="color:#fff;text-align:center">Arandi</th>'
-    +'<th style="color:#fff;text-align:center">Satis Adedi</th>'
-    +'<th style="color:#fff;text-align:center">Donusum</th>'
+
+    // Şube Performans
+    +'<div class="section">'
+    +'<div class="sec-title">Sube Performans Tablosu</div>'
+    +'<div class="tbl-wrap">'
+    +'<table>'
+    +'<thead style="background:#0f172a"><tr>'
+    +'<th style="color:#fff;width:30%">Sube</th>'
+    +'<th style="color:#e2e8f0;text-align:center">Yonlendirilen</th>'
+    +'<th style="color:#7dd3fc;text-align:center">Aranan</th>'
+    +'<th style="color:#6ee7b7;text-align:center">Satisa Donen</th>'
+    +'<th style="color:#fcd34d;text-align:center">Donusum %</th>'
     +'<th style="color:#fff;text-align:right">Toplam Ciro</th>'
-    +'</tr></thead><tbody>'+branchHTML+'</tbody></table></div>'
-    +'<div class="sec pb">Kategori Analizi</div>'
-    +'<div style="border:1px solid #e2e8f0;border-radius:10px;overflow:hidden;margin-bottom:24px">'
-    +'<table><thead style="background:#1e293b"><tr>'
+    +'</tr></thead>'
+    +'<tbody>'+branchHTML+'</tbody>'
+    +'</table></div></div>'
+
+    // Kategori
+    +'<div class="section new-page">'
+    +'<div class="sec-title">Kategori Analizi</div>'
+    +'<div class="tbl-wrap">'
+    +'<table>'
+    +'<thead style="background:#1e293b"><tr>'
     +'<th style="color:#fff">Kategori</th>'
-    +'<th style="color:#fff;text-align:center">Yonlendirme</th>'
-    +'<th style="color:#fff;text-align:center">Satis</th>'
-    +'<th style="color:#fff;text-align:center">Donusum</th>'
-    +'<th style="color:#fff;text-align:right">Toplam Ciro</th>'
-    +'<th style="color:#fff;text-align:center">Ort. Tutar</th>'
-    +'<th style="color:#fff;text-align:center">Hacim %</th>'
-    +'</tr></thead><tbody>'+catHTML+'</tbody></table></div>'
-    +'<div style="text-align:center;color:#94a3b8;font-size:11px;margin-top:20px;padding-top:14px;border-top:1px solid #e2e8f0">'
-    +'HEDEF AVM CRM - '+period+' Performans Raporu - '+dateStr
+    +'<th style="color:#e2e8f0;text-align:center">Yonlendirme</th>'
+    +'<th style="color:#6ee7b7;text-align:center">Satis</th>'
+    +'<th style="color:#fcd34d;text-align:center">Donusum %</th>'
+    +'<th style="color:#fde68a;text-align:right">Toplam Ciro</th>'
+    +'<th style="color:#e2e8f0;text-align:right">Ort. Tutar</th>'
+    +'<th style="color:#e2e8f0;text-align:center">Hacim Payi</th>'
+    +'</tr></thead>'
+    +'<tbody>'+catHTML+'</tbody>'
+    +'</table></div></div>'
+
+    // Footer
+    +'<div style="text-align:center;color:#94a3b8;font-size:11px;margin-top:24px;padding-top:14px;border-top:1px solid #e2e8f0">'
+    +'HEDEF AVM CRM &bull; '+period+' Performans Raporu &bull; '+dateStr
     +'</div>'
     +'</div></body></html>';
 
-  var win=window.open('','_blank','width=1000,height=800');
+  var win=window.open('','_blank','width=1100,height=900');
   if(!win){alert('Lutfen popup engelleyiciyi kapatin ve tekrar deneyin.');return;}
   win.document.open();
   win.document.write(html);
