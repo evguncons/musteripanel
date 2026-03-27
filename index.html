@@ -827,6 +827,7 @@ function openBranchDetails(branchName){
 // ── SALES ──────────────────────────────────────────────
 function renderSales(sales){
   var c=document.getElementById('latestSalesContainer');
+  if(!c) return;
   if(!sales||!sales.length){c.innerHTML='<div style="text-align:center;color:#94a3b8;padding:3rem;grid-column:1/-1">Satış kaydı bulunamadı.</div>';return;}
   var fmt=function(n){return '\u20ba'+new Intl.NumberFormat('tr-TR',{maximumFractionDigits:0}).format(n||0);};
   c.innerHTML=sales.map(function(s){
@@ -878,6 +879,7 @@ function clearFilters(){
 }
 function renderTable(){
   var tbody=document.getElementById('crmTableBody');
+  if(!tbody) return;
   document.getElementById('totalRecordsBadge').textContent=filteredData.length+' Kayıt';
   tbody.innerHTML='';
   if(!filteredData.length){tbody.innerHTML='<tr><td colspan="9" style="text-align:center;padding:3.5rem;color:#94a3b8;font-style:italic">Kayıt bulunamadı.</td></tr>';renderPagination(0);return;}
@@ -905,8 +907,11 @@ function renderTable(){
   renderPagination(Math.ceil(filteredData.length/rowsPerPage));
 }
 function renderPagination(total){
-  document.getElementById('paginationInfo').textContent='Sayfa '+currentPage+' / '+(total||1);
-  var ctrl=document.getElementById('paginationControls');ctrl.innerHTML='';
+  var info=document.getElementById('paginationInfo');
+  if(info) info.textContent='Sayfa '+currentPage+' / '+(total||1);
+  var ctrl=document.getElementById('paginationControls');
+  if(!ctrl) return;
+  ctrl.innerHTML='';
   if(total<=1) return;
   var mk=function(icon,page,disabled){
     var b=document.createElement('button');b.innerHTML=icon;b.className='btn btn-icon';b.disabled=disabled;
@@ -934,19 +939,9 @@ function exportPDF(){
     {label:'Toplam Yonlendirme', val:document.getElementById('globalTotalRecords').textContent, color:'#0ea5e9', bg:'#eff9ff'},
     {label:'Toplam Aranan',      val:document.getElementById('globalTotalAranan').textContent,  color:'#6366f1', bg:'#f0f0ff'},
     {label:'Satis Adedi',        val:document.getElementById('globalTotalSales').textContent,   color:'#10b981', bg:'#f0fdf4'},
-    {label:'Aylik Ciro',         val:document.getElementById('globalTotalRevenue').textContent, color:'#f59e0b', bg:'#fffbeb'},
-    {label:'Donusum Orani',      val:document.getElementById('globalConvRate').textContent,     color:'#ef4444', bg:'#fff5f5'},
-    {label:'Ortalama Sepet',     val:document.getElementById('globalAvgBasket').textContent,    color:'#8b5cf6', bg:'#faf5ff'}
+    {label:'Aylik Ciro',         val:document.getElementById('globalTotalRevenue').textContent, color:'#ef4444', bg:'#fff5f5'}
   ];
 
-  var kpiHTML=kpiData.map(function(k){
-    return '<div style="flex:1;min-width:120px;background:'+k.bg+';border:1px solid '+k.color+'33;border-radius:10px;padding:14px 16px;border-left:4px solid '+k.color+'">'
-      +'<div style="font-size:10px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px">'+k.label+'</div>'
-      +'<div style="font-size:22px;font-weight:800;color:#0f172a;line-height:1">'+k.val+'</div>'
-      +'</div>';
-  }).join('');
-
-  // Şube performans tablosu - Yönlendirilen + Aranan + Satış + Dönüşüm + Ciro
   var branchHTML=branchStatsData.map(function(s,i){
     var clean=s.branch.replace(/ \u015eubesi/gi,'');
     var total=(s.arandi||0)+(s.aranmadi||0);
@@ -966,7 +961,6 @@ function exportPDF(){
       +'</tr>';
   }).join('');
 
-  // Kategori tablosu
   var sorted=buildCatStats();
   var totalVol=sorted.reduce(function(s,e){return s+e[1].volume;},0);
   var CAT_COLORS=['#3b82f6','#10b981','#f59e0b','#ef4444','#8b5cf6','#06b6d4','#f97316','#ec4899','#84cc16','#14b8a6','#6366f1','#e11d48','#0ea5e9','#d97706'];
@@ -1036,8 +1030,7 @@ function exportPDF(){
     // KPI
     +'<div class="section">'
     +'<div class="sec-title">Genel Ozet</div>'
-    +'<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px">'+kpiData.slice(0,3).map(function(k){return '<div style="background:'+k.bg+';border:1px solid '+k.color+'33;border-radius:10px;padding:14px 16px;border-left:4px solid '+k.color+'"><div style="font-size:10px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px">'+k.label+'</div><div style="font-size:22px;font-weight:800;color:#0f172a;line-height:1">'+k.val+'</div></div>';}).join('')+'</div>'
-    +'<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:12px">'+kpiData.slice(3,6).map(function(k){return '<div style="background:'+k.bg+';border:1px solid '+k.color+'33;border-radius:10px;padding:14px 16px;border-left:4px solid '+k.color+'"><div style="font-size:10px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px">'+k.label+'</div><div style="font-size:22px;font-weight:800;color:#0f172a;line-height:1">'+k.val+'</div></div>';}).join('')+'</div>'
+    +'<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px">'+kpiData.map(function(k){return '<div style="background:'+k.bg+';border:1px solid '+k.color+'33;border-radius:10px;padding:14px 16px;border-left:4px solid '+k.color+'"><div style="font-size:10px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px">'+k.label+'</div><div style="font-size:22px;font-weight:800;color:#0f172a;line-height:1">'+k.val+'</div></div>';}).join('')+'</div>'
     +'</div>'
 
     // Şube Performans
@@ -1090,6 +1083,7 @@ function exportPDF(){
 function getTodayDT(){var n=new Date();return new Date(n.getTime()-n.getTimezoneOffset()*60000).toISOString().slice(0,16);}
 function addInputRow(){
   var c=document.getElementById('inputContainer');
+  if(!c) return;
   var d=document.createElement('div');d.className='entry-card';
   var bOpts='<option value="" disabled selected>Şube seçin...</option>'+BRANCHES.map(function(b){return '<option value="'+b+'">'+b+'</option>';}).join('');
   d.innerHTML='<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:.875rem;margin-bottom:.875rem">'
@@ -1121,7 +1115,7 @@ async function submitAllRows(){
     data.push({date:dp2[2]+'.'+dp2[1]+'.'+dp2[0]+' '+tp,branch:branch,name:name,
       contact:row.querySelector('.inp-contact').value,media:row.querySelector('.inp-media').value,
       category:row.querySelector('.inp-category').value,product:row.querySelector('.inp-product').value,
-      status:row.querySelector('.inp-status').value});
+      status:row.querySelector('.inp-status').value.toLocaleLowerCase('tr-TR')});
   });
   if(err) return alert('Şube ve Müşteri Adı alanları zorunludur.');
   if(!data.length) return;
