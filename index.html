@@ -325,8 +325,14 @@ body.dark .theme-toggle .knob{transform:translateX(20px)}
     </div>
     
     <div class="grid-2col" style="margin-bottom:1.5rem">
-      <div class="card" style="padding:1.5rem"><div style="font-size:.75rem;font-weight:800;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:1rem"><i class="fas fa-chart-pie mr-2 text-brand-500"></i>Medya Kanalı Dağılımı</div><div class="chart-wrap"><canvas id="mediaChart"></canvas></div></div>
-      <div class="card" style="padding:1.5rem"><div style="font-size:.75rem;font-weight:800;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:1rem"><i class="fas fa-chart-doughnut mr-2 text-brand-500"></i>Görüşme Sonuçları</div><div class="chart-wrap"><canvas id="resultChart"></canvas></div></div>
+      <div class="card" style="padding:1.5rem; display:flex; flex-direction:column;">
+        <div style="font-size:.75rem;font-weight:800;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:1rem"><i class="fas fa-list-ul mr-2 text-brand-500"></i>Medya Kanalı Dağılımı</div>
+        <div id="mediaListContainer" style="max-height: 250px; overflow-y: auto; padding-right: 0.5rem; flex:1;"></div>
+      </div>
+      <div class="card" style="padding:1.5rem; display:flex; flex-direction:column;">
+        <div style="font-size:.75rem;font-weight:800;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:1rem"><i class="fas fa-list-check mr-2 text-brand-500"></i>Görüşme Sonuçları</div>
+        <div id="resultListContainer" style="max-height: 250px; overflow-y: auto; padding-right: 0.5rem; flex:1;"></div>
+      </div>
     </div>
     <div class="card">
       <div class="sec-header">
@@ -516,7 +522,8 @@ body.dark .theme-toggle .knob{transform:translateX(20px)}
         <div><label class="inp-label text-indigo-500"><i class="fas fa-comment-dots mr-1"></i>Görüşme Sonucu</label><select id="modalResult" class="inp" style="border-color:rgba(99, 102, 241, 0.3)"><option value="">Seçiniz...</option><option>Müşteri Mağazaya Gelecek</option><option>Bilgi verildi, olumsuz</option><option>Satışa Döndü</option><option>Tekrar Aranacak</option><option>Müşteri Mağazaya Geldi</option><option>BORÇ NEDENİYLE SATIŞ İPTAL</option></select></div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:.875rem">
             <div><label class="inp-label text-emerald-600"><i class="fas fa-shopping-bag mr-1"></i>Sipariş</label><select id="modalOrder" class="inp" style="border-color:rgba(16, 185, 129, 0.3); color:#059669"><option value="Hayır">Hayır</option><option value="Evet,Satış Yapıldı">Evet, Satış Yapıldı</option></select></div>
-            <div><label class="inp-label text-emerald-600"><i class="fas fa-lira-sign mr-1"></i>Tutar</label><input type="number" id="modalAmount" class="inp" style="border-color:rgba(16, 185, 129, 0.3); color:#059669; font-weight:800;" placeholder="0.00"></div>
+            <!-- FIX: type="text" yapıldı -->
+            <div><label class="inp-label text-emerald-600"><i class="fas fa-lira-sign mr-1"></i>Tutar</label><input type="text" id="modalAmount" class="inp" style="border-color:rgba(16, 185, 129, 0.3); color:#059669; font-weight:800;" placeholder="0,00"></div>
         </div>
       </div>
       <div style="display:flex;justify-content:flex-end;gap:.75rem;padding-top:.75rem;border-top:1px solid var(--border); margin-top:0.5rem;">
@@ -561,6 +568,17 @@ var allRecordsData=[],filteredData=[],branchStatsData=[];
 var currentPage=1,rowsPerPage=12,currentTab='entry';
 var mediaChartInst=null,resultChartInst=null,catVolInst=null,catRevInst=null;
 var catAnalyticsRendered=false;
+
+// ── UTILS (PARSE FLOAT) ────────────────────────────────
+function parseTurkishFloat(val) {
+  if (!val) return 0;
+  if (typeof val === 'number') return val;
+  var s = String(val).trim();
+  // 1.500,00 -> 1500.00
+  s = s.replace(/\./g, '').replace(',', '.');
+  var f = parseFloat(s);
+  return isNaN(f) ? 0 : f;
+}
 
 // ── LOGIN ──────────────────────────────────────────────
 function doLogin(){
@@ -635,7 +653,7 @@ function refreshData(){
   fetchData();
 }
 
-// ── FETCH ──────────────────────────────────────────────
+// ── FETCH & AGGREGATE (SOURCE OF TRUTH) ────────────────
 async function fetchData(){
   var period=document.getElementById('currentPeriod')?document.getElementById('currentPeriod').value:'';
   try{
@@ -645,10 +663,19 @@ async function fetchData(){
       allRecordsData=(data.records||[]).sort(function(a,b){
         return(b.timestamp?new Date(b.timestamp):0)-(a.timestamp?new Date(a.timestamp):0);
       });
-      updateKPIs(data.global);
-      branchStatsData=(data.stats||[]).sort(function(a,b){return b.totalRevenue-a.totalRevenue;});
+      
+      // FIX: Backend'in (GAS) hatalı veya filtresiz hesaplamalarını ezip,
+      // tüm ekranları güvenli şekilde sadece o dönemin kayıtları üzerinden kuruyoruz.
+      recalculateAggregations();
+      updateKPIs();
       renderPerformance();
-      renderSales(data.sales||[]);
+      
+      // Sadece gerçekten satış olanları sales (akış) sayfasına gönder
+      var pureSales = allRecordsData.filter(r => {
+        return (r.order||'').toLowerCase().indexOf('evet')>-1 || (r.result||'').toLowerCase().indexOf('satışa döndü')>-1;
+      }).slice(0, 24);
+      renderSales(pureSales);
+      
       renderDashTopBranches();
       if(currentTab==='dashboard') renderDashCharts();
       if(currentTab==='category'){
@@ -664,31 +691,77 @@ async function fetchData(){
   }
 }
 
-// ── KPIs ──────────────────────────────────────────────
-function updateKPIs(g){
-  if(!g) return;
-  var fmt=function(n){return '₺'+new Intl.NumberFormat('tr-TR',{maximumFractionDigits:0}).format(n||0);};
-  document.getElementById('globalTotalRecords').textContent=g.totalRecords||0;
-  document.getElementById('globalTotalAranan').textContent=g.totalAranan||0;
-  document.getElementById('globalTotalSales').textContent=g.totalSalesCount||0;
-  document.getElementById('globalTotalRevenue').textContent=fmt(g.totalRevenue||0);
-  var conv=g.totalAranan>0?((g.totalSalesCount||0)/g.totalAranan*100).toFixed(1):0;
-  var avg=(g.totalSalesCount||0)>0?Math.round((g.totalRevenue||0)/g.totalSalesCount):0;
+function recalculateAggregations(){
+  var bMap = {};
+  BRANCHES.forEach(b => bMap[b] = {branch: b, arandi: 0, aranmadi: 0, salesCount: 0, totalRevenue: 0});
   
+  allRecordsData.forEach(r => {
+    var b = r.branch || 'Diğer';
+    if(!bMap[b] && BRANCHES.indexOf(b) > -1) { bMap[b] = {branch: b, arandi: 0, aranmadi: 0, salesCount: 0, totalRevenue: 0}; }
+    
+    if(bMap[b]) {
+        if((r.status||'').toLowerCase()==='arandı') bMap[b].arandi++;
+        else bMap[b].aranmadi++;
+        
+        var isSale=(r.order||'').toLowerCase().indexOf('evet')>-1||(r.result||'').toLowerCase().indexOf('satışa döndü')>-1;
+        if(isSale){
+            bMap[b].salesCount++;
+            bMap[b].totalRevenue += parseTurkishFloat(r.amount);
+        }
+    }
+  });
+  
+  // Şube istatistikleri listesini ciroya göre azalan sırala
+  branchStatsData = Object.values(bMap).filter(x => BRANCHES.indexOf(x.branch) > -1).sort((a,b) => b.totalRevenue - a.totalRevenue);
+}
+
+// ── KPIs ──────────────────────────────────────────────
+function updateKPIs(){
+  var totalRecords = allRecordsData.length;
+  var totalAranan = 0;
+  var totalSalesCount = 0;
+  var totalRevenue = 0;
+  
+  var catCounts = {};
+
+  allRecordsData.forEach(r => {
+      var isA=(r.status||'').toLowerCase()==='arandı';
+      if(isA) totalAranan++;
+      
+      var isSale=(r.order||'').toLowerCase().indexOf('evet')>-1||(r.result||'').toLowerCase().indexOf('satışa döndü')>-1;
+      if(isSale){
+          totalSalesCount++;
+          totalRevenue += parseTurkishFloat(r.amount);
+      }
+      
+      var cat = r.category || 'Diğer';
+      catCounts[cat] = (catCounts[cat] || 0) + 1;
+  });
+
+  var topCatMax = 0, topCatStr = '-';
+  for(var c in catCounts){
+      if(catCounts[c] > topCatMax) { topCatMax = catCounts[c]; topCatStr = c; }
+  }
+
+  var fmt=function(n){return '₺'+new Intl.NumberFormat('tr-TR',{maximumFractionDigits:0}).format(n||0);};
+  
+  document.getElementById('globalTotalRecords').textContent=totalRecords;
+  document.getElementById('globalTotalAranan').textContent=totalAranan;
+  document.getElementById('globalTotalSales').textContent=totalSalesCount;
+  document.getElementById('globalTotalRevenue').textContent=fmt(totalRevenue);
+  
+  var avg=totalSalesCount>0?Math.round(totalRevenue/totalSalesCount):0;
   var elAvgBasket = document.getElementById('globalAvgBasket');
   if(elAvgBasket) elAvgBasket.textContent=fmt(avg);
   
   var elTopVolCat = document.getElementById('globalTopVolCat');
-  if(elTopVolCat) elTopVolCat.textContent=g.topVolCat||'-';
+  if(elTopVolCat) elTopVolCat.textContent=topCatStr;
   
   var elTopVolCount = document.getElementById('globalTopVolCount');
-  if(elTopVolCount) elTopVolCount.textContent=(g.topVolCount||0)+' ADET';
+  if(elTopVolCount) elTopVolCount.textContent=topCatMax+' ADET';
 }
 
 // ── DASH CHARTS ───────────────────────────────────────
-function cDefaults(){
-  return{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'right',labels:{color:document.body.classList.contains('dark')?'#94a3b8':'#64748b',font:{family:'Plus Jakarta Sans',size:12,weight:'600'},padding:12,boxWidth:10,boxHeight:10,borderRadius:3}},tooltip:{backgroundColor:'#1e293b',titleColor:'#f8fafc',bodyColor:'#94a3b8',padding:10,cornerRadius:8}}};
-}
 function renderDashCharts(){
   var ALLOWED_MEDIA=['Whatsapp','Instagram','Web Sitesi Form','Facebook','Çağrı','SMS LİNK','Diğer'];
   var mediaCounts={};
@@ -696,22 +769,47 @@ function renderDashCharts(){
     var m=r.media||'Diğer';
     if(ALLOWED_MEDIA.indexOf(m)>-1) mediaCounts[m]=(mediaCounts[m]||0)+1;
   });
-  var mL=[],mV=[];
-  ALLOWED_MEDIA.forEach(function(k){if(mediaCounts[k]){mL.push(k);mV.push(mediaCounts[k]);}});
-  if(mediaChartInst) mediaChartInst.destroy();
-  var mCtx=document.getElementById('mediaChart');
-  if(mCtx&&mL.length) mediaChartInst=new Chart(mCtx.getContext('2d'),{type:'doughnut',data:{labels:mL,datasets:[{data:mV,backgroundColor:COLORS,borderWidth:2,borderColor:document.body.classList.contains('dark')?'#151a2a':'#fff',hoverOffset:5}]},options:Object.assign({},cDefaults(),{cutout:'65%'})});
+  var mArr = Object.keys(mediaCounts).map(function(k){ return {label:k, count:mediaCounts[k]}; }).sort(function(a,b){ return b.count-a.count; });
 
   var ALLOWED_RESULT=['Müşteri Mağazaya Gelecek','Tekrar Aranacak','Bilgi verildi, olumsuz','Mağazaya gelecek','Satışa Döndü','BORÇ NEDENİYLE SATIŞ İPTAL'];
   var resCounts={};
   allRecordsData.forEach(function(r){
-    if(r.result && ALLOWED_RESULT.indexOf(r.result)>-1) resCounts[r.result]=(resCounts[r.result]||0)+1;
+    var resultClean = (r.result||'').trim();
+    if(resultClean && ALLOWED_RESULT.indexOf(resultClean)>-1) resCounts[resultClean]=(resCounts[resultClean]||0)+1;
   });
-  var rL=[],rV=[];
-  ALLOWED_RESULT.forEach(function(k){if(resCounts[k]){rL.push(k);rV.push(resCounts[k]);}});
-  if(resultChartInst) resultChartInst.destroy();
-  var rCtx=document.getElementById('resultChart');
-  if(rCtx&&rL.length) resultChartInst=new Chart(rCtx.getContext('2d'),{type:'doughnut',data:{labels:rL,datasets:[{data:rV,backgroundColor:COLORS,borderWidth:2,borderColor:document.body.classList.contains('dark')?'#151a2a':'#fff',hoverOffset:5}]},options:Object.assign({},cDefaults(),{cutout:'65%'})});
+  var rArr = Object.keys(resCounts).map(function(k){ return {label:k, count:resCounts[k]}; }).sort(function(a,b){ return b.count-a.count; });
+
+  var renderList = function(containerId, dataArr) {
+    var c = document.getElementById(containerId);
+    if(!c) return;
+    if(!dataArr.length) {
+        c.innerHTML = '<div style="text-align:center;color:var(--text3);padding:3rem 0;font-size:0.9rem;font-weight:600;">Kayıt bulunamadı.</div>';
+        return;
+    }
+    var maxCount = dataArr[0].count; 
+    c.innerHTML = dataArr.map(function(item, i) {
+        var pct = maxCount > 0 ? Math.round((item.count / maxCount) * 100) : 0;
+        var color = COLORS[i % COLORS.length];
+        return '<div style="margin-bottom: 1.25rem;">'
+             + '<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.4rem;">'
+             + '<div style="display:flex; align-items:center; gap:0.5rem; flex:1; min-width:0;">'
+             + '<div style="width: 10px; height: 10px; border-radius: 3px; background-color: ' + color + '; flex-shrink:0;"></div>'
+             + '<span style="font-weight: 700; color: var(--text); font-size: 0.95rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="' + item.label + '">' + item.label + '</span>'
+             + '</div>'
+             + '<div style="display:flex; align-items:baseline; gap:0.3rem; flex-shrink:0;">'
+             + '<span style="font-weight: 800; color: var(--text); font-size: 1.1rem; font-family: monospace;">' + item.count + '</span>'
+             + '<span style="font-weight: 800; color: var(--text3); font-size: 0.7rem;">ADET</span>'
+             + '</div>'
+             + '</div>'
+             + '<div class="prog-bg" style="height: 6px;">'
+             + '<div class="prog-fill" style="width: ' + pct + '%; background-color: ' + color + ';"></div>'
+             + '</div>'
+             + '</div>';
+    }).join('');
+  };
+
+  renderList('mediaListContainer', mArr);
+  renderList('resultListContainer', rArr);
 }
 
 function renderDashTopBranches(){
@@ -745,7 +843,8 @@ function buildCatStats(){
     if(!catStats[cat]) catStats[cat]={volume:0,sales:0,revenue:0};
     catStats[cat].volume++;
     var isSale=(r.order||'').toLowerCase().indexOf('evet')>-1||(r.result||'').toLowerCase().indexOf('satışa döndü')>-1;
-    if(isSale){catStats[cat].sales++;catStats[cat].revenue+=parseFloat(r.amount)||0;}
+    // FIX: parseTurkishFloat eklendi
+    if(isSale){catStats[cat].sales++;catStats[cat].revenue+=parseTurkishFloat(r.amount);}
   });
   return Object.entries(catStats).filter(function(e){return e[1].volume>0;}).sort(function(a,b){return b[1].volume-a[1].volume;});
 }
@@ -937,6 +1036,7 @@ function renderSales(sales){
     var ds='';
     if(s.timestamp){var d=new Date(s.timestamp);if(!isNaN(d)) ds=d.toLocaleDateString('tr-TR',{day:'numeric',month:'short'})+' '+d.toLocaleTimeString('tr-TR',{hour:'2-digit',minute:'2-digit'});}
     var prod=(s.product||s.category||'');
+    var finalAmount = parseTurkishFloat(s.amount);
     return '<div style="background:var(--card-bg);border:1px solid var(--border);border-top:3px solid #10b981;border-radius:1rem;padding:1.5rem;display:flex;flex-direction:column;gap:1rem;transition:all .3s ease; box-shadow:var(--shadow-sm)" onmouseover="this.style.borderColor=\'#10b981\'; this.style.transform=\'translateY(-2px)\'; this.style.boxShadow=\'var(--shadow-md)\'" onmouseout="this.style.borderTopColor=\'#10b981\';this.style.borderColor=\'var(--border)\'; this.style.transform=\'translateY(0)\'; this.style.boxShadow=\'var(--shadow-sm)\'">'
       +'<div style="display:flex;justify-content:space-between;align-items:center">'
       +'<div style="width:36px;height:36px;background:rgba(16, 185, 129, 0.1);border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0"><i class="fas fa-check" style="color:#059669;font-size:.9rem"></i></div>'
@@ -948,7 +1048,7 @@ function renderSales(sales){
       +'</div>'
       +'<div style="border-top:1px solid var(--border);padding-top:.875rem;margin-top:auto">'
       +'<div style="font-size:.85rem;color:var(--text3);margin-bottom:.4rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:500">'+prod+'</div>'
-      +'<div style="font-weight:800;color:#059669;font-size:1.2rem;font-family:monospace">'+fmt(s.amount)+'</div>'
+      +'<div style="font-weight:800;color:#059669;font-size:1.2rem;font-family:monospace">'+fmt(finalAmount)+'</div>'
       +'</div>'
       +'</div>';
   }).join('');
@@ -990,7 +1090,10 @@ function renderTable(){
     var absIdx=start+idx;
     var clean=row.branch.replace(/ Şubesi/gi,'');
     var isA=(row.status||'').toLowerCase()==='arandı';
-    var amt=row.amount>0?'₺'+new Intl.NumberFormat('tr-TR',{maximumFractionDigits:0}).format(row.amount):'-';
+    
+    var floatAmt = parseTurkishFloat(row.amount);
+    var amt=floatAmt>0?'₺'+new Intl.NumberFormat('tr-TR',{maximumFractionDigits:0}).format(floatAmt):'-';
+    
     var tr=document.createElement('tr');tr.className='tbl-row';
     tr.innerHTML='<td data-label="Tarih" style="font-family:monospace;font-size:.9rem;font-weight:600;color:var(--text3);white-space:nowrap">'+(row.date||'-')+'</td>'
       +'<td data-label="Şube"><span style="background:rgba(59,130,246,0.1);color:#3b82f6;padding:.25rem .6rem;border-radius:6px;font-size:.7rem;font-weight:800;white-space:nowrap">'+clean+'</span></td>'
@@ -999,7 +1102,7 @@ function renderTable(){
       +'<td data-label="Durum"><span style="background:'+(isA?'rgba(16,185,129,0.1)':'var(--surface2)')+';color:'+(isA?'#10b981':'var(--text3)')+';padding:.25rem .6rem;border-radius:6px;font-size:.7rem;font-weight:800">'+(row.status||'-')+'</span></td>'
       +'<td data-label="Sonuç" style="font-size:.9rem;color:var(--text2);font-weight:500;max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="'+(row.result||'')+'">'+(row.result||'-')+'</td>'
       +'<td data-label="Ürün/Kat." style="font-size:.9rem;color:var(--text3);font-weight:500;max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+(row.product||row.category)+'</td>'
-      +'<td data-label="Tutar" style="text-align:right;font-family:monospace;font-weight:800;color:'+(row.amount>0?'#059669':'var(--text3)')+';font-size:.9rem">'+amt+'</td>'
+      +'<td data-label="Tutar" style="text-align:right;font-family:monospace;font-weight:800;color:'+(floatAmt>0?'#059669':'var(--text3)')+';font-size:.9rem">'+amt+'</td>'
       +'<td data-label="İşlem" style="text-align:right"><div style="display:flex;justify-content:flex-end;gap:.4rem">'
       +'<button onclick="setupEdit('+absIdx+')" class="btn btn-icon" title="Düzenle"><i class="fas fa-pen" style="font-size:.8rem"></i></button>'
       +'<button onclick="setupDelete('+absIdx+')" class="btn btn-icon" style="color:#ef4444; border-color:rgba(239, 68, 68, 0.2)" onmouseover="this.style.background=\'rgba(239,68,68,0.1)\'" onmouseout="this.style.background=\'var(--surface2)\'" title="Sil"><i class="fas fa-trash" style="font-size:.8rem"></i></button>'
