@@ -309,9 +309,9 @@ body.dark .theme-toggle .knob{transform:translateX(20px)}
       <div class="kpi-card" style="--accent:#f59e0b">
          <i class="fas fa-crown kpi-icon-bg"></i>
          <div style="position:relative; z-index:2">
-             <div style="font-size:.75rem;font-weight:800;color:var(--text3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:.6rem">Adet Lideri (Kategori)</div>
+             <div style="font-size:.75rem;font-weight:800;color:var(--text3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:.6rem">En Çok Satan Kategori</div>
              <div style="font-size:1.3rem;font-weight:800;color:var(--text);line-height:1.2;margin-bottom:.3rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" id="globalTopVolCat">-</div>
-             <div style="font-size:.85rem;font-weight:800;color:#f59e0b;text-transform:uppercase;" id="globalTopVolCount">0 ADET</div>
+             <div style="font-size:.85rem;font-weight:800;color:#f59e0b;text-transform:uppercase;" id="globalTopVolCount">0 SATIŞ</div>
          </div>
       </div>
       <div class="kpi-card" style="--accent:#8b5cf6">
@@ -722,25 +722,27 @@ function updateKPIs(){
   var totalSalesCount = 0;
   var totalRevenue = 0;
   
-  var catCounts = {};
+  var catSalesCounts = {}; // Yalnızca Satışları sayması için
 
   allRecordsData.forEach(r => {
       var isA=(r.status||'').toLowerCase()==='arandı';
       if(isA) totalAranan++;
       
       var isSale=(r.order||'').toLowerCase().indexOf('evet')>-1||(r.result||'').toLowerCase().indexOf('satışa döndü')>-1;
+      var cat = r.category || 'Diğer';
+
       if(isSale){
           totalSalesCount++;
           totalRevenue += parseTurkishFloat(r.amount);
+          
+          // Sadece başarılı satış gerçekleştiğinde kategoriyi say
+          catSalesCounts[cat] = (catSalesCounts[cat] || 0) + 1;
       }
-      
-      var cat = r.category || 'Diğer';
-      catCounts[cat] = (catCounts[cat] || 0) + 1;
   });
 
   var topCatMax = 0, topCatStr = '-';
-  for(var c in catCounts){
-      if(catCounts[c] > topCatMax) { topCatMax = catCounts[c]; topCatStr = c; }
+  for(var c in catSalesCounts){
+      if(catSalesCounts[c] > topCatMax) { topCatMax = catSalesCounts[c]; topCatStr = c; }
   }
 
   var fmt=function(n){return '₺'+new Intl.NumberFormat('tr-TR',{maximumFractionDigits:0}).format(n||0);};
@@ -758,7 +760,7 @@ function updateKPIs(){
   if(elTopVolCat) elTopVolCat.textContent=topCatStr;
   
   var elTopVolCount = document.getElementById('globalTopVolCount');
-  if(elTopVolCount) elTopVolCount.textContent=topCatMax+' ADET';
+  if(elTopVolCount) elTopVolCount.textContent=topCatMax+' SATIŞ';
 }
 
 // ── DASH CHARTS ───────────────────────────────────────
