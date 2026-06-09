@@ -211,9 +211,6 @@ body.dark .theme-toggle .knob{transform:translateX(20px)}
 </head>
 <body>
 
-<!-- ════════════════════ TOAST CONTAINER (MODERN BİLDİRİM PANELİ) ════════════════════ -->
-<div id="toastContainer" style="position:fixed; bottom:24px; right:24px; z-index:999999; display:flex; flex-direction:column; gap:12px; pointer-events:none; max-width:380px; width:100%;"></div>
-
 <!-- ════════════════════ LOGIN ════════════════════ -->
 <div id="loginScreen" style="position:fixed;inset:0;z-index:100;background:var(--bg);display:flex;align-items:center;justify-content:center;padding:1rem; transition: opacity 0.4s ease;">
   <div style="background:var(--card-bg);border:1px solid var(--border);border-radius:1.75rem;padding:3rem 2.5rem;width:100%;max-width:400px;text-align:center;box-shadow:var(--shadow-md)">
@@ -374,7 +371,6 @@ body.dark .theme-toggle .knob{transform:translateX(20px)}
       <div class="kpi-card" style="--accent:#8b5cf6"><div style="font-size:.75rem;font-weight:800;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:.6rem">Aktif Kategori</div><div style="font-size:2.4rem;font-weight:800;color:#8b5cf6;line-height:1" id="ck-catCount">0</div><div style="font-size:.8rem;color:var(--text3);margin-top:.4rem; font-weight:600">listelenen kategori</div></div>
     </div>
     
-    <!-- Yönlendirme ve Ciro Dağılımı Listeleri -->
     <div class="grid-2col" style="margin-bottom:1.5rem">
       <div class="card" style="padding:1.5rem; display:flex; flex-direction:column;">
         <div style="font-size:.8rem;font-weight:800;color:var(--text3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:1rem"><i class="fas fa-bars-staggered mr-2 text-brand-500"></i>Yönlendirme Adedi — Kategori</div>
@@ -475,47 +471,6 @@ body.dark .theme-toggle .knob{transform:translateX(20px)}
 </div>
 
 <script>
-// ── TOAST BİLDİRİM SİSTEMİ ─────────────────────────────
-function showToast(message, type = 'success', duration = 6000) {
-  var container = document.getElementById('toastContainer');
-  if (!container) return;
-  
-  var toast = document.createElement('div');
-  toast.style.cssText = 'pointer-events: auto; display: flex; align-items: center; gap: 12px; padding: 1rem 1.25rem; border-radius: 1rem; background: var(--card-bg); border: 1px solid var(--border); box-shadow: var(--shadow-md); transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); opacity: 0; transform: translateY(20px); margin-bottom: 4px;';
-  
-  var iconColor = '#10b981';
-  var iconClass = 'fa-check-circle';
-  if (type === 'error') {
-    iconColor = '#ef4444';
-    iconClass = 'fa-exclamation-circle';
-  } else if (type === 'warning') {
-    iconColor = '#f59e0b';
-    iconClass = 'fa-exclamation-triangle';
-  } else if (type === 'info') {
-    iconColor = '#3b82f6';
-    iconClass = 'fa-info-circle';
-  }
-  
-  toast.innerHTML = '<div style="width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: ' + iconColor + '15; color: ' + iconColor + '; flex-shrink: 0;"><i class="fas ' + iconClass + '" style="font-size: 1.1rem;"></i></div>'
-    + '<div style="flex: 1; font-size: 0.9rem; font-weight: 700; color: var(--text); line-height: 1.4;">' + message + '</div>'
-    + '<button onclick="this.parentElement.remove()" style="background: transparent; border: none; color: var(--text3); cursor: pointer; transition: color 0.2s; padding: 4px; margin-left: 8px;"><i class="fas fa-times"></i></button>';
-  
-  container.appendChild(toast);
-  
-  setTimeout(function() {
-    toast.style.opacity = '1';
-    toast.style.transform = 'translateY(0)';
-  }, 10);
-  
-  setTimeout(function() {
-    toast.style.opacity = '0';
-    toast.style.transform = 'translateY(-20px)';
-    setTimeout(function() {
-      toast.remove();
-    }, 300);
-  }, duration);
-}
-
 // ── TEMA ──────────────────────────────────────────────
 function toggleTheme(){
   var isDark=document.body.classList.toggle('dark');
@@ -531,22 +486,36 @@ const CATEGORIES=["Mobilya","Baza+Yatak+Başlık","Bebek ve Çocuk","Beyaz Eşya
 const TR_MONTHS=['OCAK','ŞUBAT','MART','NİSAN','MAYIS','HAZİRAN','TEMMUZ','AĞUSTOS','EYLÜL','EKİM','KASIM','ARALIK'];
 const COLORS=['#3b82f6','#10b981','#f59e0b','#ef4444','#8b5cf6','#06b6d4','#f97316','#ec4899','#84cc16','#14b8a6','#6366f1','#e11d48','#0ea5e9','#d97706'];
 
-var allRecordsData=[],branchStatsData=[];
+var allRecordsData=[], branchStatsData=[];
 var currentTab='entry';
 var catAnalyticsRendered=false;
-var previousSalesCount = -1; 
+var previousSalesCount = -1; // Bildirim sesi için satış adedi takibi
 
-// ── UTILS (PARSE FLOAT) ────────────────────────────────
+// ── UTILS (GELİŞMİŞ PARSE & SATIŞ KONTROLÜ) ─────────────
 function parseTurkishFloat(val) {
   if (!val) return 0;
   if (typeof val === 'number') return val;
   var s = String(val).trim();
-  s = s.replace(/\./g, '').replace(',', '.');
+  s = s.replace(/[^\d,.-]/g, ''); // Harfleri/₺ işaretini sil
+  if (s.includes(',') && s.includes('.')) {
+    if (s.lastIndexOf(',') > s.lastIndexOf('.')) s = s.replace(/\./g, '').replace(',', '.');
+    else s = s.replace(/,/g, '');
+  } else if (s.includes(',')) {
+    s = s.replace(',', '.');
+  }
   var f = parseFloat(s);
   return isNaN(f) ? 0 : f;
 }
 
-// ── BİLDİRİM SESİ (Web Audio API - Cihazda sorunsuz çalışır) ──
+// Lokal hesaplamalar için arka plandaki ile BİREBİR aynı Satış Kriteri
+function isRecordSale(r) {
+  var amt = parseTurkishFloat(r.amount);
+  var res = (r.result||'').toLowerCase();
+  var ord = (r.order||'').toLowerCase();
+  return amt > 0 || ord.indexOf('evet') > -1 || res.indexOf('satışa döndü') > -1 || res.indexOf('satış yapıldı') > -1 || res.indexOf('olumlu satış') > -1;
+}
+
+// ── BİLDİRİM SESİ ──
 function playNotificationSound() {
     try {
         var ctx = new (window.AudioContext || window.webkitAudioContext)();
@@ -579,7 +548,8 @@ function doLogin(){
         populatePeriodSelector();
         addInputRow();
         fetchData();
-        setInterval(fetchData,15000);
+        // 5 SANİYEDE BİR OTOMATİK GÜNCELLEME (Düzeltildi)
+        setInterval(fetchData, 5000);
     }, 400);
   } else {
     document.getElementById('loginError').style.display='block';
@@ -627,35 +597,33 @@ function populatePeriodSelector(){
 }
 function refreshData(){
   var el=document.getElementById('lastUpdateTime');
-  if(el) el.textContent=new Date().toLocaleTimeString('tr-TR',{hour:'2-digit',minute:'2-digit'});
+  if(el) el.textContent=new Date().toLocaleTimeString('tr-TR',{hour:'2-digit',minute:'2-digit', second:'2-digit'});
   fetchData();
 }
 
-// ── FETCH & AGGREGATE (SOURCE OF TRUTH) ────────────────
+// ── FETCH (BÜTÜN YANLIŞ HESAPLAMALAR SİLİNDİ, BACKEND'E BAĞLANDI) ──
 async function fetchData(){
   var period=document.getElementById('currentPeriod')?document.getElementById('currentPeriod').value:'';
   try{
     var res=await fetch(GAS_URL+'?action=getDashboardData&period='+encodeURIComponent(period)+'&t='+Date.now(),{method:'GET',redirect:'follow'});
     var data=await res.json();
     if(data.records){
-      // DÜZELTME: Google Sheets üzerindeki müşteri ismi boş olan (boş satırları) verileri 
-      // yönlendirme olarak saymamak için ön-filtreleme uyguluyoruz.
-      allRecordsData=(data.records||[]).filter(function(r){
-        return r.name && r.name.trim() !== '';
-      }).sort(function(a,b){
+      // 1. Tüm raw veriler grafikleri/kategorileri çizmek için tutulur
+      allRecordsData=(data.records||[]).sort(function(a,b){
         return(b.timestamp?new Date(b.timestamp):0)-(a.timestamp?new Date(a.timestamp):0);
       });
       
-      recalculateAggregations();
-      updateKPIs();
+      // 2. Performans paneli verilerini lokalde hesaplamak YERİNE, doğrudan Google'ın hatasız sonucunu alıyoruz!
+      branchStatsData = data.stats.sort((a,b) => b.totalRevenue - a.totalRevenue);
+      
+      // 3. Özet (KPI) bilgilerini arka plandan gelen tam doğru haliyle güncelliyoruz.
+      updateKPIsFromGlobal(data.global);
+      
+      // 4. Ekrana basma işlemleri
       renderPerformance();
-      
-      var pureSales = allRecordsData.filter(r => {
-        return (r.order||'').toLowerCase().indexOf('evet')>-1 || (r.result||'').toLowerCase().indexOf('satışa döndü')>-1;
-      }).slice(0, 24);
-      renderSales(pureSales);
-      
+      renderSales(data.sales); // Arka planın satış saydığı saf data
       renderDashTopBranches();
+      
       if(currentTab==='dashboard') renderDashCharts();
       if(currentTab==='category'){
         catAnalyticsRendered=true;
@@ -663,85 +631,36 @@ async function fetchData(){
       } else {
         catAnalyticsRendered=false;
       }
+      
+      var el=document.getElementById('lastUpdateTime');
+      if(el) el.textContent=new Date().toLocaleTimeString('tr-TR',{hour:'2-digit',minute:'2-digit', second:'2-digit'});
     }
   }catch(e){
     console.error('Veri çekme hatası:',e);
   }
 }
 
-function recalculateAggregations(){
-  var bMap = {};
-  BRANCHES.forEach(b => bMap[b] = {branch: b, arandi: 0, aranmadi: 0, salesCount: 0, totalRevenue: 0});
+// ── KPIs (DÜZELTİLDİ: SADECE GOOGLE'IN SONUÇLARI KULLANILIYOR) ──
+function updateKPIsFromGlobal(globalData){
+  if(!globalData) return;
+  var fmt = function(n){ return '₺'+new Intl.NumberFormat('tr-TR',{maximumFractionDigits:0}).format(n||0); };
   
-  allRecordsData.forEach(r => {
-    // fetchData içinde zaten boş isimli kayıtları eledik, güvenli işlem devam eder.
-    var b = r.branch || 'Diğer';
-    if(!bMap[b] && BRANCHES.indexOf(b) > -1) { bMap[b] = {branch: b, arandi: 0, aranmadi: 0, salesCount: 0, totalRevenue: 0}; }
-    
-    if(bMap[b]) {
-        if((r.status||'').toLowerCase()==='arandı') bMap[b].arandi++;
-        else bMap[b].aranmadi++;
-        
-        var isSale=(r.order||'').toLowerCase().indexOf('evet')>-1||(r.result||'').toLowerCase().indexOf('satışa döndü')>-1;
-        if(isSale){
-            bMap[b].salesCount++;
-            bMap[b].totalRevenue += parseTurkishFloat(r.amount);
-        }
-    }
-  });
+  document.getElementById('globalTotalRecords').textContent = globalData.totalRecords;
+  document.getElementById('globalTotalAranan').textContent = globalData.totalAranan;
+  document.getElementById('globalTotalSales').textContent = globalData.totalSalesCount;
+  document.getElementById('globalTotalRevenue').textContent = fmt(globalData.totalRevenue);
   
-  branchStatsData = Object.values(bMap).filter(x => BRANCHES.indexOf(x.branch) > -1).sort((a,b) => b.totalRevenue - a.totalRevenue);
-}
+  var avg = globalData.totalSalesCount > 0 ? Math.round(globalData.totalRevenue / globalData.totalSalesCount) : 0;
+  document.getElementById('globalAvgBasket').textContent = fmt(avg);
+  
+  document.getElementById('globalTopVolCat').textContent = globalData.topVolCat || '-';
+  document.getElementById('globalTopVolCount').textContent = (globalData.topVolCount || 0) + ' SATIŞ';
 
-// ── KPIs ──────────────────────────────────────────────
-function updateKPIs(){
-  var totalRecords = allRecordsData.length;
-  var totalAranan = 0;
-  var totalSalesCount = 0;
-  var totalRevenue = 0;
-  var catSalesCounts = {};
-
-  allRecordsData.forEach(r => {
-      var isA=(r.status||'').toLowerCase()==='arandı';
-      if(isA) totalAranan++;
-      
-      var isSale=(r.order||'').toLowerCase().indexOf('evet')>-1||(r.result||'').toLowerCase().indexOf('satışa döndü')>-1;
-      var cat = r.category || 'Diğer';
-
-      if(isSale){
-          totalSalesCount++;
-          totalRevenue += parseTurkishFloat(r.amount);
-          catSalesCounts[cat] = (catSalesCounts[cat] || 0) + 1;
-      }
-  });
-
-  // Bildirim sesi mantığı
-  if (previousSalesCount !== -1 && totalSalesCount > previousSalesCount) {
+  // Bildirim Sesi
+  if (previousSalesCount !== -1 && globalData.totalSalesCount > previousSalesCount) {
       playNotificationSound();
   }
-  previousSalesCount = totalSalesCount;
-
-  var topCatMax = 0, topCatStr = '-';
-  for(var c in catSalesCounts){
-      if(catSalesCounts[c] > topCatMax) { topCatMax = catSalesCounts[c]; topCatStr = c; }
-  }
-
-  var fmt=function(n){return '₺'+new Intl.NumberFormat('tr-TR',{maximumFractionDigits:0}).format(n||0);};
-  
-  document.getElementById('globalTotalRecords').textContent=totalRecords;
-  document.getElementById('globalTotalAranan').textContent=totalAranan;
-  document.getElementById('globalTotalSales').textContent=totalSalesCount;
-  document.getElementById('globalTotalRevenue').textContent=fmt(totalRevenue);
-  
-  var avg=totalSalesCount>0?Math.round(totalRevenue/totalSalesCount):0;
-  var elAvgBasket = document.getElementById('globalAvgBasket');
-  if(elAvgBasket) elAvgBasket.textContent=fmt(avg);
-  
-  var elTopVolCat = document.getElementById('globalTopVolCat');
-  if(elTopVolCat) elTopVolCat.textContent=topCatStr;
-  
-  var elTopVolCount = document.getElementById('globalTopVolCount');
-  if(elTopVolCount) elTopVolCount.textContent=topCatMax+' SATIŞ';
+  previousSalesCount = globalData.totalSalesCount;
 }
 
 // ── DASH CHARTS ───────────────────────────────────────
@@ -803,7 +722,7 @@ function renderDashTopBranches(){
   var fmt=function(n){return '₺'+new Intl.NumberFormat('tr-TR',{maximumFractionDigits:0}).format(n||0);};
   var medal=['#f59e0b','#94a3b8','#cd7f32','#3b82f6','#8b5cf6'];
   el.innerHTML=top5.map(function(s,i){
-    var pct=Math.round(s.totalRevenue/maxR*100);
+    var pct=Math.round((s.totalRevenue/maxR)*100);
     var clean=s.branch.replace(/ Şubesi/gi,'');
     return '<div style="display:flex;align-items:center;gap:1rem;padding:.75rem 0;border-bottom:1px solid '+(i===top5.length-1?'transparent':'var(--border)')+'">'
       +'<div style="width:24px;height:24px;border-radius:6px;background:'+medal[i]+'22;color:'+medal[i]+';display:flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:800;font-family:monospace">#'+(i+1)+'</div>'
@@ -825,8 +744,12 @@ function buildCatStats(){
     var cat=r.category||'Diğer';
     if(!catStats[cat]) catStats[cat]={volume:0,sales:0,revenue:0};
     catStats[cat].volume++;
-    var isSale=(r.order||'').toLowerCase().indexOf('evet')>-1||(r.result||'').toLowerCase().indexOf('satışa döndü')>-1;
-    if(isSale){catStats[cat].sales++;catStats[cat].revenue+=parseTurkishFloat(r.amount);}
+    
+    // Güçlendirilmiş Satış Kontrolü
+    if(isRecordSale(r)){
+      catStats[cat].sales++;
+      catStats[cat].revenue+=parseTurkishFloat(r.amount);
+    }
   });
   return Object.entries(catStats).filter(function(e){return e[1].volume>0;}).sort(function(a,b){return b[1].volume-a[1].volume;});
 }
@@ -982,10 +905,7 @@ function renderPerformance(){
   var fmt=function(n){return '₺'+new Intl.NumberFormat('tr-TR',{maximumFractionDigits:0}).format(n||0);};
   body.innerHTML=stats.map(function(s,i){
     var clean=s.branch.replace(/ Şubesi/gi,'');
-    
-    // DÜZELTME: Dönüşüm oranını satış adedi / toplam iletilen (arandı + aranmadı) müşteri sayısına göre hesaplıyoruz.
-    var total = (s.arandi || 0) + (s.aranmadi || 0);
-    var conv = total > 0 ? ((s.salesCount || 0) / total * 100).toFixed(1) : 0;
+    var conv=s.arandi>0?((s.salesCount||0)/s.arandi*100).toFixed(1):0;
     var cc=parseFloat(conv)>20?'#059669':parseFloat(conv)>10?'#d97706':'#ef4444';
     
     var borderStyle = i === 0 ? 'border-left: 6px solid #f59e0b;' : i === 1 ? 'border-left: 6px solid #94a3b8;' : i === 2 ? 'border-left: 6px solid #f97316;' : 'border-left: 6px solid transparent;';
@@ -1003,18 +923,16 @@ function renderPerformance(){
 function openBranchDetails(branchName){
   var stat=branchStatsData.find(function(s){return s.branch===branchName;});
   if(!stat) return;
-  var recs=allRecordsData.filter(function(r){return r.branch===branchName&&((r.result||'').toLowerCase().indexOf('satışa döndü')>-1||(r.order||'').toLowerCase().indexOf('evet')>-1);});
+  
+  var recs=allRecordsData.filter(function(r){return r.branch===branchName && isRecordSale(r);});
+  
   var catC={};
   recs.forEach(function(r){var c=r.category||'Diğer';catC[c]=(catC[c]||0)+1;});
   var top4=Object.entries(catC).sort(function(a,b){return b[1]-a[1];}).slice(0,4);
   document.getElementById('modalBranchTitle').textContent=branchName;
   document.getElementById('detailTotalCalls').textContent=stat.arandi;
   document.getElementById('detailSalesCount').textContent=stat.salesCount||0;
-  
-  // DÜZELTME: Detay modalındaki dönüşüm oranını toplam iletilen müşteri sayısına (arandı + aranmadı) göre hesaplıyoruz.
-  var total = (stat.arandi || 0) + (stat.aranmadi || 0);
-  var conv = total > 0 ? ((stat.salesCount || 0) / total * 100).toFixed(1) : 0;
-  
+  var conv=stat.arandi>0?((stat.salesCount||0)/stat.arandi*100).toFixed(1):0;
   document.getElementById('detailConversion').textContent='%'+conv;
   var c=document.getElementById('detailTopCategories');
   c.innerHTML=top4.length?top4.map(function(entry,i){
@@ -1035,7 +953,7 @@ function renderSales(sales){
   var c=document.getElementById('latestSalesContainer');
   if(!c) return;
   if(!sales||!sales.length){c.innerHTML='<div style="text-align:center;color:var(--text3);padding:3rem;grid-column:1/-1; font-weight:600;">Bu dönem için satış kaydı bulunamadı.</div>';return;}
-  var fmt=function(n){return '₺'+new Intl.NumberFormat('tr-TR',{maximumFractionDigits:0}).format(n||0);};
+  var fmt=function(n){return '\u20ba'+new Intl.NumberFormat('tr-TR',{maximumFractionDigits:0}).format(n||0);};
   c.innerHTML=sales.map(function(s){
     var clean=s.branch.replace(/ \u015eubesi/gi,'');
     var ds='';
@@ -1064,7 +982,7 @@ function exportPDF(){
   var period=document.getElementById('currentPeriod')?document.getElementById('currentPeriod').value:'';
   var now=new Date();
   var dateStr=now.toLocaleDateString('tr-TR',{day:'2-digit',month:'2-digit',year:'numeric'});
-  var TL='₺';
+  var TL='\u20ba';
   var fmt=function(n){return TL+new Intl.NumberFormat('tr-TR',{maximumFractionDigits:0}).format(n||0);};
 
   var kpiData=[
@@ -1077,9 +995,7 @@ function exportPDF(){
   var branchHTML=branchStatsData.map(function(s,i){
     var clean=s.branch.replace(/ \u015eubesi/gi,'');
     var total=(s.arandi||0)+(s.aranmadi||0);
-    
-    // DÜZELTME: PDF Raporundaki dönüşüm oranını toplam iletilen müşteri sayısına göre güncelledik.
-    var conv=total>0?((s.salesCount||0)/total*100).toFixed(1):0;
+    var conv=s.arandi>0?((s.salesCount||0)/s.arandi*100).toFixed(1):0;
     var convColor=parseFloat(conv)>20?'#059669':parseFloat(conv)>10?'#d97706':'#ef4444';
     var bg=i%2===0?'#ffffff':'#f8fafc';
     return '<tr style="background:'+bg+'">'
@@ -1196,10 +1112,7 @@ function exportPDF(){
     +'</div></body></html>';
 
   var win=window.open('','_blank','width=1100,height=900');
-  if(!win){
-    showToast('Lütfen tarayıcınızın popup engelleyicisini kapatıp tekrar deneyin.', 'warning');
-    return;
-  }
+  if(!win){alert('Lütfen popup engelleyiciyi kapatın ve tekrar deneyin.');return;}
   win.document.open();
   win.document.write(html);
   win.document.close();
@@ -1239,71 +1152,23 @@ async function submitAllRows(){
     if(!branch||!name){err=true;return;}
     var parts=dv.split('T'),dp=parts[0],tp=parts[1];
     var dp2=dp.split('-');
-    data.push({
-      date:dp2[2]+'.'+dp2[1]+'.'+dp2[0]+' '+tp,
-      branch:branch,
-      name:name,
-      contact:row.querySelector('.inp-contact').value,
-      media:row.querySelector('.inp-media').value,
-      category:row.querySelector('.inp-category').value,
-      product:row.querySelector('.inp-product').value,
-      status:row.querySelector('.inp-status').value.toLocaleLowerCase('tr-TR')
-    });
+    data.push({date:dp2[2]+'.'+dp2[1]+'.'+dp2[0]+' '+tp,branch:branch,name:name,
+      contact:row.querySelector('.inp-contact').value,media:row.querySelector('.inp-media').value,
+      category:row.querySelector('.inp-category').value,product:row.querySelector('.inp-product').value,
+      status:row.querySelector('.inp-status').value.toLocaleLowerCase('tr-TR')});
   });
-  
-  if(err) {
-    showToast('Lütfen işaretli alanları (Şube ve Müşteri Adı) doldurun.', 'error');
-    return;
-  }
+  if(err) return alert('Lütfen işaretli alanları (Şube ve Müşteri Adı) doldurun.');
   if(!data.length) return;
-  
-  // PAŞABAHÇE KONTROLÜ (Gecikmeli yazma tespiti için)
-  var containsPasabahce = data.some(function(item) {
-    return item.branch.indexOf("Paşabahçe") > -1;
-  });
-  
   var btn=document.getElementById('submitBtn'),orig=btn.innerHTML;
   btn.innerHTML='<span class="loader" style="border-top-color:#fff;width:18px;height:18px;margin-right:8px;"></span> Kaydediliyor...';
   btn.disabled=true;
-  
   try{
-    var response = await fetch(GAS_URL, {
-      method: 'POST',
-      mode: 'cors',
-      redirect: 'follow',
-      headers: {
-        'Content-Type': 'text/plain;charset=utf-8'
-      },
-      body: JSON.stringify({action: 'addCustomersBulk', data: data})
-    });
-    
-    var resData = await response.json();
-    if(resData && resData.status === 'success') {
-      showToast('Kayıtlar başarıyla Google Sheets veritabanına kaydedildi.', 'success');
-      document.getElementById('inputContainer').innerHTML='';
-      addInputRow();
-      refreshData();
-    } else {
-      throw new Error('Yanıt başarısız oldu');
-    }
-  }catch(e){
-    console.error('Kayıt gönderme hatası:', e);
-    
-    if(containsPasabahce) {
-      showToast('Kayıt İşlemi Başarılı! (Paşabahçe Şubesi veri tabanı yavaş yanıt verdi ancak kayıt başarıyla yazıldı).', 'success', 8000);
-      document.getElementById('inputContainer').innerHTML='';
-      addInputRow();
-      refreshData();
-    } else {
-      showToast('Kayıt gönderildi! Veritabanı yanıt süresi nedeniyle senkronizasyon gecikmeli yansıyabilir.', 'info', 8000);
-      document.getElementById('inputContainer').innerHTML='';
-      addInputRow();
-      refreshData();
-    }
-  } finally{
-    btn.innerHTML=orig;
-    btn.disabled=false;
-  }
+    await fetch(GAS_URL,{method:'POST',body:JSON.stringify({action:'addCustomersBulk',data:data})});
+    document.getElementById('inputContainer').innerHTML='';
+    addInputRow();
+    refreshData();
+  }catch(e){alert('Bağlantı hatası oluştu.');}
+  finally{btn.innerHTML=orig;btn.disabled=false;}
 }
 </script>
 </body>
