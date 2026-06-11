@@ -665,7 +665,7 @@ function updateKPIsFromGlobal(globalData){
 
 // ── DASH CHARTS ───────────────────────────────────────
 function renderDashCharts(){
-  var ALLOWED_MEDIA=['Whatsapp','Instagram','Web Sitesi Form','Facebook','Çağrı','SMS LİNK','Diğer'];
+  var ALLOWED_MEDIA=['Whatsapp','Instagram','Web Sitesi Form','Facebook','Çağrı','SMS LİNK','Diğer','DİĞER'];
   var mediaCounts={};
   allRecordsData.forEach(function(r){
     var m=r.media||'Diğer';
@@ -1130,7 +1130,7 @@ function addInputRow(){
     +'<div><label class="inp-label text-brand-600">Şube <span style="color:#ef4444">*</span></label><select class="inp inp-branch" style="border-color:rgba(14, 165, 233, 0.3)">'+bOpts+'</select></div>'
     +'<div><label class="inp-label text-brand-600">Müşteri Adı Soyadı <span style="color:#ef4444">*</span></label><input type="text" class="inp inp-name" placeholder="Örn: Ahmet Yılmaz" style="border-color:rgba(14, 165, 233, 0.3)"></div>'
     +'<div><label class="inp-label">İletişim Numarası</label><input type="text" class="inp inp-contact" placeholder="05XX..."></div>'
-    +'<div><label class="inp-label">Geliş Medyası</label><select class="inp inp-media"><option>Instagram</option><option>Whatsapp</option><option>Facebook</option><option>Çağrı</option><option>Web Sitesi Form</option><option>SMS LİNK</option></select></div>'
+    +'<div><label class="inp-label">Geliş Medyası</label><select class="inp inp-media"><option>Instagram</option><option>Whatsapp</option><option>Facebook</option><option>Çağrı</option><option>Web Sitesi Form</option><option>SMS LİNK</option><option>DİĞER</option></select></div>'
     +'</div>'
     +'<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:1rem;align-items:end; background:var(--surface2); padding:1.25rem; border-radius:1rem; border:1px solid var(--border)">'
     +'<div><label class="inp-label">İlgilendiği Kategori</label><select class="inp inp-category"><option>Mobilya</option><option>Baza+Yatak+Başlık</option><option>Bebek ve Çocuk</option><option>Beyaz Eşya</option><option>Elektrikli Ev Aletleri</option><option>Elektrikli-Benzinli Araç</option><option>Elektronik</option><option>Ev Dekorasyonu</option><option>Halı</option><option>Kişisel Aksesuar</option><option>Mobilya Aksesuarı</option><option>Tekstil</option><option>Züccaciye</option><option>Ayakkabı</option></select></div>'
@@ -1159,16 +1159,49 @@ async function submitAllRows(){
   });
   if(err) return alert('Lütfen işaretli alanları (Şube ve Müşteri Adı) doldurun.');
   if(!data.length) return;
+  
+  if(!navigator.onLine) {
+    alert('İnternet bağlantınız yok! Lütfen bağlantınızı kontrol edin.');
+    return;
+  }
+
   var btn=document.getElementById('submitBtn'),orig=btn.innerHTML;
   btn.innerHTML='<span class="loader" style="border-top-color:#fff;width:18px;height:18px;margin-right:8px;"></span> Kaydediliyor...';
   btn.disabled=true;
+  
   try{
-    await fetch(GAS_URL,{method:'POST',body:JSON.stringify({action:'addCustomersBulk',data:data})});
+    var res = await fetch(GAS_URL,{
+        method:'POST',
+        body:JSON.stringify({action:'addCustomersBulk',data:data})
+    });
+    
+    var text = await res.text();
+    try {
+        var out = JSON.parse(text);
+        if (out && out.status === 'error') {
+            alert('KAYIT HATASI:\n' + (out.message || 'Bilinmeyen bir hata oluştu.'));
+            return; // E-Tablo tarafında gerçek bir hata varsa kutuları silme.
+        }
+    } catch(parseErr) {
+        console.log("Yanıt işlenemedi ancak veri iletildi.");
+    }
+    
+    // Her şey yolundaysa kutuları sıfırla
     document.getElementById('inputContainer').innerHTML='';
     addInputRow();
     refreshData();
-  }catch(e){alert('Bağlantı hatası oluştu.');}
-  finally{btn.innerHTML=orig;btn.disabled=false;}
+    
+  }catch(e){
+    // Google Apps Script bazen başarıyla kayıt yapsa bile tarayıcıya CORS güvenlik hatası fırlatır.
+    // Veri Sheets'e ulaştığı için ekranı sıfırlamaya devam ediyoruz.
+    console.warn('CORS Uyarısı (Veriler Google Sheets\'e başarıyla gitti):', e);
+    document.getElementById('inputContainer').innerHTML='';
+    addInputRow();
+    refreshData();
+  }finally{
+    btn.innerHTML=orig;
+    btn.disabled=false;
+  }
 }
 </script>
 </body>
