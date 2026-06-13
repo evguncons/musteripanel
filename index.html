@@ -470,6 +470,18 @@ body.dark .theme-toggle .knob{transform:translateX(20px)}
   </div>
 </div>
 
+<!-- ÖZEL HATA / UYARI MODALI -->
+<div id="warningModal" class="modal-bg" style="z-index: 9999;">
+  <div class="modal-content" style="background:var(--card-bg);border:2px solid #ef4444;border-radius:1.5rem;width:100%;max-width:420px;text-align:center;box-shadow:var(--shadow-md); padding:2rem;">
+    <div style="width:64px;height:64px;background:rgba(239, 68, 68, 0.1);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 1.2rem;">
+      <i class="fas fa-exclamation-triangle" style="color:#ef4444;font-size:2rem"></i>
+    </div>
+    <h3 style="font-size:1.3rem;font-weight:800;color:var(--text);margin-bottom:.5rem; letter-spacing:-0.02em;" id="warningTitle">Uyarı</h3>
+    <p style="font-size:.95rem;color:var(--text2);margin-bottom:1.8rem;line-height:1.6;white-space:pre-line; font-weight:500;" id="warningMessage"></p>
+    <button onclick="document.getElementById('warningModal').classList.remove('show')" class="btn btn-danger" style="width:100%; border-radius:1rem; height:50px; font-size:1.05rem;">Tamam, Anladım</button>
+  </div>
+</div>
+
 <script>
 // BÜTÜN KODLAR BURANIN İÇİNDE OLMALI
 const GAS_URL='https://script.google.com/macros/s/AKfycbwRSKYdXIHm2A6uts8MJE0v6snp3rsSVm4Qk5yQRd9chXtGoMUCQGXZ37X05QUJY2Aq/exec';
@@ -492,6 +504,13 @@ var currentTab='entry';
 var catAnalyticsRendered=false;
 var previousSalesCount = -1; // Bildirim sesi için satış adedi takibi
 
+// ── ÖZEL UYARI MODALI GÖSTERİCİ ──
+function showWarning(title, message) {
+    document.getElementById('warningTitle').textContent = title;
+    document.getElementById('warningMessage').textContent = message;
+    document.getElementById('warningModal').classList.add('show');
+}
+
 // ── UTILS (GELİŞMİŞ PARSE & SATIŞ KONTROLÜ) ─────────────
 function parseTurkishFloat(val) {
   if (!val) return 0;
@@ -506,6 +525,13 @@ function parseTurkishFloat(val) {
   }
   var f = parseFloat(s);
   return isNaN(f) ? 0 : f;
+}
+
+// SPAM KONTROLÜ İÇİN ÖZEL NUMARA FORMATLAMA
+function getCompareNum(str) {
+    var s = String(str || '').replace(/\D/g, ''); // Sadece rakamları bırak (boşluk,+90 vb silinir)
+    // Standart telefon numaralarından en garanti son 10 haneyi al (0535... ile 535... eşleşsin diye)
+    return s.length >= 10 ? s.slice(-10) : s;
 }
 
 // Lokal hesaplamalar için arka plandaki ile BİREBİR aynı Satış Kriteri
@@ -602,7 +628,7 @@ function refreshData(){
   fetchData();
 }
 
-// ── FETCH (BÜTÜN YANLIŞ HESAPLAMALAR SİLİNDİ, BACKEND'E BAĞLANDI) ──
+// ── FETCH ──────────────────────────────────────────────
 async function fetchData(){
   var period=document.getElementById('currentPeriod')?document.getElementById('currentPeriod').value:'';
   try{
@@ -636,7 +662,7 @@ async function fetchData(){
   }
 }
 
-// ── KPIs (DÜZELTİLDİ: SADECE GOOGLE'IN SONUÇLARI KULLANILIYOR) ──
+// ── KPIs ──────────────────────────────────────────────
 function updateKPIsFromGlobal(globalData){
   if(!globalData) return;
   var fmt = function(n){ return '₺'+new Intl.NumberFormat('tr-TR',{maximumFractionDigits:0}).format(n||0); };
@@ -1106,7 +1132,7 @@ function exportPDF(){
     +'</div></body></html>';
 
   var win=window.open('','_blank','width=1100,height=900');
-  if(!win){alert('Lütfen popup engelleyiciyi kapatın ve tekrar deneyin.');return;}
+  if(!win){showWarning('Hata','Lütfen popup engelleyiciyi kapatın ve tekrar deneyin.');return;}
   win.document.open();
   win.document.write(html);
   win.document.close();
@@ -1137,26 +1163,65 @@ function addInputRow(){
 
 async function submitAllRows(){
   var rows=document.querySelectorAll('#inputContainer > .entry-card');
-  var data=[],err=false;
-  rows.forEach(function(row){
+  var data=[];
+  var hasEmptyError=false;
+  var hasSpamError=false;
+  var currentSubmissions=[];
+
+  for(var i=0; i<rows.length; i++){
+    var row = rows[i];
     var branch=row.querySelector('.inp-branch').value;
     var name=row.querySelector('.inp-name').value.trim();
+    var contact=row.querySelector('.inp-contact').value;
     var dv=row.querySelector('input[type="datetime-local"]').value;
+    
     row.classList.toggle('error',!branch||!name);
-    if(!branch||!name){err=true;return;}
+    if(!branch||!name){hasEmptyError=true; continue;}
+    
+    // --- GELİŞMİŞ SPAM KONTROLÜ (ÖN YÜZ) ---
+    var compContact = getCompareNum(contact);
+
+    if (compContact.length >= 7) {
+       // Aynı formda iki kere aynı numara girilmiş mi?
+       if (currentSubmissions.indexOf(compContact) > -1) {
+          showWarning('🚫 Spam Engeli', contact + ' numarasını tek formda birden fazla kez girmeye çalışıyorsunuz.');
+          hasSpamError = true;
+          row.classList.add('error');
+          break;
+       }
+       currentSubmissions.push(compContact);
+       
+       // E-Tabloda (O Ay İçinde) bu numara kayıtlı mı?
+       var exists = allRecordsData.find(function(r){
+          return getCompareNum(r.contact) === compContact;
+       });
+       
+       if(exists) {
+          showWarning('🚫 Mükerrer Kayıt', name + ' (' + contact + ') numaralı müşteri bu ay sistemde zaten kayıtlı!\n\nKayıtlı Şube: ' + exists.branch + '\nİşlem Tarihi: ' + (exists.date || 'Bilinmiyor'));
+          hasSpamError = true;
+          row.classList.add('error');
+          break;
+       }
+    }
+    // ------------------------------
+
     var parts=dv.split('T'),dp=parts[0],tp=parts[1];
     var dp2=dp.split('-');
     data.push({date:dp2[2]+'.'+dp2[1]+'.'+dp2[0]+' '+tp,branch:branch,name:name,
-      contact:row.querySelector('.inp-contact').value,media:row.querySelector('.inp-media').value,
+      contact:contact,media:row.querySelector('.inp-media').value,
       category:row.querySelector('.inp-category').value,product:row.querySelector('.inp-product').value,
       status:row.querySelector('.inp-status').value.toLocaleLowerCase('tr-TR')});
-  });
+  }
   
-  if(err) return alert('Lütfen işaretli alanları (Şube ve Müşteri Adı) doldurun.');
+  if(hasSpamError) return; // Spam varsa iptal et
+  if(hasEmptyError) {
+      showWarning('Eksik Bilgi', 'Lütfen işaretli alanları (Şube ve Müşteri Adı) doldurun.');
+      return;
+  }
   if(!data.length) return;
   
   if(!navigator.onLine) {
-    alert('İnternet bağlantınız yok! Lütfen bağlantınızı kontrol edin.');
+    showWarning('Bağlantı Hatası', 'İnternet bağlantınız yok! Lütfen bağlantınızı kontrol edin.');
     return;
   }
 
@@ -1174,7 +1239,7 @@ async function submitAllRows(){
     try {
         var out = JSON.parse(text);
         if (out && out.status === 'error') {
-            alert('KAYIT HATASI:\n' + (out.message || 'Bilinmeyen bir hata oluştu.'));
+            showWarning('Kayıt Hatası', out.message || 'Bilinmeyen bir hata oluştu.');
             return; 
         }
     } catch(parseErr) {
