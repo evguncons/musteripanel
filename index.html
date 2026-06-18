@@ -1225,6 +1225,41 @@ function exportPDF(){
 
 // ── ENTRY ──────────────────────────────────────────────
 function getTodayDT(){var n=new Date();return new Date(n.getTime()-n.getTimezoneOffset()*60000).toISOString().slice(0,16);}
+
+// ── ANLIK MÜKERRER KONTROLÜ (YENİ EKLENDİ) ──
+function checkDuplicatePhone(inputEl) {
+    var contact = inputEl.value;
+    var compContact = getCompareNum(contact);
+
+    if (compContact.length >= 7) {
+        // E-Tabloda (O Ay İçinde) bu numara kayıtlı mı?
+        var exists = allRecordsData.find(function(r){
+            return getCompareNum(r.contact) === compContact;
+        });
+        
+        if(exists) {
+            showWarning('🚫 Mükerrer Kayıt', 'Bu numara sistemde zaten kayıtlı!\n\nKayıtlı Müşteri: ' + (exists.name || 'Bilinmiyor') + '\nKayıtlı Şube: ' + exists.branch + '\nİşlem Tarihi: ' + (exists.date || 'Bilinmiyor'));
+            inputEl.value = ''; // Hatalı numarayı temizle
+            inputEl.closest('.entry-card').classList.add('error');
+            setTimeout(() => inputEl.closest('.entry-card').classList.remove('error'), 600);
+            return;
+        }
+
+        // Aynı ekranda birden fazla kez aynı numarayı yazdı mı?
+        var allContacts = document.querySelectorAll('.inp-contact');
+        var matchCount = 0;
+        allContacts.forEach(function(el) {
+            if (getCompareNum(el.value) === compContact) matchCount++;
+        });
+        if (matchCount > 1) {
+            showWarning('🚫 Spam Engeli', 'Bu numarayı aynı form ekranında birden fazla satıra girdiniz!');
+            inputEl.value = ''; // Hatalı numarayı temizle
+            inputEl.closest('.entry-card').classList.add('error');
+            setTimeout(() => inputEl.closest('.entry-card').classList.remove('error'), 600);
+        }
+    }
+}
+
 function addInputRow(){
   var c=document.getElementById('inputContainer');
   if(!c) return;
@@ -1234,7 +1269,7 @@ function addInputRow(){
     +'<div><label class="inp-label">Tarih & Saat</label><input type="datetime-local" class="inp" value="'+getTodayDT()+'"></div>'
     +'<div><label class="inp-label text-brand-600">Şube <span style="color:#ef4444">*</span></label><select class="inp inp-branch" style="border-color:rgba(14, 165, 233, 0.3)">'+bOpts+'</select></div>'
     +'<div><label class="inp-label text-brand-600">Müşteri Adı Soyadı <span style="color:#ef4444">*</span></label><input type="text" class="inp inp-name" placeholder="Örn: Ahmet Yılmaz" style="border-color:rgba(14, 165, 233, 0.3)"></div>'
-    +'<div><label class="inp-label">İletişim Numarası</label><input type="text" class="inp inp-contact" placeholder="05XX..."></div>'
+    +'<div><label class="inp-label">İletişim Numarası</label><input type="text" class="inp inp-contact" placeholder="05XX..." onchange="checkDuplicatePhone(this)"></div>'
     +'<div><label class="inp-label">Geliş Medyası</label><select class="inp inp-media"><option>Instagram</option><option>Whatsapp</option><option>Facebook</option><option>Çağrı</option><option>Web Sitesi Form</option><option>SMS LİNK</option></select></div>'
     +'</div>'
     +'<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:1rem;align-items:end; background:var(--surface2); padding:1.25rem; border-radius:1rem; border:1px solid var(--border)">'
