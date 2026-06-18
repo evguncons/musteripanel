@@ -82,6 +82,7 @@ body{background:var(--bg);color:var(--text);font-family:'Plus Jakarta Sans',sans
 select.inp{appearance:none;line-height:1.5;background-image:url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%2364748b' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");background-position:right .75rem center;background-repeat:no-repeat;background-size:1.1em;cursor:pointer}
 
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:.5rem;padding:.6rem 1.4rem;font-weight:700;font-size:.95rem;border-radius:.875rem;transition:all .25s ease;cursor:pointer;height:44px;border:none;font-family:'Plus Jakarta Sans',sans-serif;white-space:nowrap}
+.btn:disabled{opacity:0.5;cursor:not-allowed;pointer-events:none;}
 .btn-primary{background:linear-gradient(135deg,#0ea5e9,#0284c7);color:#fff;box-shadow:0 4px 12px rgba(14,165,233,.25)}
 .btn-primary:hover{background:linear-gradient(135deg,#0284c7,#0369a1);transform:translateY(-2px);box-shadow:0 6px 16px rgba(14,165,233,.35)}
 .btn-ghost{background:var(--card-bg);color:var(--text2);border:1px solid var(--border)}
@@ -266,7 +267,7 @@ body.dark .theme-toggle .knob{transform:translateX(20px)}
       <div class="nav-tab active" onclick="switchTab('entry')" id="tab-entry"><i class="fas fa-user-plus"></i> Müşteri Kayıt</div>
       <div class="nav-tab" onclick="switchTab('category')" id="tab-category"><i class="fas fa-tags"></i> Kategori Analizi</div>
       <div class="nav-tab" onclick="switchTab('performance')" id="tab-performance"><i class="fas fa-trophy"></i> Performans</div>
-      <div class="nav-tab" onclick="switchTab('sales')" id="tab-sales"><i class="fas fa-shopping-bag"></i> Son Satışlar</div>
+      <div class="nav-tab" onclick="switchTab('sales')" id="tab-sales"><i class="fas fa-shopping-bag"></i> Satışa Dönenler</div>
     </div>
   </header>
 
@@ -428,18 +429,42 @@ body.dark .theme-toggle .knob{transform:translateX(20px)}
     <div id="branchStatsBody"><div style="display:flex;justify-content:center;padding:4rem"><div class="loader"></div></div></div>
   </div>
 
-  <!-- ══ SALES ══ -->
+  <!-- ══ SALES (Filtreli ve Sayfalamalı) ══ -->
   <div id="view-sales" class="tab-content">
-    <div class="card" style="overflow:hidden;border-top:4px solid #10b981">
+    <div class="card" style="display:flex;flex-direction:column;min-height:600px;border-top:4px solid #10b981">
       <div class="sec-header" style="justify-content:space-between; background:var(--surface2)">
         <div style="display:flex;align-items:center;gap:.75rem">
           <div class="sec-icon" style="background:rgba(16, 185, 129, 0.1);color:#059669"><i class="fas fa-shopping-bag text-xl"></i></div>
-          <div><div style="font-size:1.1rem;font-weight:800;color:var(--text)">Canlı Satış Akışı</div><div style="font-size:.75rem;font-weight:600;color:var(--text3)">Sistemdeki son 24 başarılı satış</div></div>
+          <div><div style="font-size:1.1rem;font-weight:800;color:var(--text)">Satışa Dönenler</div><div style="font-size:.75rem;font-weight:600;color:var(--text3)">Tüm başarılı satış kayıtları</div></div>
         </div>
-        <div style="display:flex;align-items:center;gap:.5rem;background:rgba(16, 185, 129, 0.15);color:#059669;padding:.4rem 1rem;border-radius:.75rem;font-size:.75rem;font-weight:800; box-shadow:var(--shadow-sm)"><div class="pulse" style="background:#059669"></div> CANLI AKIŞ</div>
+        <div style="display:flex;align-items:center;gap:.75rem;">
+          <select id="salesBranchFilter" class="inp" style="height:38px; padding:0.2rem 2.2rem 0.2rem 1rem; font-size:0.85rem; width:auto; border-radius:0.75rem;" onchange="salesCurrentPage=1; updateSalesView();">
+            <option value="all">Tüm Şubeler</option>
+          </select>
+        </div>
       </div>
-      <div id="latestSalesContainer" style="padding:1.5rem;display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:1.25rem;max-height:800px;overflow-y:auto; background:var(--card-bg);">
+      
+      <!-- İstatistik Satırı -->
+      <div style="display:flex; gap:2rem; padding: 1rem 1.5rem; background: var(--surface); border-bottom: 1px solid var(--border);">
+         <div>
+            <div style="font-size:0.7rem; font-weight:800; color:var(--text3); text-transform:uppercase; margin-bottom:0.2rem;">Filtrelenen Satış</div>
+            <div id="salesFilterCount" style="font-size:1.5rem; font-weight:800; color:#10b981; line-height:1;">0 <span style="font-size:0.8rem; color:var(--text3)">ADET</span></div>
+         </div>
+         <div>
+            <div style="font-size:0.7rem; font-weight:800; color:var(--text3); text-transform:uppercase; margin-bottom:0.2rem;">Filtrelenen Ciro</div>
+            <div id="salesFilterRevenue" style="font-size:1.5rem; font-weight:800; color:var(--text); line-height:1; font-family:monospace;">₺0</div>
+         </div>
+      </div>
+
+      <div id="latestSalesContainer" style="padding:1.5rem;display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:1.25rem; background:var(--card-bg);">
         <div style="display:flex;justify-content:center;padding:4rem;grid-column:1/-1"><div class="loader"></div></div>
+      </div>
+      
+      <!-- Sayfalama (Pagination) -->
+      <div style="padding:1rem 1.5rem; border-top:1px solid var(--border); display:flex; justify-content:space-between; align-items:center; margin-top:auto; background:var(--surface2);">
+         <button class="btn btn-ghost btn-sm" id="btnPrevPage" onclick="changeSalesPage(-1)"><i class="fas fa-chevron-left mr-1"></i> Önceki</button>
+         <div style="font-size:0.85rem; font-weight:800; color:var(--text2); font-family:monospace;" id="salesPageIndicator">Sayfa 1 / 1</div>
+         <button class="btn btn-ghost btn-sm" id="btnNextPage" onclick="changeSalesPage(1)">Sonraki <i class="fas fa-chevron-right ml-1"></i></button>
       </div>
     </div>
   </div>
@@ -502,7 +527,12 @@ function toggleTheme(){
 var allRecordsData=[], branchStatsData=[];
 var currentTab='entry';
 var catAnalyticsRendered=false;
-var previousSalesCount = -1; // Bildirim sesi için satış adedi takibi
+var previousSalesCount = -1;
+
+// Satış Sayfalaması için Değişkenler
+var salesCurrentPage = 1;
+var salesItemsPerPage = 12;
+var allSalesFiltered = [];
 
 // ── ÖZEL UYARI MODALI GÖSTERİCİ ──
 function showWarning(title, message) {
@@ -511,12 +541,12 @@ function showWarning(title, message) {
     document.getElementById('warningModal').classList.add('show');
 }
 
-// ── UTILS (GELİŞMİŞ PARSE & SATIŞ KONTROLÜ) ─────────────
+// ── UTILS ─────────────
 function parseTurkishFloat(val) {
   if (!val) return 0;
   if (typeof val === 'number') return val;
   var s = String(val).trim();
-  s = s.replace(/[^\d,.-]/g, ''); // Harfleri/₺ işaretini sil
+  s = s.replace(/[^\d,.-]/g, ''); 
   if (s.includes(',') && s.includes('.')) {
     if (s.lastIndexOf(',') > s.lastIndexOf('.')) s = s.replace(/\./g, '').replace(',', '.');
     else s = s.replace(/,/g, '');
@@ -527,14 +557,11 @@ function parseTurkishFloat(val) {
   return isNaN(f) ? 0 : f;
 }
 
-// SPAM KONTROLÜ İÇİN ÖZEL NUMARA FORMATLAMA
 function getCompareNum(str) {
-    var s = String(str || '').replace(/\D/g, ''); // Sadece rakamları bırak (boşluk,+90 vb silinir)
-    // Standart telefon numaralarından en garanti son 10 haneyi al (0535... ile 535... eşleşsin diye)
+    var s = String(str || '').replace(/\D/g, ''); 
     return s.length >= 10 ? s.slice(-10) : s;
 }
 
-// Lokal hesaplamalar için arka plandaki ile BİREBİR aynı Satış Kriteri
 function isRecordSale(r) {
   var amt = parseTurkishFloat(r.amount);
   var res = (r.result||'').toLowerCase();
@@ -573,9 +600,9 @@ function doLogin(){
         document.getElementById('loginScreen').style.display='none';
         document.getElementById('mainApp').style.display='block';
         populatePeriodSelector();
+        populateSalesBranchFilter();
         addInputRow();
         fetchData();
-        // 5 SANİYEDE BİR OTOMATİK GÜNCELLEME
         setInterval(fetchData, 5000);
     }, 400);
   } else {
@@ -622,6 +649,19 @@ function populatePeriodSelector(){
     s.appendChild(o);
   }
 }
+
+function populateSalesBranchFilter() {
+    var sel = document.getElementById('salesBranchFilter');
+    if (!sel) return;
+    var currVal = sel.value;
+    var html = '<option value="all">Tüm Şubeler</option>';
+    BRANCHES.forEach(function(b) {
+        html += '<option value="'+b+'">'+b.replace(/ Şubesi/gi, '')+'</option>';
+    });
+    sel.innerHTML = html;
+    if(currVal) sel.value = currVal;
+}
+
 function refreshData(){
   var el=document.getElementById('lastUpdateTime');
   if(el) el.textContent=new Date().toLocaleTimeString('tr-TR',{hour:'2-digit',minute:'2-digit', second:'2-digit'});
@@ -643,7 +683,7 @@ async function fetchData(){
       updateKPIsFromGlobal(data.global);
       
       renderPerformance();
-      renderSales(data.sales);
+      updateSalesView(); // Yeni filtrelenmiş satış sistemini tetikler
       renderDashTopBranches();
       
       if(currentTab==='dashboard') renderDashCharts();
@@ -968,33 +1008,78 @@ function openBranchDetails(branchName){
   modal.classList.add('show');
 }
 
-// ── SALES ──────────────────────────────────────────────
-function renderSales(sales){
-  var c=document.getElementById('latestSalesContainer');
-  if(!c) return;
-  if(!sales||!sales.length){c.innerHTML='<div style="text-align:center;color:var(--text3);padding:3rem;grid-column:1/-1; font-weight:600;">Bu dönem için satış kaydı bulunamadı.</div>';return;}
-  var fmt=function(n){return '\u20ba'+new Intl.NumberFormat('tr-TR',{maximumFractionDigits:0}).format(n||0);};
-  c.innerHTML=sales.map(function(s){
-    var clean=s.branch.replace(/ \u015eubesi/gi,'');
-    var ds='';
-    if(s.timestamp){var d=new Date(s.timestamp);if(!isNaN(d)) ds=d.toLocaleDateString('tr-TR',{day:'numeric',month:'short'})+' '+d.toLocaleTimeString('tr-TR',{hour:'2-digit',minute:'2-digit'});}
-    var prod=(s.product||s.category||'');
-    var finalAmount = parseTurkishFloat(s.amount);
-    return '<div style="background:var(--card-bg);border:1px solid var(--border);border-top:3px solid #10b981;border-radius:1rem;padding:1.5rem;display:flex;flex-direction:column;gap:1rem;transition:all .3s ease; box-shadow:var(--shadow-sm)" onmouseover="this.style.borderColor=\'#10b981\'; this.style.transform=\'translateY(-2px)\'; this.style.boxShadow=\'var(--shadow-md)\'" onmouseout="this.style.borderTopColor=\'#10b981\';this.style.borderColor=\'var(--border)\'; this.style.transform=\'translateY(0)\'; this.style.boxShadow=\'var(--shadow-sm)\'">'
-      +'<div style="display:flex;justify-content:space-between;align-items:center">'
-      +'<div style="width:36px;height:36px;background:rgba(16, 185, 129, 0.1);border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0"><i class="fas fa-check" style="color:#059669;font-size:.9rem"></i></div>'
-      +'<span style="font-size:.8rem;font-weight:700;color:var(--text3)">'+ds+'</span>'
-      +'</div>'
-      +'<div>'
-      +'<div style="font-size:.75rem;font-weight:800;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:.4rem">'+clean+'</div>'
-      +'<div style="font-weight:800;color:var(--text);font-size:1.1rem;line-height:1.3">'+s.name+'</div>'
-      +'</div>'
-      +'<div style="border-top:1px solid var(--border);padding-top:.875rem;margin-top:auto">'
-      +'<div style="font-size:.85rem;color:var(--text3);margin-bottom:.4rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:500">'+prod+'</div>'
-      +'<div style="font-weight:800;color:#059669;font-size:1.2rem;font-family:monospace">'+fmt(finalAmount)+'</div>'
-      +'</div>'
-      +'</div>';
-  }).join('');
+// ── SALES (Filtreli ve Sayfalamalı) ────────────────────────────────
+function updateSalesView() {
+    var branchFilter = document.getElementById('salesBranchFilter').value;
+    
+    // Doğru satılan ürünleri bul ve gerekirse şubeye göre filtrele
+    allSalesFiltered = allRecordsData.filter(function(r) {
+        var isSale = isRecordSale(r);
+        var matchBranch = (branchFilter === 'all') || (r.branch === branchFilter);
+        
+        // isSale doğruysa ve şube uyuyorsa listeye al (Tutar 0 olsa bile)
+        return isSale && matchBranch;
+    });
+
+    // Filtre sonrası üst başlıktaki sayıları güncelle
+    var totalCount = allSalesFiltered.length;
+    var totalRev = allSalesFiltered.reduce((sum, r) => sum + parseTurkishFloat(r.amount), 0);
+
+    var fmt=function(n){return '₺'+new Intl.NumberFormat('tr-TR',{maximumFractionDigits:0}).format(n||0);};
+    document.getElementById('salesFilterCount').innerHTML = totalCount + ' <span style="font-size:0.8rem; color:var(--text3)">ADET</span>';
+    document.getElementById('salesFilterRevenue').textContent = fmt(totalRev);
+
+    renderSalesGrid();
+}
+
+function renderSalesGrid() {
+    var c = document.getElementById('latestSalesContainer');
+    if(!c) return;
+
+    var totalPages = Math.ceil(allSalesFiltered.length / salesItemsPerPage) || 1;
+    if (salesCurrentPage > totalPages) salesCurrentPage = totalPages;
+    if (salesCurrentPage < 1) salesCurrentPage = 1;
+
+    document.getElementById('salesPageIndicator').textContent = 'Sayfa ' + salesCurrentPage + ' / ' + totalPages;
+    document.getElementById('btnPrevPage').disabled = (salesCurrentPage === 1);
+    document.getElementById('btnNextPage').disabled = (salesCurrentPage === totalPages);
+
+    var startIndex = (salesCurrentPage - 1) * salesItemsPerPage;
+    var endIndex = startIndex + salesItemsPerPage;
+    var currentData = allSalesFiltered.slice(startIndex, endIndex);
+
+    if(!currentData.length) {
+        c.innerHTML = '<div style="text-align:center;color:var(--text3);padding:3rem;grid-column:1/-1; font-weight:600;">Bu kriterlere uygun satış bulunamadı.</div>';
+        return;
+    }
+
+    var fmt=function(n){return '\u20ba'+new Intl.NumberFormat('tr-TR',{maximumFractionDigits:0}).format(n||0);};
+    c.innerHTML=currentData.map(function(s){
+        var clean=(s.branch||'').replace(/ \u015eubesi/gi,'');
+        var ds='';
+        if(s.timestamp){var d=new Date(s.timestamp);if(!isNaN(d)) ds=d.toLocaleDateString('tr-TR',{day:'numeric',month:'short'})+' '+d.toLocaleTimeString('tr-TR',{hour:'2-digit',minute:'2-digit'});}
+        var prod=(s.product||s.category||'');
+        var finalAmount = parseTurkishFloat(s.amount);
+        return '<div style="background:var(--card-bg);border:1px solid var(--border);border-top:3px solid #10b981;border-radius:1rem;padding:1.5rem;display:flex;flex-direction:column;gap:1rem;transition:all .3s ease; box-shadow:var(--shadow-sm)" onmouseover="this.style.borderColor=\'#10b981\'; this.style.transform=\'translateY(-2px)\'; this.style.boxShadow=\'var(--shadow-md)\'" onmouseout="this.style.borderTopColor=\'#10b981\';this.style.borderColor=\'var(--border)\'; this.style.transform=\'translateY(0)\'; this.style.boxShadow=\'var(--shadow-sm)\'">'
+          +'<div style="display:flex;justify-content:space-between;align-items:center">'
+          +'<div style="width:36px;height:36px;background:rgba(16, 185, 129, 0.1);border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0"><i class="fas fa-check" style="color:#059669;font-size:.9rem"></i></div>'
+          +'<span style="font-size:.8rem;font-weight:700;color:var(--text3)">'+ds+'</span>'
+          +'</div>'
+          +'<div>'
+          +'<div style="font-size:.75rem;font-weight:800;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:.4rem">'+clean+'</div>'
+          +'<div style="font-weight:800;color:var(--text);font-size:1.1rem;line-height:1.3">'+s.name+'</div>'
+          +'</div>'
+          +'<div style="border-top:1px solid var(--border);padding-top:.875rem;margin-top:auto">'
+          +'<div style="font-size:.85rem;color:var(--text3);margin-bottom:.4rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:500">'+prod+'</div>'
+          +'<div style="font-weight:800;color:#059669;font-size:1.2rem;font-family:monospace">'+fmt(finalAmount)+'</div>'
+          +'</div>'
+          +'</div>';
+    }).join('');
+}
+
+function changeSalesPage(dir) {
+    salesCurrentPage += dir;
+    renderSalesGrid();
 }
 
 // ── PDF RAPOR ──────────────────────────────────────────
