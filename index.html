@@ -305,7 +305,6 @@ body.dark .theme-toggle .knob{transform:translateX(20px)}
     <div class="grid-kpi" id="catKpiRow">
       <div class="kpi-card" style="--accent:#3b82f6"><div style="font-size:.75rem;font-weight:800;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:.6rem">En Yüksek Hacim</div><div style="font-size:1.5rem;font-weight:800;color:var(--text);line-height:1.2;margin-bottom:.3rem" id="ck-topHacim">—</div><div style="font-size:.95rem;color:#3b82f6;font-weight:700" id="ck-topHacimVal">0 kayıt</div></div>
       <div class="kpi-card" style="--accent:#d97706"><div style="font-size:.75rem;font-weight:800;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:.6rem">En Yüksek Ciro</div><div style="font-size:1.5rem;font-weight:800;color:var(--text);line-height:1.2;margin-bottom:.3rem" id="ck-topCiro">—</div><div style="font-size:.95rem;color:#d97706;font-weight:700" id="ck-topCiroVal">—</div></div>
-      <div class="kpi-card" style="--accent:#059669"><div style="font-size:.75rem;font-weight:800;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:.6rem">En Yüksek Dönüşüm</div><div style="font-size:1.5rem;font-weight:800;color:var(--text);line-height:1.2;margin-bottom:.3rem" id="ck-topConv">—</div><div style="font-size:.95rem;color:#059669;font-weight:700" id="ck-topConvVal">—</div></div>
       <div class="kpi-card" style="--accent:#8b5cf6"><div style="font-size:.75rem;font-weight:800;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:.6rem">Aktif Kategori</div><div style="font-size:2.4rem;font-weight:800;color:#8b5cf6;line-height:1" id="ck-catCount">0</div><div style="font-size:.8rem;color:var(--text3);margin-top:.4rem; font-weight:600">listelenen kategori</div></div>
     </div>
     
@@ -559,6 +558,11 @@ const TABS = ['entry', 'dashboard', 'category', 'performance', 'sales', 'report'
 function toggleTheme(){
   var isDark=document.body.classList.toggle('dark');
   localStorage.setItem('theme',isDark?'dark':'light');
+  if (allRecordsData.length > 0) {
+    renderPerformance();
+    var sortedCats = buildCatStats();
+    if(sortedCats.length) renderHeatmap(sortedCats.slice(0,8));
+  }
 }
 (function(){
   if(localStorage.getItem('theme')==='dark') document.body.classList.add('dark');
@@ -848,7 +852,8 @@ function buildCatStats(){
   var catStats={};
   CATEGORIES.forEach(function(c){catStats[c]={volume:0,sales:0,revenue:0};});
   allRecordsData.forEach(function(r){
-    var cat=r.category||'Diğer';
+    var cat=(r.category||'').trim();
+    if(!cat || cat.toLowerCase() === 'diğer') return;
     if(!catStats[cat]) catStats[cat]={volume:0,sales:0,revenue:0};
     catStats[cat].volume++;
     
@@ -867,15 +872,12 @@ function renderCategoryAnalytics(){
 
   var topCat=sorted[0];
   var topRev=sorted.slice().sort(function(a,b){return b[1].revenue-a[1].revenue;})[0];
-  var topConv=sorted.filter(function(e){return e[1].sales>0;}).sort(function(a,b){return(b[1].sales/b[1].volume)-(a[1].sales/a[1].volume);})[0];
 
   var ck=function(id,val){var el=document.getElementById(id);if(el) el.textContent=val;};
   ck('ck-topHacim',topCat?topCat[0]:'—');
   ck('ck-topHacimVal',topCat?topCat[1].volume+' kayıt':'0 kayıt');
   ck('ck-topCiro',topRev?topRev[0]:'—');
   ck('ck-topCiroVal',topRev?fmt(topRev[1].revenue):'—');
-  ck('ck-topConv',topConv?topConv[0]:'—');
-  ck('ck-topConvVal',topConv?'%'+((topConv[1].sales/topConv[1].volume)*100).toFixed(1):'—');
   ck('ck-catCount',sorted.length);
 
   var sortedByRev = sorted.slice().sort(function(a,b){return b[1].revenue-a[1].revenue;});
@@ -1032,7 +1034,10 @@ function openBranchDetails(branchName){
   var recs=allRecordsData.filter(function(r){return r.branch===branchName && isRecordSale(r);});
   
   var catC={};
-  recs.forEach(function(r){var c=r.category||'Diğer';catC[c]=(catC[c]||0)+1;});
+  recs.forEach(function(r){
+    var c=(r.category||'').trim();
+    if(c && c.toLowerCase() !== 'diğer') catC[c]=(catC[c]||0)+1;
+  });
   var top4=Object.entries(catC).sort(function(a,b){return b[1]-a[1];}).slice(0,4);
   document.getElementById('modalBranchTitle').textContent=branchName;
   document.getElementById('detailTotalCalls').textContent=stat.arandi;
