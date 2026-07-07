@@ -206,6 +206,16 @@ body.dark .theme-toggle .knob{transform:translateX(20px)}
 .trend-up {background:rgba(16, 185, 129, 0.15); color:var(--sys-green);}
 .trend-down {background:rgba(239, 68, 68, 0.15); color:var(--sys-red);}
 
+/* BAŞARILI KAYIT TOAST BİLDİRİMİ */
+.toast {
+  position:fixed; bottom:30px; left:50%; transform:translateX(-50%) translateY(100px);
+  background:var(--sys-green); color:#fff; padding:12px 24px; border-radius:12px;
+  font-weight:700; font-size:.95rem; box-shadow:0 10px 25px rgba(16,185,129,0.4);
+  display:flex; align-items:center; gap:10px; z-index:99999; opacity:0;
+  transition:all 0.4s cubic-bezier(0.4, 0, 0.2, 1); pointer-events:none;
+}
+.toast.show { transform:translateX(-50%) translateY(0); opacity:1; }
+
 </style>
 </head>
 <body>
@@ -578,6 +588,9 @@ body.dark .theme-toggle .knob{transform:translateX(20px)}
   </div>
 </div>
 
+<!-- OTOMATİK KAYBOLAN BAŞARILI BİLDİRİMİ -->
+<div id="successToast" class="toast"><i class="fas fa-check-circle" style="font-size:1.2rem"></i> <span id="toastMsg"></span></div>
+
 <script>
 const GAS_URL='https://script.google.com/macros/s/AKfycbwRSKYdXIHm2A6uts8MJE0v6snp3rsSVm4Qk5yQRd9chXtGoMUCQGXZ37X05QUJY2Aq/exec';
 const BRANCHES=["İnegöl Şubesi","Paşabahçe Şubesi","Çekmeköy Şubesi","İzmit Şubesi","Gölcük Şubesi","Körfez Şubesi","Derince Şubesi","Sultanbeyli Şubesi","Yenidoğan Şubesi","Kavacık Şubesi","Çayırova Şubesi","Gebze Şubesi"];
@@ -626,23 +639,14 @@ function showWarning(title, message) {
 }
 
 function showSuccess(message) {
-    document.getElementById('warningTitle').textContent = 'Başarılı';
-    document.getElementById('warningTitle').style.color = 'var(--sys-green)';
+    var toast = document.getElementById('successToast');
+    document.getElementById('toastMsg').textContent = message;
+    toast.classList.add('show');
     
-    document.getElementById('warningIcon').className = 'fas fa-check-circle';
-    document.getElementById('warningIcon').style.color = 'var(--sys-green)';
-    document.getElementById('warningIconBg').style.background = 'rgba(16, 185, 129, 0.1)';
-    
-    document.getElementById('warningMessage').textContent = message;
-    
-    var btn = document.getElementById('warningBtn');
-    btn.className = 'btn';
-    btn.style.background = 'var(--sys-green)';
-    btn.style.color = '#fff';
-    
-    document.querySelector('#warningModal .modal-content').style.borderColor = 'var(--sys-green)';
-    
-    document.getElementById('warningModal').classList.add('show');
+    // 3 Saniye sonra kendi kendine kaybolur
+    setTimeout(function() {
+        toast.classList.remove('show');
+    }, 3000);
 }
 
 function parseTurkishFloat(val) {
