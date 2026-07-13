@@ -32,8 +32,6 @@ body.dark{
   --scroll-thumb:#363e5f;
   --shadow-sm: 0 4px 6px -1px rgba(0,0,0,0.3);
   --shadow-md: 0 10px 25px -5px rgba(0,0,0,0.4);
-  
-  /* Brand mappings */
   --sys-blue: #0ea5e9;
   --sys-green: #10b981;
   --sys-orange: #f59e0b;
@@ -60,8 +58,6 @@ body{
   --scroll-thumb:#cbd5e1;
   --shadow-sm: 0 4px 6px -1px rgba(0,0,0,0.05);
   --shadow-md: 0 10px 25px -5px rgba(0,0,0,0.05), 0 8px 10px -6px rgba(0,0,0,0.01);
-  
-  /* Brand mappings */
   --sys-blue: #0ea5e9;
   --sys-green: #10b981;
   --sys-orange: #f59e0b;
@@ -72,10 +68,7 @@ body{
 body{background:var(--bg);color:var(--text);font-family:'Plus Jakarta Sans',sans-serif;font-size:15px;-webkit-tap-highlight-color:transparent;margin:0; transition: background 0.3s ease, color 0.3s ease;}
 
 /* ── ANIMATIONS ── */
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(8px); }
-  to { opacity: 1; transform: translateY(0); }
-}
+@keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
 .tab-content { display: none; animation: fadeIn 0.35s cubic-bezier(0.4, 0, 0.2, 1) forwards; }
 .tab-content.active { display: block; }
 @keyframes spin{to{transform:rotate(360deg)}}
@@ -129,6 +122,11 @@ select.inp{appearance:none;line-height:1.5;background-image:url("data:image/svg+
 .prog-bg{background:var(--prog-bg);border-radius:6px;height:8px;overflow:hidden}
 .prog-fill{height:100%;border-radius:6px;transition:width 0.8s cubic-bezier(0.4, 0, 0.2, 1)}
 
+/* Toast Notification */
+.toast { position:fixed; bottom:-100px; left:50%; transform:translateX(-50%); background:var(--sys-green); color:#fff; padding:12px 24px; border-radius:50px; font-weight:700; font-size:1rem; box-shadow:0 10px 25px rgba(16,185,129,0.4); transition:bottom 0.4s cubic-bezier(0.4, 0, 0.2, 1); z-index:9999; display:flex; align-items:center; gap:8px; pointer-events:none;}
+.toast.show { bottom: 30px; }
+
+/* Modals */
 .modal-bg{position:fixed;inset:0;z-index:999;background:rgba(15,23,42,.6);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;padding:1rem; opacity:0; visibility:hidden; transition:all 0.3s ease;}
 .modal-bg.show { opacity:1; visibility:visible; }
 .modal-content { transform:scale(0.95); transition:all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
@@ -142,7 +140,6 @@ select.inp{appearance:none;line-height:1.5;background-image:url("data:image/svg+
 .tabs-row::-webkit-scrollbar{height:0}
 .sec-header{display:flex;align-items:center;gap:1rem;padding:1.25rem 1.5rem;border-bottom:1px solid var(--border);flex-wrap:wrap; background:var(--surface2)}
 .sec-icon{width:42px;height:42px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0; box-shadow:0 2px 8px rgba(0,0,0,0.05)}
-.chart-wrap{position:relative;height:250px}
 
 /* ── HEADER STICKY GLASSMORPHISM ── */
 .app-header {
@@ -179,7 +176,6 @@ select.inp{appearance:none;line-height:1.5;background-image:url("data:image/svg+
   .podium-wrap{gap:.75rem;padding-top:3.5rem;min-height:260px!important}
   .entry-card{padding:1.25rem}
   #branchStatsBody>div{grid-template-columns:2fr 1fr 1fr 1fr 1.5fr!important; padding: 1rem !important;}
-  .rep-filters { grid-template-columns: 1fr !important; }
 }
 
 @media(max-width:480px){
@@ -203,21 +199,9 @@ body:not(.dark) .theme-toggle{background:#cbd5e1}
 body.dark .theme-toggle{background:#0ea5e9}
 body.dark .theme-toggle .knob{transform:translateX(20px)}
 
-/* Radio Buttons Custom CSS */
-.filter-type-wrap { display: flex; gap: 1rem; margin-bottom: 1rem; border-bottom: 1px solid var(--border); padding-bottom: 1rem; }
-.filter-type-label { display: flex; align-items: center; gap: 0.5rem; cursor: pointer; font-size: 0.9rem; font-weight: 700; color: var(--text2); }
-.filter-type-label input[type="radio"] { accent-color: var(--sys-purple); width: 1.2rem; height: 1.2rem; cursor: pointer; }
-.filter-type-label:has(input:checked) { color: var(--text); }
-
-/* BAŞARILI KAYIT TOAST BİLDİRİMİ */
-.toast {
-  position:fixed; bottom:30px; left:50%; transform:translateX(-50%) translateY(100px);
-  background:var(--sys-green); color:#fff; padding:12px 24px; border-radius:12px;
-  font-weight:700; font-size:.95rem; box-shadow:0 10px 25px rgba(16,185,129,0.4);
-  display:flex; align-items:center; gap:10px; z-index:99999; opacity:0;
-  transition:all 0.4s cubic-bezier(0.4, 0, 0.2, 1); pointer-events:none;
-}
-.toast.show { transform:translateX(-50%) translateY(0); opacity:1; }
+.trend-badge {display:inline-flex; align-items:center; padding: 4px 8px; border-radius:8px; font-weight:800; font-size:0.8rem; margin-top:0.6rem; letter-spacing:0.02em;}
+.trend-up {background:rgba(16, 185, 129, 0.15); color:var(--sys-green);}
+.trend-down {background:rgba(239, 68, 68, 0.15); color:var(--sys-red);}
 
 </style>
 </head>
@@ -271,7 +255,6 @@ body.dark .theme-toggle .knob{transform:translateX(20px)}
       </div>
     </div>
     
-    <!-- TABS ROW -->
     <div class="tabs-row">
       <div class="nav-tab" onclick="switchTab('dashboard')" id="tab-dashboard"><i class="fas fa-chart-pie"></i> Özet (Panel)</div>
       <div class="nav-tab active" onclick="switchTab('entry')" id="tab-entry"><i class="fas fa-user-plus"></i> Müşteri Kayıt</div>
@@ -472,96 +455,69 @@ body.dark .theme-toggle .knob{transform:translateX(20px)}
       <div class="sec-header">
         <div class="sec-icon" style="background:rgba(139, 92, 246, 0.1);color:var(--sys-purple)"><i class="fas fa-file-invoice text-xl"></i></div>
         <div>
-          <div style="font-size:1.1rem;font-weight:800;color:var(--text)">Gelişmiş Rapor (Trend Analizi)</div>
-          <div style="font-size:.75rem;font-weight:600;color:var(--text3)">Seçilen dönem/tarih ve kategori için detaylı filtreleme.</div>
+          <div style="font-size:1.1rem;font-weight:800;color:var(--text)">Gelişmiş Rapor (Tarih & Saat Bazlı)</div>
+          <div style="font-size:.75rem;font-weight:600;color:var(--text3)">Tam nokta atışı gün ve kategori filtrelemesi yapabilirsiniz.</div>
         </div>
       </div>
-      <div style="padding:1.5rem;">
-        
-        <!-- Filtre Tipi Seçimi (Radyo Butonlar) -->
-        <div class="filter-type-wrap">
-           <label class="filter-type-label">
-              <input type="radio" name="filterType" value="period" checked onchange="toggleReportFilterFields()"> Ay/Dönem Seçimi
-           </label>
-           <label class="filter-type-label">
-              <input type="radio" name="filterType" value="date" onchange="toggleReportFilterFields()"> Gün/Saat (Nokta Atışı)
-           </label>
+      <div style="padding:1.5rem; display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:1.25rem; align-items:end;">
+        <div>
+          <label class="inp-label">Başlangıç Tarihi</label>
+          <input type="date" id="reportStartDate" class="inp" />
         </div>
-
-        <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:1.25rem; align-items:end;" class="rep-filters">
-            
-            <!-- DÖNEM FİLTRESİ ALANLARI -->
-            <div id="wrapReportStartPeriod">
-              <label class="inp-label">Başlangıç Dönemi</label>
-              <select id="reportStartPeriod" class="inp"></select>
-            </div>
-            <div id="wrapReportEndPeriod">
-              <label class="inp-label">Bitiş Dönemi</label>
-              <select id="reportEndPeriod" class="inp"></select>
-            </div>
-
-            <!-- GÜN/SAAT FİLTRESİ ALANLARI (Gizli başlar) -->
-            <div id="wrapReportStartDate" style="display:none;">
-              <label class="inp-label">Başlangıç (Gün/Saat)</label>
-              <input type="datetime-local" id="reportStartDate" class="inp">
-            </div>
-            <div id="wrapReportEndDate" style="display:none;">
-              <label class="inp-label">Bitiş (Gün/Saat)</label>
-              <input type="datetime-local" id="reportEndDate" class="inp">
-            </div>
-
-            <div>
-              <label class="inp-label">Kategori Filtresi</label>
-              <select id="reportCategory" class="inp">
-                 <option value="all">Tüm Kategoriler</option>
-                 <option>Mobilya</option>
-                 <option>Baza+Yatak+Başlık</option>
-                 <option>Bebek ve Çocuk</option>
-                 <option>Beyaz Eşya</option>
-                 <option>Elektrikli Ev Aletleri</option>
-                 <option>Elektrikli-Benzinli Araç</option>
-                 <option>Elektronik</option>
-                 <option>Ev Dekorasyonu</option>
-                 <option>Halı</option>
-                 <option>Kişisel Aksesuar</option>
-                 <option>Mobilya Aksesuarı</option>
-                 <option>Tekstil</option>
-                 <option>Züccaciye</option>
-                 <option>Ayakkabı</option>
-                 <option>LİMİT ÖĞREN</option>
-                 <option>GENEL ÜRÜN BİLGİSİ</option>
-              </select>
-            </div>
-            
-            <div>
-              <button class="btn btn-primary" style="width:100%; background:linear-gradient(135deg,var(--sys-purple),#7e22ce);" onclick="fetchAdvancedReport()"><i class="fas fa-search mr-2"></i> Raporu Getir</button>
-            </div>
+        <div>
+          <label class="inp-label">Bitiş Tarihi</label>
+          <input type="date" id="reportEndDate" class="inp" />
+        </div>
+        <div>
+          <label class="inp-label">Kategori Filtresi</label>
+          <select id="reportCategory" class="inp">
+             <option value="all">Tüm Kategoriler</option>
+             <option>Mobilya</option>
+             <option>Baza+Yatak+Başlık</option>
+             <option>Bebek ve Çocuk</option>
+             <option>Beyaz Eşya</option>
+             <option>Elektrikli Ev Aletleri</option>
+             <option>Elektrikli-Benzinli Araç</option>
+             <option>Elektronik</option>
+             <option>Ev Dekorasyonu</option>
+             <option>Halı</option>
+             <option>Kişisel Aksesuar</option>
+             <option>Mobilya Aksesuarı</option>
+             <option>Tekstil</option>
+             <option>Züccaciye</option>
+             <option>Ayakkabı</option>
+             <option>LİMİT ÖĞREN</option>
+             <option>GENEL ÜRÜN BİLGİSİ</option>
+          </select>
+        </div>
+        <div>
+          <button class="btn btn-primary" style="width:100%; background:linear-gradient(135deg,var(--sys-purple),#7e22ce);" onclick="fetchAdvancedReport()"><i class="fas fa-search mr-2"></i> Raporu Getir</button>
         </div>
       </div>
     </div>
     
-    <div id="reportKpiWrap" style="display:none; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:1rem; margin-bottom:1.5rem;">
-        <div class="card" style="padding:1.25rem; border-left:4px solid var(--text3);">
-            <div style="font-size:0.75rem; font-weight:800; color:var(--text3); text-transform:uppercase; margin-bottom:0.3rem;"><i class="fas fa-share-square mr-2"></i>Yönlendirme Adedi</div>
-            <div style="font-size:1.8rem; font-weight:800; color:var(--text); line-height:1;" id="repTotalVolume">0</div>
+    <div id="reportKpiWrap" style="display:none; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:1.25rem; margin-bottom:1.5rem;">
+        <div class="card" style="padding:1.5rem; border-left:4px solid var(--text3);">
+            <div style="font-size:0.75rem; font-weight:800; color:var(--text3); text-transform:uppercase; margin-bottom:0.5rem;"><i class="fas fa-share-square mr-2"></i>Yönlendirme Adedi</div>
+            <div style="font-size:1.8rem; font-weight:800; color:var(--text); line-height:1;" id="repTotalLeads">0</div>
         </div>
-        <div class="card" style="padding:1.25rem; border-left:4px solid var(--sys-green);">
-            <div style="font-size:0.75rem; font-weight:800; color:var(--text3); text-transform:uppercase; margin-bottom:0.3rem;"><i class="fas fa-shopping-bag mr-2" style="color:var(--sys-green)"></i>Filtreli Satış (Net)</div>
+        <div class="card" style="padding:1.5rem; border-left:4px solid var(--sys-green);">
+            <div style="font-size:0.75rem; font-weight:800; color:var(--text3); text-transform:uppercase; margin-bottom:0.5rem;"><i class="fas fa-shopping-bag mr-2" style="color:var(--sys-green)"></i>Filtreli Satış (Net)</div>
             <div style="font-size:1.8rem; font-weight:800; color:var(--text); line-height:1;" id="repTotalSales">0</div>
         </div>
-        <div class="card" style="padding:1.25rem; border-left:4px solid var(--sys-orange);">
-            <div style="font-size:0.75rem; font-weight:800; color:var(--text3); text-transform:uppercase; margin-bottom:0.3rem;"><i class="fas fa-bolt mr-2" style="color:var(--sys-orange)"></i>Dönüşüm Oranı</div>
-            <div style="font-size:1.8rem; font-weight:800; color:var(--sys-orange); line-height:1; font-family:monospace;" id="repConversion">%0</div>
+        <div class="card" style="padding:1.5rem; border-left:4px solid var(--sys-orange);">
+            <div style="font-size:0.75rem; font-weight:800; color:var(--text3); text-transform:uppercase; margin-bottom:0.5rem;"><i class="fas fa-bolt mr-2" style="color:var(--sys-orange)"></i>Dönüşüm Oranı</div>
+            <div style="font-size:1.8rem; font-weight:800; color:var(--sys-orange); line-height:1;" id="repConversion">%0</div>
         </div>
-        <div class="card" style="padding:1.25rem; border-left:4px solid var(--sys-blue);">
-            <div style="font-size:0.75rem; font-weight:800; color:var(--text3); text-transform:uppercase; margin-bottom:0.3rem;"><i class="fas fa-lira-sign mr-2" style="color:var(--sys-blue)"></i>Filtreli Ciro</div>
+        <div class="card" style="padding:1.5rem; border-left:4px solid var(--sys-blue);">
+            <div style="font-size:0.75rem; font-weight:800; color:var(--text3); text-transform:uppercase; margin-bottom:0.5rem;"><i class="fas fa-lira-sign mr-2" style="color:var(--sys-blue)"></i>Filtreli Ciro</div>
             <div style="font-size:1.8rem; font-weight:800; color:var(--sys-blue); line-height:1; font-family:monospace;" id="repTotalRevenue">₺0</div>
         </div>
     </div>
 
     <div id="reportTableWrap" class="card" style="display:none;">
         <div class="sec-header" style="justify-content:space-between;">
-            <div style="font-size:1.1rem;font-weight:800;color:var(--text)">Filtrelenen Satış Kayıtları</div>
+            <div style="font-size:1.1rem;font-weight:800;color:var(--text)">Satış Kayıtları</div>
             <div style="display:flex;gap:10px;">
                 <button class="btn btn-ghost btn-sm" onclick="exportReportExcel()"><i class="fas fa-file-excel mr-2" style="color:var(--sys-green)"></i> Excel İndir</button>
                 <button class="btn btn-ghost btn-sm" onclick="exportReportPDF()"><i class="fas fa-print mr-2" style="color:var(--sys-blue)"></i> Yazdır / PDF</button>
@@ -624,13 +580,12 @@ body.dark .theme-toggle .knob{transform:translateX(20px)}
   </div>
 </div>
 
-<!-- OTOMATİK KAYBOLAN BAŞARILI BİLDİRİMİ (TOAST) -->
+<!-- TOAST BİLDİRİMİ -->
 <div id="successToast" class="toast"><i class="fas fa-check-circle" style="font-size:1.2rem"></i> <span id="toastMsg"></span></div>
-
 
 <script>
 const GAS_URL='https://script.google.com/macros/s/AKfycbwRSKYdXIHm2A6uts8MJE0v6snp3rsSVm4Qk5yQRd9chXtGoMUCQGXZ37X05QUJY2Aq/exec';
-const BRANCHES=["İnegöl Şubesi","Paşabahçe Şubesi","Çekmeköy Şubesi","İzmit Şubesi","Gölcük Şubesi","Körfez Şubesi","Derince Şubesi","Sultanbeyli Şubesi","Yenidoğan Şubesi","Kavacık Şubesi","Çayırova Şubesi","Gebze Şubesi"];
+const BRANCHES=["İnegöl Şubesi","Paşabahçe Şubesi","Çekmeköy Şubesi","İzmit Şubesi","Gölcük Şubesi","Körfez Şubesi","Derince Şubesi","Sultanbeyli Şubesi","Yenidoğan Şubesi","Kavacık Şubesi","Çayırova Şubesi","Gebze Şubesi","Düzce Şubesi"];
 const CATEGORIES=["Mobilya","Baza+Yatak+Başlık","Bebek ve Çocuk","Beyaz Eşya","Elektrikli Ev Aletleri","Elektrikli-Benzinli Araç","Elektronik","Ev Dekorasyonu","Halı","Kişisel Aksesuar","Mobilya Aksesuarı","Tekstil","Züccaciye","Ayakkabı","LİMİT ÖĞREN","GENEL ÜRÜN BİLGİSİ"];
 const TR_MONTHS=['OCAK','ŞUBAT','MART','NİSAN','MAYIS','HAZİRAN','TEMMUZ','AĞUSTOS','EYLÜL','EKİM','KASIM','ARALIK'];
 const COLORS=['#0ea5e9','#10b981','#f59e0b','#ef4444','#8b5cf6','#06b6d4','#f97316','#ec4899','#84cc16','#14b8a6','#6366f1','#e11d48','#0ea5e9','#d97706'];
@@ -658,31 +613,23 @@ var allSalesFiltered = [];
 function showWarning(title, message) {
     document.getElementById('warningTitle').textContent = title;
     document.getElementById('warningTitle').style.color = 'var(--text)';
-    
     document.getElementById('warningIcon').className = 'fas fa-exclamation-triangle';
     document.getElementById('warningIcon').style.color = 'var(--sys-red)';
     document.getElementById('warningIconBg').style.background = 'rgba(239, 68, 68, 0.1)';
-    
     document.getElementById('warningMessage').textContent = message;
-    
     var btn = document.getElementById('warningBtn');
     btn.className = 'btn btn-danger';
     btn.style.background = 'linear-gradient(135deg,#ef4444,#dc2626)';
     btn.style.color = '#fff';
-    
     document.querySelector('#warningModal .modal-content').style.borderColor = 'var(--sys-red)';
-    
     document.getElementById('warningModal').classList.add('show');
 }
 
-function showSuccess(message) {
-    var toast = document.getElementById('successToast');
-    document.getElementById('toastMsg').textContent = message;
-    toast.classList.add('show');
-    
-    setTimeout(function() {
-        toast.classList.remove('show');
-    }, 3000);
+function showToast(msg) {
+    let t = document.getElementById('successToast');
+    document.getElementById('toastMsg').textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 3000);
 }
 
 function parseTurkishFloat(val) {
@@ -743,9 +690,9 @@ function doLogin(){
         populatePeriodSelector();
         populateSalesBranchFilter();
         
-        // Tarih filtresi varsayılan olarak bugünü seçili getirsin
-        document.getElementById('reportStartDate').value = getTodayDT().split('T')[0] + 'T00:00';
-        document.getElementById('reportEndDate').value = getTodayDT().split('T')[0] + 'T23:59';
+        let today = new Date().toISOString().split('T')[0];
+        if(document.getElementById('reportStartDate')) document.getElementById('reportStartDate').value = today;
+        if(document.getElementById('reportEndDate')) document.getElementById('reportEndDate').value = today;
         
         addInputRow();
         fetchData();
@@ -780,18 +727,16 @@ function switchTab(tab){
 
 function populatePeriodSelector(){
   var s=document.getElementById('currentPeriod');
-  var rs=document.getElementById('reportStartPeriod');
-  var re=document.getElementById('reportEndPeriod');
-  if(!s || !rs || !re) return;
-  s.innerHTML=''; rs.innerHTML=''; re.innerHTML='';
+  if(!s) return;
+  s.innerHTML='';
   var n=new Date();
   for(var i=-6;i<=2;i++){
     var d=new Date(n.getFullYear(),n.getMonth()+i,1);
     var v=TR_MONTHS[d.getMonth()]+' '+d.getFullYear();
-    
-    var o1=document.createElement('option'); o1.value=v; o1.textContent=v; if(i===0) o1.selected=true; s.appendChild(o1);
-    var o2=document.createElement('option'); o2.value=v; o2.textContent=v; if(i===0) o2.selected=true; rs.appendChild(o2);
-    var o3=document.createElement('option'); o3.value=v; o3.textContent=v; if(i===0) o3.selected=true; re.appendChild(o3);
+    var o=document.createElement('option');
+    o.value=v; o.textContent=v;
+    if(i===0) o.selected=true;
+    s.appendChild(o);
   }
 }
 
@@ -1181,40 +1126,25 @@ function changeSalesPage(dir) {
     renderSalesGrid();
 }
 
-function toggleReportFilterFields() {
-    var fType = document.querySelector('input[name="filterType"]:checked').value;
-    if (fType === 'period') {
-        document.getElementById('wrapReportStartPeriod').style.display = 'block';
-        document.getElementById('wrapReportEndPeriod').style.display = 'block';
-        document.getElementById('wrapReportStartDate').style.display = 'none';
-        document.getElementById('wrapReportEndDate').style.display = 'none';
-    } else {
-        document.getElementById('wrapReportStartPeriod').style.display = 'none';
-        document.getElementById('wrapReportEndPeriod').style.display = 'none';
-        document.getElementById('wrapReportStartDate').style.display = 'block';
-        document.getElementById('wrapReportEndDate').style.display = 'block';
-    }
-}
-
 async function fetchAdvancedReport() {
-    let fType = document.querySelector('input[name="filterType"]:checked').value;
-    let payload = { action: 'getAdvancedReport', data: { filterType: fType, category: document.getElementById('reportCategory').value } };
+    let sP = document.getElementById('reportStartDate').value;
+    let eP = document.getElementById('reportEndDate').value;
+    let cat = document.getElementById('reportCategory').value;
     
-    if (fType === 'period') {
-        payload.data.startPeriod = document.getElementById('reportStartPeriod').value;
-        payload.data.endPeriod = document.getElementById('reportEndPeriod').value;
-    } else {
-        payload.data.startDate = document.getElementById('reportStartDate').value;
-        payload.data.endDate = document.getElementById('reportEndDate').value;
-    }
-
     let btn = event.currentTarget;
     let orig = btn.innerHTML;
     btn.innerHTML = '<span class="loader" style="width:18px;height:18px;margin-right:8px;border-top-color:transparent;"></span> Rapor Hazırlanıyor...';
     btn.disabled = true;
 
     try {
-        let res = await fetch(GAS_URL, { method: 'POST', body: JSON.stringify(payload) });
+        let res = await fetch(GAS_URL, {
+            method: 'POST',
+            body: JSON.stringify({
+                action: 'getAdvancedReport',
+                data: { startPeriod: sP, endPeriod: eP, category: cat }
+            })
+        });
+        
         let text = await res.text();
         let result = JSON.parse(text);
 
@@ -1225,13 +1155,13 @@ async function fetchAdvancedReport() {
             document.getElementById('reportKpiWrap').style.display = 'grid';
             document.getElementById('reportTableWrap').style.display = 'block';
             
-            document.getElementById('repTotalVolume').textContent = result.totalVolume;
+            document.getElementById('repTotalLeads').textContent = result.totalLeads;
             document.getElementById('repTotalSales').textContent = result.totalSales;
+            
+            let convRate = result.totalLeads > 0 ? (result.totalSales / result.totalLeads * 100).toFixed(1) : 0;
+            document.getElementById('repConversion').textContent = "%" + convRate;
             document.getElementById('repTotalRevenue').textContent = fmt(result.totalRevenue);
             
-            let conv = result.totalVolume > 0 ? ((result.totalSales / result.totalVolume) * 100).toFixed(1) : 0;
-            document.getElementById('repConversion').textContent = '%' + conv;
-
             let tbody = document.getElementById('reportTableBody');
             if (currentReportData.length === 0) {
                 tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:2rem;color:var(--text3);font-weight:600;">Bu filtreye uygun geçerli satış bulunamadı.</td></tr>';
@@ -1278,23 +1208,18 @@ function exportReportExcel() {
 function exportReportPDF() {
     if(!currentReportData || currentReportData.length === 0) return showWarning("Eksik İşlem", "Dışa aktarılacak veri yok.");
     
-    let fType = document.querySelector('input[name="filterType"]:checked').value;
-    let periodText = "";
-    if(fType === 'period') {
-        periodText = document.getElementById('reportStartPeriod').value + " - " + document.getElementById('reportEndPeriod').value;
-    } else {
-        periodText = document.getElementById('reportStartDate').value.replace('T', ' ') + " - " + document.getElementById('reportEndDate').value.replace('T', ' ');
-    }
-
+    let sD = document.getElementById('reportStartDate').value;
+    let eD = document.getElementById('reportEndDate').value;
     let cat = document.getElementById('reportCategory').value;
     
+    let dateStrDisp = sD && eD ? `${sD} / ${eD}` : "Tüm Zamanlar";
+    
     let now = new Date();
-    let dateStr = now.toLocaleDateString('tr-TR') + ' ' + now.toLocaleTimeString('tr-TR', {hour:'2-digit', minute:'2-digit'});
+    let printDate = now.toLocaleDateString('tr-TR') + ' ' + now.toLocaleTimeString('tr-TR', {hour:'2-digit', minute:'2-digit'});
     let TL = '\u20ba';
     let fmt = function(n){ return TL+new Intl.NumberFormat('tr-TR',{maximumFractionDigits:0}).format(n||0); };
 
-    // Ekranda görünen 4 metrik değerini alıyoruz
-    let tVol = document.getElementById('repTotalVolume').textContent;
+    let tLeads = document.getElementById('repTotalLeads').textContent;
     let tSales = document.getElementById('repTotalSales').textContent;
     let tConv = document.getElementById('repConversion').textContent;
     let tRev = document.getElementById('repTotalRevenue').textContent;
@@ -1325,19 +1250,10 @@ function exportReportPDF() {
     .header { background: linear-gradient(135deg, #0ea5e9, #6366f1); color:#fff; padding:32px 40px; border-radius:20px; margin-bottom:30px; box-shadow: 0 10px 25px -5px rgba(14,165,233,0.3); }
     .header h1 { font-size:28px; font-weight:800; margin-bottom:10px; letter-spacing:-0.5px; }
     .header p { font-size:14px; font-weight:700; opacity:0.95; text-transform:uppercase; letter-spacing:1px; margin-bottom:6px; }
-    
-    /* YENİ 4'LÜ KPI GRID */
-    .kpi-grid { display:grid; grid-template-columns: repeat(4, 1fr); gap:15px; margin-bottom:30px; }
-    .kpi-card { background:#fff; border:1px solid #e2e8f0; padding:16px; border-radius:12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); }
-    .kpi-card.gray { border-left:4px solid #64748b; }
-    .kpi-card.green { border-left:4px solid #10b981; }
-    .kpi-card.orange { border-left:4px solid #f59e0b; }
-    .kpi-card.blue { border-left:4px solid #0ea5e9; }
-    .kpi-label { font-size:11px; font-weight:800; color:#64748b; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:8px; }
-    .kpi-val { font-size:22px; font-weight:800; color:#0f172a; line-height:1; }
-    .kpi-card.orange .kpi-val { color:#f59e0b; font-family:monospace; }
-    .kpi-card.blue .kpi-val { color:#0ea5e9; font-family:monospace; }
-    
+    .kpi-grid { display:flex; gap:15px; margin-bottom:30px; }
+    .kpi-card { flex:1; background:#fff; border:1px solid #e2e8f0; padding:20px; border-radius:16px; border-left:4px solid #0ea5e9; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); }
+    .kpi-label { font-size:11px; font-weight:800; color:#64748b; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:10px; }
+    .kpi-val { font-size:24px; font-weight:800; color:#0f172a; line-height:1; }
     .table-container { background:#fff; border-radius:16px; border:1px solid #e2e8f0; overflow:hidden; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.02); }
     table { width:100%; border-collapse:collapse; text-align:left; table-layout: fixed; }
     th { background:#f8fafc; padding:16px 10px; font-size:12px; font-weight:800; color:#475569; text-transform:uppercase; letter-spacing:0.5px; border-bottom:2px solid #e2e8f0; }
@@ -1368,17 +1284,10 @@ function exportReportPDF() {
         .header h1 { color:#000 !important; font-size:24px !important; margin-bottom:8px !important;}
         .header p { color:#000 !important; font-size:14px !important; font-weight:800 !important;}
         .no-print { display:none !important; }
-        
-        .kpi-grid { margin-bottom:20px !important; gap:10px !important; grid-template-columns: repeat(4, 1fr) !important; }
-        .kpi-card { border: 1px solid #999 !important; padding:12px !important; border-radius:8px !important; box-shadow:none !important; }
-        .kpi-card.gray { border-left:3px solid #666 !important; }
-        .kpi-card.green { border-left:3px solid #000 !important; }
-        .kpi-card.orange { border-left:3px solid #000 !important; }
-        .kpi-card.blue { border-left:3px solid #000 !important; }
-        
+        .kpi-grid { margin-bottom:20px !important; gap:10px !important;}
+        .kpi-card { border: 1px solid #999 !important; padding:12px !important; border-radius:8px !important; box-shadow:none !important;}
         .kpi-label { color:#555 !important; font-size:10px !important;}
         .kpi-val { color:#000 !important; font-size:18px !important;}
-        
         .table-container { border:none !important; box-shadow:none !important; border-radius:0 !important; overflow:visible !important;}
         table { width:100% !important; table-layout:fixed !important; }
         th { padding:10px 6px !important; font-size:12px !important; border-bottom:2px solid #000 !important; background:#f1f1f1 !important; color:#000 !important; white-space:normal !important;}
@@ -1401,25 +1310,25 @@ function exportReportPDF() {
     <div class="container">
         <div class="header">
             <h1>Özel Satış Analizi</h1>
-            <p>Dönem/Tarih: ${periodText}</p>
-            <p style="color:#000;">Filtre: ${cat}</p>
+            <p>Tarih Aralığı: ${dateStrDisp}</p>
+            <p style="color:#000;">Kategori: ${cat}</p>
         </div>
         <div class="kpi-grid">
-            <div class="kpi-card gray">
+            <div class="kpi-card" style="border-left-color: #64748b;">
                 <div class="kpi-label">Yönlendirme Adedi</div>
-                <div class="kpi-val">${tVol}</div>
+                <div class="kpi-val">${tLeads}</div>
             </div>
-            <div class="kpi-card green">
+            <div class="kpi-card" style="border-left-color: #10b981;">
                 <div class="kpi-label">Filtreli Satış (Net)</div>
-                <div class="kpi-val">${tSales}</div>
+                <div class="kpi-val" style="color:#10b981">${tSales}</div>
             </div>
-            <div class="kpi-card orange">
+            <div class="kpi-card" style="border-left-color: #f59e0b;">
                 <div class="kpi-label">Dönüşüm Oranı</div>
-                <div class="kpi-val">${tConv}</div>
+                <div class="kpi-val" style="color:#f59e0b">${tConv}</div>
             </div>
-            <div class="kpi-card blue">
+            <div class="kpi-card" style="border-left-color: #0ea5e9;">
                 <div class="kpi-label">Filtreli Ciro</div>
-                <div class="kpi-val">${tRev}</div>
+                <div class="kpi-val" style="color:#0ea5e9; font-family:monospace;">${tRev}</div>
             </div>
         </div>
         <div class="table-container">
@@ -1441,7 +1350,7 @@ function exportReportPDF() {
             </table>
         </div>
         <div style="text-align:center; margin-top:40px; padding-top:20px; border-top:1px solid #e2e8f0; font-size:12px; color:#94a3b8; font-weight:700;">
-            Oluşturulma Tarihi: ${dateStr} &nbsp;&bull;&nbsp; HEDEF AVM CRM
+            Oluşturulma Tarihi: ${printDate} &nbsp;&bull;&nbsp; HEDEF AVM CRM
         </div>
     </div>
     </body>
@@ -1588,7 +1497,7 @@ async function submitAllRows(){
         refreshData();
         btn.innerHTML=orig;
         btn.disabled=false;
-        showSuccess('Müşteri kayıtları başarıyla sisteme aktarıldı.');
+        showToast('Müşteri kayıtları başarıyla sisteme aktarıldı.');
     }, 800); 
     
   }catch(e){
