@@ -582,6 +582,9 @@ body.dark .theme-toggle .knob{transform:translateX(20px)}
   </div>
 </div>
 
+<!-- TOAST BİLDİRİMİ -->
+<div id="successToast" class="toast"><i class="fas fa-check-circle" style="font-size:1.2rem"></i> <span id="toastMsg"></span></div>
+
 <script>
 const GAS_URL='https://script.google.com/macros/s/AKfycbwRSKYdXIHm2A6uts8MJE0v6snp3rsSVm4Qk5yQRd9chXtGoMUCQGXZ37X05QUJY2Aq/exec';
 const BRANCHES=["İnegöl Şubesi","Paşabahçe Şubesi","Çekmeköy Şubesi","İzmit Şubesi","Gölcük Şubesi","Körfez Şubesi","Derince Şubesi","Sultanbeyli Şubesi","Yenidoğan Şubesi","Kavacık Şubesi","Çayırova Şubesi","Gebze Şubesi","Düzce Şubesi"];
@@ -647,6 +650,16 @@ function showSuccess(message) {
     document.querySelector('#warningModal .modal-content').style.borderColor = 'var(--sys-green)';
     
     document.getElementById('warningModal').classList.add('show');
+}
+
+function showToast(msg) {
+    let t = document.getElementById('successToast');
+    let tMsg = document.getElementById('toastMsg');
+    if(t && tMsg) {
+        tMsg.textContent = msg;
+        t.classList.add('show');
+        setTimeout(() => t.classList.remove('show'), 3000);
+    }
 }
 
 function getTodayDT() {
@@ -1580,28 +1593,40 @@ async function submitAllRows(){
   btn.disabled=true;
   
   try{
-    await fetch(GAS_URL,{
-        method:'POST',
-        mode: 'no-cors',
+    let res = await fetch(GAS_URL, {
+        method: 'POST',
         headers: {
-            'Content-Type': 'application/json'
+            'Content-Type': 'text/plain;charset=utf-8' 
         },
-        body:JSON.stringify({action:'addCustomersBulk',data:data})
+        body: JSON.stringify({action:'addCustomersBulk', data:data})
     });
     
-    setTimeout(function() {
-        document.getElementById('inputContainer').innerHTML='';
-        addInputRow();
-        refreshData();
-        btn.innerHTML=orig;
-        btn.disabled=false;
-        showToast('Müşteri kayıtları başarıyla sisteme aktarıldı.');
-    }, 800); 
+    let text = await res.text();
+    let result = {};
+    try {
+        result = JSON.parse(text);
+    } catch (err) {
+        result = { status: 'error', message: 'Sunucudan geçersiz yanıt döndü. Apps Script sürümünüz güncel olmayabilir.' };
+    }
+
+    if (result.status === 'success') {
+        setTimeout(function() {
+            document.getElementById('inputContainer').innerHTML='';
+            addInputRow();
+            refreshData();
+            btn.innerHTML=orig;
+            btn.disabled=false;
+            showToast('Müşteri kayıtları başarıyla sisteme aktarıldı.');
+        }, 500); 
+    } else {
+        throw new Error(result.message || 'Bilinmeyen sunucu hatası.');
+    }
     
   }catch(e){
+    console.error(e);
     btn.innerHTML=orig;
     btn.disabled=false;
-    showWarning('Bağlantı Hatası', 'Kayıt sırasında bir hata oluştu. İnternetinizi kontrol edin.');
+    showWarning('Kayıt Başarısız', 'Sebep: ' + e.message + '\n\nNOT: Google Apps Script üzerinde "Yeni Sürüm (New Version)" dağıtımı yapmayı unutmuş olabilirsiniz.');
   }
 }
 </script>
