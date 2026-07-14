@@ -690,6 +690,31 @@ function isRecordSale(r) {
   return amt > 0 || ord.indexOf('evet') > -1 || res.indexOf('satışa döndü') > -1 || res.indexOf('satış yapıldı') > -1 || res.indexOf('olumlu satış') > -1;
 }
 
+function parseAnyDate(dStr) {
+    if (!dStr) return 0;
+    
+    var str = String(dStr).trim();
+    
+    // 1. Öncelikli olarak Türkçe DD.MM.YYYY formatını yakala (Amerikan formatına kaymasını engeller)
+    var trRegex = /^(\d{1,2})\.(\d{1,2})\.(\d{4})(?:\s+(\d{1,2}:\d{1,2}))?/;
+    var match = str.match(trRegex);
+    if (match) {
+        var dd = match[1].padStart(2, '0');
+        var mm = match[2].padStart(2, '0');
+        var yyyy = match[3];
+        var time = match[4] || '00:00';
+        var isoStr = yyyy + '-' + mm + '-' + dd + 'T' + time + ':00';
+        var d2 = new Date(isoStr);
+        if (!isNaN(d2.getTime())) return d2.getTime();
+    }
+
+    // 2. Yukarıdaki şarta uymazsa standart (ISO) formatı olarak okumayı dene
+    var d = new Date(str);
+    if (!isNaN(d.getTime())) return d.getTime();
+
+    return 0;
+}
+
 function playNotificationSound() {
     try {
         var ctx = new (window.AudioContext || window.webkitAudioContext)();
@@ -793,7 +818,7 @@ async function fetchData(){
     var data=await res.json();
     if(data.records){
       allRecordsData=(data.records||[]).sort(function(a,b){
-        return(b.timestamp?new Date(b.timestamp):0)-(a.timestamp?new Date(a.timestamp):0);
+        return parseAnyDate(b.timestamp || b.date) - parseAnyDate(a.timestamp || a.date);
       });
       
       branchStatsData = data.stats.sort((a,b) => b.totalRevenue - a.totalRevenue);
@@ -1107,7 +1132,12 @@ function updateSalesView() {
     allSalesFiltered = allRecordsData.filter(function(r) {
         var isSale = isRecordSale(r);
         var matchBranch = (branchFilter === 'all') || (r.branch === branchFilter);
+        
         return isSale && matchBranch;
+    });
+
+    allSalesFiltered.sort(function(a, b) {
+        return parseAnyDate(b.timestamp || b.date) - parseAnyDate(a.timestamp || a.date);
     });
 
     var totalCount = allSalesFiltered.length;
@@ -1145,7 +1175,13 @@ function renderSalesGrid() {
     c.innerHTML=currentData.map(function(s){
         var clean=(s.branch||'').replace(/ \u015eubesi/gi,'');
         var ds='';
-        if(s.timestamp){var d=new Date(s.timestamp);if(!isNaN(d)) ds=d.toLocaleDateString('tr-TR',{day:'numeric',month:'short'})+' '+d.toLocaleTimeString('tr-TR',{hour:'2-digit',minute:'2-digit'});}
+        var t = parseAnyDate(s.timestamp || s.date);
+        if (t > 0) {
+            var d = new Date(t);
+            ds = d.toLocaleDateString('tr-TR',{day:'2-digit',month:'long'}) + ' ' + d.toLocaleTimeString('tr-TR',{hour:'2-digit',minute:'2-digit'});
+        } else {
+            ds = s.date || '';
+        }
         var prod=(s.product||s.category||'');
         var finalAmount = parseTurkishFloat(s.amount);
         return '<div style="background:var(--card-bg);border:1px solid var(--border);border-top:3px solid var(--sys-green);border-radius:1rem;padding:1.5rem;display:flex;flex-direction:column;gap:1rem;transition:all .3s ease; box-shadow:var(--shadow-sm)" onmouseover="this.style.borderColor=\'var(--sys-green)\'; this.style.transform=\'translateY(-2px)\'; this.style.boxShadow=\'var(--shadow-md)\'" onmouseout="this.style.borderTopColor=\'var(--sys-green)\';this.style.borderColor=\'var(--border)\'; this.style.transform=\'translateY(0)\'; this.style.boxShadow=\'var(--shadow-sm)\'">'
