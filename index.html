@@ -773,7 +773,7 @@ function parseCustomerText() {
         }
     }
 
-    // 2. Şube Çıkarımı (Şile ve Kumbaba Eklendi)
+    // 2. Şube Çıkarımı (GELİŞMİŞ: Metinde en son geçen şubeyi/ilçeyi baz alır, bot mesajlarını ezer)
     var branchMap = {
         'İnegöl Şubesi': ['inegöl', 'inegol', 'bursa', 'hamıtler', 'hamitler', 'osmangazi', 'nilüfer', 'yıldırım'],
         'Paşabahçe Şubesi': ['paşabahçe', 'pasabahce', 'beykoz', 'kavacık'],
@@ -790,20 +790,24 @@ function parseCustomerText() {
         'Düzce Şubesi': ['düzce', 'duzce', 'kalıcı konutlar']
     };
 
-    let branchFound = false;
+    let bestBranch = "";
+    let maxIndex = -1;
+
+    // Şubeleri ararken, metnin en sonunda geçen şubeyi "kullanıcının son kararı/lokasyonu" olarak kabul et
     BRANCHES.forEach(b => {
         var bLower = b.toLocaleLowerCase('tr-TR').replace(' şubesi', '').trim();
-        if (lowerText.includes(bLower)) { branch = b; branchFound = true; }
+        let idx = lowerText.lastIndexOf(bLower);
+        if (idx > maxIndex) { maxIndex = idx; bestBranch = b; }
     });
-    if (!branchFound) {
-        for (let bName in branchMap) {
-            let keywords = branchMap[bName];
-            for (let i = 0; i < keywords.length; i++) {
-                if (lowerText.includes(keywords[i])) { branch = bName; break; }
-            }
-            if (branch) break;
+
+    for (let bName in branchMap) {
+        let keywords = branchMap[bName];
+        for (let i = 0; i < keywords.length; i++) {
+            let idx = lowerText.lastIndexOf(keywords[i]);
+            if (idx > maxIndex) { maxIndex = idx; bestBranch = bName; }
         }
     }
+    if (bestBranch) branch = bestBranch;
 
     // 3. Medya Çıkarımı
     if (lowerText.includes('talep #') || lowerText.includes('tc kimlik') || lowerText.includes('ürünsku')) {
@@ -819,15 +823,14 @@ function parseCustomerText() {
 
     var lines = text.split('\n').map(l => l.trim()).filter(l => l.length > 0);
     
-    // Kategori Kütüphanesi
     var catMap = {
         'Beyaz Eşya': ['buzdolabı', 'çamaşır', 'bulaşık', 'fırın', 'ocak', 'davlumbaz', 'derin dondurucu', 'kurutma', 'ankastre', 'arçelik', 'beko', 'vestel', 'bosch', 'profilo', 'altus', 'electrolux', 'siemens', 'hoover', 'silverline', 'uğur'],
-        'Elektrikli-Benzinli Araç': ['benzinli', 'elektrikli motor', 'scooter', 'motosiklet', 'atv', 'motor', 'volta', 'rks', 'arora', 'kuba', 'moped', 'ebike', 'bisiklet', 'cc', 'yuki', 'kral', 'mondial', 'bajaj', 'kanuni'],
+        'Elektrikli-Benzinli Araç': ['benzinli', 'elektrikli motor', 'scooter', 'motosiklet', 'atv', 'motor', 'volta', 'rks', 'arora', 'kuba', 'moped', 'ebike', 'bisiklet', 'cc', 'yuki', 'kral', 'mondial', 'bajaj', 'kanuni', 'vsm'],
         'Elektronik': ['cep telefonu', 'akıllı telefon', 'tv', 'televizyon', 'pc', 'bilgisayar', 'tablet', 'kulaklık', 'akıllı saat', 'playstation', 'laptop', 'iphone', 'apple', 'samsung', 'xiaomi', 'poco', 'casper', 'lenovo', 'asus', 'general mobile', 'huawei', 'honor', 'vivo', 'oppo', 'omix', 'tcl', 'redmi', 'realme', 'tecno', 'infinix', 'reeder'],
         'Mobilya': ['koltuk', 'kanepe', 'masa', 'sandalye', 'dolap', 'sehpa', 'berjer', 'vitrin', 'konsol', 'tv ünitesi', 'gardırop', 'yatak odası', 'yemek odası', 'genç odası', 'zigon', 'kose', 'köşe takımı', 'çekyat', 'puf', 'şifonyer', 'komodin'],
         'Baza+Yatak+Başlık': ['baza', 'yatak', 'başlık', 'karyola', 'bambi', 'puffy', 'yatsan', 'işbir', 'yataş', 'idaş', 'istikbal', 'bellona', 'mondi'],
         'Bebek ve Çocuk': ['bebek', 'çoçuk', 'çocuk', 'beşik', 'oyuncak', 'mama sandalyesi', 'puset', 'akülü araba', 'bebek arabası', 'park yatak', 'kraft', 'pierre cardin', 'joie', 'kanz', 'prego', 'babyhope'],
-        'Elektrikli Ev Aletleri': ['süpürge', 'ütü', 'blender', 'tost', 'rondo', 'çaycı', 'kahve', 'mikser', 'fritöz', 'klima', 'vantilatör', 'ısıtıcı', 'airfryer', 'dyson', 'philips', 'tefal', 'fakir', 'arzum', 'korkmaz', 'karaca', 'homend', 'braun', 'delonghi', 'karcher', 'sinbo', 'cvs', 'goldmaster', 'arzum'],
+        'Elektrikli Ev Aletleri': ['süpürge', 'ütü', 'blender', 'tost', 'rondo', 'çaycı', 'kahve', 'mikser', 'fritöz', 'klima', 'vantilatör', 'ısıtıcı', 'airfryer', 'dyson', 'philips', 'tefal', 'fakir', 'arzum', 'korkmaz', 'karaca', 'homend', 'braun', 'delonghi', 'karcher', 'sinbo', 'cvs', 'goldmaster'],
         'Ev Dekorasyonu': ['dekorasyon', 'tablo', 'ayna', 'avize', 'abajur', 'duvar saati', 'biblo', 'vazo', 'çerçeve', 'şamdan', 'mumluk'],
         'Halı': ['halı', 'kilim', 'yolluk', 'merinos', 'padişah', 'dinarsu', 'saray', 'kaşmir', 'royal', 'pierre cardin halı', 'sanat halı', 'festival halı', 'angora'],
         'Kişisel Aksesuar': ['kol saati', 'çanta', 'cüzdan', 'kemer', 'parfüm', 'saat', 'güneş gözlüğü', 'takı', 'bijuteri', 'bavul', 'valiz'],
@@ -846,9 +849,10 @@ function parseCustomerText() {
             if (asMatch) name = asMatch[1].trim();
         }
         
-        let tutarIdx = lowerText.indexOf("tutar");
-        if (tutarIdx !== -1) {
-            let cutPos = tutarIdx + 5; 
+        let tLower = text.toLocaleLowerCase('tr-TR');
+        let tIdx = tLower.indexOf("tutar");
+        if (tIdx !== -1) {
+            let cutPos = tIdx + 5; 
             let afterTutar = text.substring(cutPos).replace(/^[:\-—\s]+/, '').trim();
             if (afterTutar) { product = afterTutar; }
         } else {
@@ -857,10 +861,9 @@ function parseCustomerText() {
         }
 
     } else if (media === 'Facebook') {
-        // İsim Tespiti
         if (lines.length > 0 && lines[0].length < 30 && !/\d/.test(lines[0])) { name = lines[0]; }
         
-        // Anti-Spam Bot Filtresi (Facebook mesajlarındaki çöp satırları atar)
+        // Anti-Spam Bot Filtresi (Botun standart yolladığı metinleri tamamen yok eder)
         let cleanLines = lines.filter(l => {
             let low = l.toLocaleLowerCase('tr-TR');
             return !low.includes('isim soyisim') && 
@@ -869,19 +872,38 @@ function parseCustomerText() {
                    !low.includes('bu konuşmayı ata') &&
                    !low.includes('reklama yanıt verdi') &&
                    !low.includes('yapay zeka') &&
-                   !low.includes('en son uygulamayı kullan');
+                   !low.includes('en son uygulamayı kullan') &&
+                   !low.includes('hedef alışveriş') &&
+                   !low.includes('gönderdi') &&
+                   !low.includes('linkten form doldurun') &&
+                   !low.includes('satısımız yoktur') &&
+                   !low.includes('bu iller için elden taksitli');
         });
 
-        // Kategori ve Ürün Bulma (Sadece Temiz Satırlarda)
         let foundKw = null;
         for (let cat in catMap) {
             let keywords = catMap[cat];
             for (let kw of keywords) {
                 for (let line of cleanLines) {
-                    if (line.toLocaleLowerCase('tr-TR').includes(kw)) {
+                    let lowerLine = line.toLocaleLowerCase('tr-TR');
+                    if (lowerLine.includes(kw)) {
                         foundKw = kw;
-                        // Uzun reklam metnini almak yerine sadece yakalanan anahtar kelimeyi BÜYÜK HARFLE ürün adı yap.
-                        product = kw.toLocaleUpperCase('tr-TR');
+                        let kwIndex = lowerLine.indexOf(kw);
+                        let prodName = kw.toLocaleUpperCase('tr-TR');
+                        
+                        // "Peki volta vsm" gibi ifadelerde "VOLTA" ile yetinmeyip cümlenin devamını (Örn: "VOLTA VSM") al
+                        if (line.length < 50) {
+                            let extracted = line.substring(kwIndex).toLocaleUpperCase('tr-TR').trim();
+                            extracted = extracted.replace(/[?.,!]/g, '').trim();
+                            if (extracted.length > 0) {
+                                prodName = extracted;
+                            }
+                        }
+                        
+                        // Eğer ürün ismi dümdüz "VOLTA" olarak kaldıysa, istenen formata dönüştür
+                        if (prodName === 'VOLTA') prodName = 'VOLTA ELEKTRİKLİ ARAÇ';
+                        
+                        product = prodName;
                         category = cat;
                         break;
                     }
@@ -918,7 +940,7 @@ function parseCustomerText() {
         }
     }
 
-    // 5. Akıllı Kategori Çıkarımı (Üstte bulunamadıysa metnin genelinden tarar)
+    // 5. Akıllı Kategori Çıkarımı
     if (!category) {
         let searchArea = product ? product.toLocaleLowerCase('tr-TR') : text.toLocaleLowerCase('tr-TR')
              .replace(/telefon\s*numara.*?/g, '')
