@@ -197,7 +197,6 @@ body.dark .theme-toggle .knob{transform:translateX(20px)}
 .trend-up {background:rgba(16, 185, 129, 0.15); color:var(--sys-green);}
 .trend-down {background:rgba(239, 68, 68, 0.15); color:var(--sys-red);}
 
-/* Konfeti CSS */
 .confetti { position: fixed; z-index: 9999; pointer-events: none; }
 </style>
 </head>
@@ -310,7 +309,6 @@ body.dark .theme-toggle .knob{transform:translateX(20px)}
       </div>
     </div>
     
-    <!-- YENİ: Grafik ve Canlı Akış Alanı -->
     <div class="grid-2col" style="margin-bottom:1.5rem; grid-template-columns: 2fr 1fr;">
        <div class="card" style="padding:1.5rem;">
           <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
@@ -363,7 +361,7 @@ body.dark .theme-toggle .knob{transform:translateX(20px)}
             <div style="font-size:0.85rem; font-weight:800; color:var(--text); text-transform:uppercase; letter-spacing:0.05em;"><i class="fas fa-magic" style="color:var(--sys-blue); margin-right:0.4rem;"></i>Yapay Zeka Metin Çözümleyici</div>
             <button class="btn btn-sm btn-primary" onclick="parseCustomerText()"><i class="fas fa-bolt mr-1"></i> Çözümle ve Satıra Aktar</button>
           </div>
-          <textarea id="parseArea" class="inp" style="height:80px; resize:vertical; font-size:0.85rem; padding:0.75rem;" placeholder="WhatsApp, E-Posta veya Notlar'dan gelen karmaşık metni buraya yapıştırın..."></textarea>
+          <textarea id="parseArea" class="inp" style="height:80px; resize:vertical; font-size:0.85rem; padding:0.75rem;" placeholder="WhatsApp, E-Posta, Meta veya Notlar'dan gelen karmaşık metni buraya yapıştırın..."></textarea>
         </div>
         
         <div id="inputContainer" style="display:flex;flex-direction:column;gap:1rem"></div>
@@ -435,7 +433,6 @@ body.dark .theme-toggle .knob{transform:translateX(20px)}
           <div><div style="font-size:1.1rem;font-weight:800;color:var(--text)">Satışa Dönenler</div><div style="font-size:.75rem;font-weight:600;color:var(--text3)">Tüm başarılı satış kayıtları</div></div>
         </div>
         <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
-          <!-- YENİ: Arama Çubuğu -->
           <div style="position:relative;">
              <i class="fas fa-search" style="position:absolute; left:12px; top:50%; transform:translateY(-50%); color:var(--text3); font-size:0.85rem;"></i>
              <input type="text" id="salesSearchInput" class="inp" placeholder="İsim veya ürün ara..." onkeyup="salesCurrentPage=1; updateSalesView();" style="height:38px; padding-left:2.2rem; width:220px; font-size:0.85rem; border-radius:0.75rem;">
@@ -613,7 +610,7 @@ const TABS = ['entry', 'dashboard', 'category', 'performance', 'sales', 'report'
 function toggleTheme(){
   var isDark=document.body.classList.toggle('dark');
   localStorage.setItem('theme',isDark?'dark':'light');
-  if(window.salesChartInstance) renderDashCharts(); // Grafiği temaya göre güncelle
+  if(window.salesChartInstance) renderDashCharts(); 
 }
 (function(){
   if(localStorage.getItem('theme')==='dark') document.body.classList.add('dark');
@@ -667,7 +664,6 @@ function showToast(msg) {
     }
 }
 
-// Konfeti Efekti Fonksiyonu (YENİ)
 function fireConfetti() {
     const colors = ['#0ea5e9', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#e11d48'];
     for(let i=0; i<80; i++) {
@@ -749,7 +745,8 @@ function parseAnyDate(dStr) {
 }
 
 function parseCustomerText() {
-    var text = document.getElementById('parseArea').value.trim();
+    var rawText = document.getElementById('parseArea').value;
+    var text = rawText.trim();
     if (!text) { showWarning('Boş Metin', 'Lütfen çözümlenecek müşteri bilgilerini kutucuğa yapıştırın.'); return; }
 
     var name = "", phone = "", branch = "", media = "", category = "", product = "";
@@ -763,7 +760,7 @@ function parseCustomerText() {
         if (rawPhone.length >= 10) phone = "0" + rawPhone.slice(-10);
     }
 
-    // SPAM VE MÜKERRER KONTROLÜ (Satır açmadan önce)
+    // SPAM VE MÜKERRER KONTROLÜ
     if (phone) {
         let compContact = getCompareNum(phone);
         if (compContact.length >= 7) {
@@ -782,20 +779,50 @@ function parseCustomerText() {
         }
     }
 
-    // 2. Şube Çıkarımı
+    // 2. Şube Çıkarımı (Gelişmiş - İlçeleri de tanır)
+    var branchMap = {
+        'İnegöl Şubesi': ['inegöl', 'inegol', 'bursa', 'hamıtler', 'hamitler', 'osmangazi', 'nilüfer', 'yıldırım'],
+        'Paşabahçe Şubesi': ['paşabahçe', 'pasabahce', 'beykoz', 'kavacık'],
+        'Çekmeköy Şubesi': ['çekmeköy', 'cekmekoy', 'madenler', 'taşdelen'],
+        'İzmit Şubesi': ['izmit', 'kocaeli', 'yahyakaptan', 'bekirdere'],
+        'Gölcük Şubesi': ['gölcük', 'golcuk', 'değirmendere'],
+        'Körfez Şubesi': ['körfez', 'korfez', 'yarımca', 'tütünçiftlik'],
+        'Derince Şubesi': ['derince', 'yenikent'],
+        'Sultanbeyli Şubesi': ['sultanbeyli', 'sultanbeyli', 'hasanpaşa'],
+        'Yenidoğan Şubesi': ['yenidoğan', 'yenidogan', 'sancaktepe'],
+        'Kavacık Şubesi': ['kavacık', 'kavacik', 'beykoz'],
+        'Çayırova Şubesi': ['çayırova', 'cayirova', 'şekerpınar'],
+        'Gebze Şubesi': ['gebze', 'mutlukent', 'darıca'],
+        'Düzce Şubesi': ['düzce', 'duzce', 'kalıcı konutlar']
+    };
+
+    let branchFound = false;
+    // Önce direkt şube adını arayalım
     BRANCHES.forEach(b => {
         var bLower = b.toLocaleLowerCase('tr-TR').replace(' şubesi', '').trim();
-        if (lowerText.includes(bLower)) branch = b;
+        if (lowerText.includes(bLower)) { branch = b; branchFound = true; }
     });
+    // Bulamazsa il/ilçe haritasından bakalım
+    if (!branchFound) {
+        for (let bName in branchMap) {
+            let keywords = branchMap[bName];
+            for (let i = 0; i < keywords.length; i++) {
+                if (lowerText.includes(keywords[i])) { branch = bName; break; }
+            }
+            if (branch) break;
+        }
+    }
 
-    // 3. Medya Çıkarımı
+    // 3. Medya Çıkarımı (Serbest Formata Uyum)
     if (lowerText.includes('talep #') || lowerText.includes('tc kimlik') || lowerText.includes('sepet') || lowerText.includes('ürünsku')) {
         media = 'Web Sitesi Form';
+    } else if (lowerText.includes('bu konuşmayı ata') || lowerText.includes('replied to an ad') || lowerText.includes('meta business') || lowerText.includes('facebook')) {
+        media = 'Facebook';
     } else {
-        ['instagram', 'whatsapp', 'facebook', 'çağrı', 'web sitesi form', 'sms link'].forEach(m => {
-            if (lowerText.includes(m)) media = m === 'çağrı' ? 'Çağrı' : (m === 'web sitesi form' ? 'Web Sitesi Form' : (m === 'sms link' ? 'SMS LİNK' : m.charAt(0).toUpperCase() + m.slice(1)));
+        ['instagram', 'whatsapp', 'facebook', 'çağrı', 'sms link'].forEach(m => {
+            if (lowerText.includes(m)) media = m === 'çağrı' ? 'Çağrı' : (m === 'sms link' ? 'SMS LİNK' : m.charAt(0).toUpperCase() + m.slice(1));
         });
-        if (!media) media = 'Whatsapp'; 
+        if (!media) media = 'Facebook'; // Hiçbir şey bulunamazsa varsayılan Facebook
     }
 
     // 4. İsim ve Ürün Çıkarımı
@@ -810,18 +837,29 @@ function parseCustomerText() {
             if (asMatch) name = asMatch[1].trim();
         }
         
-        let lowerTextForProd = text.toLocaleLowerCase('tr-TR');
-        let tutarIndex = lowerTextForProd.lastIndexOf("tutar");
-        
+        let tutarIndex = lowerText.indexOf("tutar");
         if (tutarIndex !== -1) {
             let cutPos = tutarIndex + 5; 
             let afterTutar = text.substring(cutPos).replace(/^[:\-—\s]+/, '').trim();
-            if (afterTutar) {
-                product = afterTutar;
+            if (afterTutar) { product = afterTutar; }
+        }
+    } else if (media === 'Facebook') {
+        // Serbest format isim (İlk satırı isim kabul et, çok uzun değilse ve sayı içermiyorsa)
+        if (lines.length > 0 && lines[0].length < 30 && !/\d/.test(lines[0])) {
+            name = lines[0];
+        }
+        
+        // Ürün adı tespiti (Mesajlaşmadaki bağlam)
+        for (let i = 0; i < lines.length; i++) {
+            let lLower = lines[i].toLocaleLowerCase('tr-TR');
+            if (lLower.includes('telefon') || lLower.includes('koltuk') || lLower.includes('yatak') || lLower.includes('dolap')) {
+                product = lines[i].substring(0, 50); // İlgili mesajı ürün adı olarak al (kısaltarak)
+                break;
             }
         }
     }
 
+    // Klasik isim arama (eğer yukarıdakiler bulamazsa)
     if (!name) {
         for (let i = 0; i < lines.length; i++) {
             let lLower = lines[i].toLocaleLowerCase('tr-TR');
@@ -830,15 +868,9 @@ function parseCustomerText() {
                 if(name) break;
             }
         }
-        if (!name && lines.length > 0) {
-            let firstLine = lines[0].toLocaleLowerCase('tr-TR');
-            if (!firstLine.match(/\d{5}/) && !firstLine.includes('şube') && !firstLine.includes('talep')) {
-                name = lines[0];
-            }
-        }
     }
 
-    if (!product && media !== 'Web Sitesi Form') {
+    if (!product && media !== 'Web Sitesi Form' && media !== 'Facebook') {
         for (let i = 0; i < lines.length; i++) {
             let lLower = lines[i].toLocaleLowerCase('tr-TR');
             if (lLower.includes('sku') && lLower.includes('adet')) continue;
@@ -851,21 +883,21 @@ function parseCustomerText() {
         }
     }
 
-    // 5. Kategori Çıkarımı
+    // 5. Akıllı Kategori Çıkarımı
     var catMap = {
-        'Mobilya': ['koltuk', 'kanepe', 'masa', 'sandalye', 'dolap', 'sehpa', 'berjer', 'vitrin', 'konsol', 'tv ünitesi', 'gardırop', 'yatak odası', 'yemek odası', 'genç odası', 'zigon'],
-        'Baza+Yatak+Başlık': ['baza', 'yatak', 'başlık', 'karyola', 'bambi', 'puffy', 'yatsan'],
-        'Bebek ve Çocuk': ['bebek', 'çoçuk', 'çocuk', 'beşik', 'oyuncak', 'mama sandalyesi', 'puset', 'akülü araba'],
-        'Beyaz Eşya': ['buzdolabı', 'çamaşır', 'bulaşık', 'fırın', 'ocak', 'davlumbaz', 'derin dondurucu', 'kurutma', 'ankastre', 'arçelik', 'beko', 'vestel', 'bosch', 'profilo', 'altus', 'electrolux', 'siemens'],
-        'Elektrikli Ev Aletleri': ['süpürge', 'ütü', 'blender', 'tost', 'rondo', 'çaycı', 'kahve', 'mikser', 'fritöz', 'klima', 'vantilatör', 'ısıtıcı', 'airfryer', 'dyson', 'philips', 'tefal', 'fakir', 'arzum'],
-        'Elektrikli-Benzinli Araç': ['benzinli', 'elektrikli motor', 'scooter', 'motosiklet', 'atv', 'motor', 'volta', 'rks', 'arora', 'kuba', 'moped', 'ebike', 'bisiklet', 'cc'],
-        'Elektronik': ['cep telefonu', 'akıllı telefon', 'tv', 'televizyon', 'pc', 'bilgisayar', 'tablet', 'kulaklık', 'akıllı saat', 'playstation', 'laptop', 'iphone', 'apple', 'samsung', 'xiaomi', 'poco', 'casper', 'lenovo', 'asus', 'general mobile', 'huawei', 'honor', 'vivo', 'oppo'],
-        'Ev Dekorasyonu': ['dekorasyon', 'tablo', 'ayna', 'avize', 'abajur', 'duvar saati'],
-        'Halı': ['halı', 'kilim', 'yolluk', 'merinos', 'padişah', 'dinarsu', 'saray'],
-        'Kişisel Aksesuar': ['kol saati', 'çanta', 'cüzdan', 'kemer', 'parfüm', 'saat'],
-        'Tekstil': ['nevresim', 'pike', 'battaniye', 'yorgan', 'havlu', 'perde', 'bornoz', 'taç', 'karaca', 'linens', 'english home', 'madame coco'],
-        'Züccaciye': ['tabak', 'bardak', 'tencere', 'tava', 'çatal', 'kaşık', 'bıçak', 'kase', 'fincan', 'yemek takımı', 'emsan', 'schafer', 'korkmaz', 'jumbo', 'bernardo', 'güral', 'kütahya'],
-        'Ayakkabı': ['ayakkabı', 'bot', 'çizme', 'terlik', 'spor ayakkabı', 'sneaker', 'nike', 'adidas', 'puma', 'kinetix', 'lumberjack', 'skechers', 'vans']
+        'Beyaz Eşya': ['buzdolabı', 'çamaşır', 'bulaşık', 'fırın', 'ocak', 'davlumbaz', 'derin dondurucu', 'kurutma', 'ankastre', 'arçelik', 'beko', 'vestel', 'bosch', 'profilo', 'altus', 'electrolux', 'siemens', 'hoover', 'silverline', 'uğur'],
+        'Elektrikli-Benzinli Araç': ['benzinli', 'elektrikli motor', 'scooter', 'motosiklet', 'atv', 'motor', 'volta', 'rks', 'arora', 'kuba', 'moped', 'ebike', 'bisiklet', 'cc', 'kuba', 'yuki', 'kral', 'mondial', 'bajaj', 'kanuni'],
+        'Elektronik': ['cep telefonu', 'akıllı telefon', 'tv', 'televizyon', 'pc', 'bilgisayar', 'tablet', 'kulaklık', 'akıllı saat', 'playstation', 'laptop', 'iphone', 'apple', 'samsung', 'xiaomi', 'poco', 'casper', 'lenovo', 'asus', 'general mobile', 'huawei', 'honor', 'vivo', 'oppo', 'omix', 'tcl', 'redmi', 'realme', 'tecno', 'infinix', 'reeder'],
+        'Mobilya': ['koltuk', 'kanepe', 'masa', 'sandalye', 'dolap', 'sehpa', 'berjer', 'vitrin', 'konsol', 'tv ünitesi', 'gardırop', 'yatak odası', 'yemek odası', 'genç odası', 'zigon', 'kose', 'köşe takımı', 'çekyat', 'puf', 'şifonyer', 'komodin'],
+        'Baza+Yatak+Başlık': ['baza', 'yatak', 'başlık', 'karyola', 'bambi', 'puffy', 'yatsan', 'işbir', 'yataş', 'idaş', 'istikbal', 'bellona', 'mondi'],
+        'Bebek ve Çocuk': ['bebek', 'çoçuk', 'çocuk', 'beşik', 'oyuncak', 'mama sandalyesi', 'puset', 'akülü araba', 'bebek arabası', 'park yatak', 'kraft', 'pierre cardin', 'joie', 'kanz', 'prego', 'babyhope'],
+        'Elektrikli Ev Aletleri': ['süpürge', 'ütü', 'blender', 'tost', 'rondo', 'çaycı', 'kahve', 'mikser', 'fritöz', 'klima', 'vantilatör', 'ısıtıcı', 'airfryer', 'dyson', 'philips', 'tefal', 'fakir', 'arzum', 'korkmaz', 'karaca', 'homend', 'braun', 'delonghi', 'karcher', 'sinbo', 'cvs', 'goldmaster', 'arzum'],
+        'Ev Dekorasyonu': ['dekorasyon', 'tablo', 'ayna', 'avize', 'abajur', 'duvar saati', 'biblo', 'vazo', 'çerçeve', 'şamdan', 'mumluk'],
+        'Halı': ['halı', 'kilim', 'yolluk', 'merinos', 'padişah', 'dinarsu', 'saray', 'kaşmir', 'royal', 'pierre cardin halı', 'sanat halı', 'festival halı', 'angora'],
+        'Kişisel Aksesuar': ['kol saati', 'çanta', 'cüzdan', 'kemer', 'parfüm', 'saat', 'güneş gözlüğü', 'takı', 'bijuteri', 'bavul', 'valiz'],
+        'Tekstil': ['nevresim', 'pike', 'battaniye', 'yorgan', 'havlu', 'perde', 'bornoz', 'taç', 'karaca', 'linens', 'english home', 'madame coco', 'sarev', 'cotton box', 'özdilek', 'sarar', 'hobby', 'kristal'],
+        'Züccaciye': ['tabak', 'bardak', 'tencere', 'tava', 'çatal', 'kaşık', 'bıçak', 'kase', 'fincan', 'yemek takımı', 'emsan', 'schafer', 'korkmaz', 'jumbo', 'bernardo', 'güral', 'kütahya', 'porland', 'paşabahçe', 'lav', 'keramika', 'aryıldız', 'hisar', 'nehir', 'cem', 'mehtap', 'papilla', 'essenso', 'tantitoni', 'bambum'],
+        'Ayakkabı': ['ayakkabı', 'bot', 'çizme', 'terlik', 'spor ayakkabı', 'sneaker', 'nike', 'adidas', 'puma', 'kinetix', 'lumberjack', 'skechers', 'vans', 'polaris', 'flo', 'defacto', 'lc waikiki', 'koton', 'mavi', 'colins']
     };
 
     let searchArea = product ? product.toLocaleLowerCase('tr-TR') : text.toLocaleLowerCase('tr-TR').replace(/telefon\s*\d+/g, '').replace(/e-posta/g, '');
@@ -877,6 +909,9 @@ function parseCustomerText() {
         }
         if (category) break;
     }
+
+    if (!product) product = "GENEL ÜRÜN BİLGİSİ";
+    if (!category) category = "GENEL ÜRÜN BİLGİSİ";
 
     var rows = document.querySelectorAll('#inputContainer > .entry-card');
     var targetRow = null;
@@ -1054,10 +1089,8 @@ function updateKPIsFromGlobal(globalData){
 }
 
 function renderDashCharts(){
-  // --- ÇİZGİ GRAFİK (CİRO TRENDİ) ---
   var ctx = document.getElementById('salesChart');
   if(ctx) {
-      // Satışları gün bazında grupla
       var salesByDate = {};
       allSalesFiltered.forEach(function(s) {
           var t = parseAnyDate(s.timestamp || s.date);
@@ -1068,14 +1101,11 @@ function renderDashCharts(){
           }
       });
       
-      // Son 7-10 günü sırayla göster
       var labels = [], chartData = [];
       var keys = Object.keys(salesByDate).sort(function(a,b) { 
-          // Basit sıralama için, aylar aynıysa güne göre (Bu kısım aynı ay içinde mükemmel çalışır)
           return parseInt(a) - parseInt(b);
       });
       
-      // Eğeri veri yoksa dummy data koyalım şık dursun
       if(keys.length === 0) {
           labels = ['1 Tem', '2 Tem', '3 Tem', '4 Tem', '5 Tem'];
           chartData = [0, 0, 0, 0, 0];
@@ -1124,7 +1154,6 @@ function renderDashCharts(){
       });
   }
 
-  // --- CANLI AKIŞ (YENİ) ---
   var feedContainer = document.getElementById('liveSalesFeed');
   if(feedContainer) {
       var latestSales = allSalesFiltered.slice(0, 5);
@@ -1387,7 +1416,7 @@ function openBranchDetails(branchName){
 
 function updateSalesView() {
     var branchFilter = document.getElementById('salesBranchFilter').value;
-    var searchFilter = document.getElementById('salesSearchInput') ? document.getElementById('salesSearchInput').value.toLowerCase('tr-TR') : "";
+    var searchFilter = document.getElementById('salesSearchInput') ? document.getElementById('salesSearchInput').value.toLocaleLowerCase('tr-TR') : "";
     
     allSalesFiltered = allRecordsData.filter(function(r) {
         var isSale = isRecordSale(r);
@@ -1395,8 +1424,8 @@ function updateSalesView() {
         
         var matchSearch = true;
         if(searchFilter) {
-            let n = (r.name || '').toLowerCase('tr-TR');
-            let p = (r.product || '').toLowerCase('tr-TR');
+            let n = (r.name || '').toLocaleLowerCase('tr-TR');
+            let p = (r.product || '').toLocaleLowerCase('tr-TR');
             matchSearch = n.includes(searchFilter) || p.includes(searchFilter);
         }
         return isSale && matchBranch && matchSearch;
@@ -1644,22 +1673,41 @@ async function submitAllRows(){
   btn.disabled=true;
   
   try{
-    let res = await fetch(GAS_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({action:'addCustomersBulk', data:data}) });
-    let text = await res.text(); let result = {};
-    try { result = JSON.parse(text); } catch (err) { result = { status: 'error', message: 'Sunucudan geçersiz yanıt döndü.' }; }
+    let res = await fetch(GAS_URL, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'text/plain;charset=utf-8' 
+        },
+        body: JSON.stringify({action:'addCustomersBulk', data:data})
+    });
+    
+    let text = await res.text();
+    let result = {};
+    try {
+        result = JSON.parse(text);
+    } catch (err) {
+        result = { status: 'error', message: 'Sunucudan geçersiz yanıt döndü. Apps Script sürümünüz güncel olmayabilir.' };
+    }
 
     if (result.status === 'success') {
         setTimeout(function() {
             document.getElementById('inputContainer').innerHTML='';
-            addInputRow(); refreshData();
-            btn.innerHTML=orig; btn.disabled=false;
+            addInputRow();
+            refreshData();
+            btn.innerHTML=orig;
+            btn.disabled=false;
             showToast('Müşteri kayıtları başarıyla sisteme aktarıldı.');
-            fireConfetti(); // YENİ: Başarı animasyonu
+            fireConfetti();
         }, 500); 
-    } else { throw new Error(result.message || 'Bilinmeyen sunucu hatası.'); }
+    } else {
+        throw new Error(result.message || 'Bilinmeyen sunucu hatası.');
+    }
+    
   }catch(e){
-    console.error(e); btn.innerHTML=orig; btn.disabled=false;
-    showWarning('Kayıt Başarısız', 'Sebep: ' + e.message + '\n\nNOT: Google Apps Script üzerinde "Yeni Sürüm" dağıtımı yapmayı unutmuş olabilirsiniz.');
+    console.error(e);
+    btn.innerHTML=orig;
+    btn.disabled=false;
+    showWarning('Kayıt Başarısız', 'Sebep: ' + e.message + '\n\nNOT: Google Apps Script üzerinde "Yeni Sürüm (New Version)" dağıtımı yapmayı unutmuş olabilirsiniz.');
   }
 }
 </script>
