@@ -765,25 +765,19 @@ function parseCustomerText() {
         let compContact = getCompareNum(phone);
         if (compContact.length >= 7) {
             let exists = allRecordsData.find(r => getCompareNum(r.contact) === compContact);
-            if (exists) {
-                showWarning('Mükerrer Kayıt', 'Bu numara sistemde kayıtlı!\n\nKayıtlı Müşteri: ' + (exists.name || 'Bilinmiyor') + '\nKayıtlı Şube: ' + exists.branch);
-                return; 
-            }
+            if (exists) { showWarning('Mükerrer Kayıt', 'Bu numara sistemde kayıtlı!\n\nMüşteri: ' + (exists.name || 'Bilinmiyor') + '\nŞube: ' + exists.branch); return; }
             let currentInputs = document.querySelectorAll('.inp-contact');
             for(let i=0; i<currentInputs.length; i++) {
-                if (getCompareNum(currentInputs[i].value) === compContact) {
-                    showWarning('Spam Engeli', 'Bu numarayı az önce aşağıdaki satırlardan birine zaten eklediniz!');
-                    return; 
-                }
+                if (getCompareNum(currentInputs[i].value) === compContact) { showWarning('Spam Engeli', 'Bu numarayı az önce aşağıdaki satırlardan birine eklediniz!'); return; }
             }
         }
     }
 
-    // 2. Şube Çıkarımı (Gelişmiş - İlçeleri de tanır)
+    // 2. Şube Çıkarımı (Şile ve Kumbaba Eklendi)
     var branchMap = {
         'İnegöl Şubesi': ['inegöl', 'inegol', 'bursa', 'hamıtler', 'hamitler', 'osmangazi', 'nilüfer', 'yıldırım'],
         'Paşabahçe Şubesi': ['paşabahçe', 'pasabahce', 'beykoz', 'kavacık'],
-        'Çekmeköy Şubesi': ['çekmeköy', 'cekmekoy', 'madenler', 'taşdelen'],
+        'Çekmeköy Şubesi': ['çekmeköy', 'cekmekoy', 'madenler', 'taşdelen', 'şile', 'sile', 'kumbaba'],
         'İzmit Şubesi': ['izmit', 'kocaeli', 'yahyakaptan', 'bekirdere'],
         'Gölcük Şubesi': ['gölcük', 'golcuk', 'değirmendere'],
         'Körfez Şubesi': ['körfez', 'korfez', 'yarımca', 'tütünçiftlik'],
@@ -797,12 +791,10 @@ function parseCustomerText() {
     };
 
     let branchFound = false;
-    // Önce direkt şube adını arayalım
     BRANCHES.forEach(b => {
         var bLower = b.toLocaleLowerCase('tr-TR').replace(' şubesi', '').trim();
         if (lowerText.includes(bLower)) { branch = b; branchFound = true; }
     });
-    // Bulamazsa il/ilçe haritasından bakalım
     if (!branchFound) {
         for (let bName in branchMap) {
             let keywords = branchMap[bName];
@@ -813,80 +805,24 @@ function parseCustomerText() {
         }
     }
 
-    // 3. Medya Çıkarımı (Serbest Formata Uyum)
-    if (lowerText.includes('talep #') || lowerText.includes('tc kimlik') || lowerText.includes('sepet') || lowerText.includes('ürünsku')) {
+    // 3. Medya Çıkarımı
+    if (lowerText.includes('talep #') || lowerText.includes('tc kimlik') || lowerText.includes('ürünsku')) {
         media = 'Web Sitesi Form';
-    } else if (lowerText.includes('bu konuşmayı ata') || lowerText.includes('replied to an ad') || lowerText.includes('meta business') || lowerText.includes('facebook')) {
+    } else if (lowerText.includes('bu konuşmayı ata') || lowerText.includes('replied to an ad') || lowerText.includes('meta business') || lowerText.includes('facebook') || lowerText.includes('fb.com')) {
         media = 'Facebook';
     } else {
         ['instagram', 'whatsapp', 'facebook', 'çağrı', 'sms link'].forEach(m => {
             if (lowerText.includes(m)) media = m === 'çağrı' ? 'Çağrı' : (m === 'sms link' ? 'SMS LİNK' : m.charAt(0).toUpperCase() + m.slice(1));
         });
-        if (!media) media = 'Facebook'; // Hiçbir şey bulunamazsa varsayılan Facebook
+        if (!media) media = 'Facebook'; 
     }
 
-    // 4. İsim ve Ürün Çıkarımı
     var lines = text.split('\n').map(l => l.trim()).filter(l => l.length > 0);
-
-    if (media === 'Web Sitesi Form') {
-        let nameMatch = text.match(/Talep\s*#\d+\s*[—\-]\s*(.+)/i);
-        if (nameMatch) {
-            name = nameMatch[1].trim();
-        } else {
-            let asMatch = text.match(/Ad Soyad(.*?)(?:Telefon|E-posta|TC Kimlik)/i);
-            if (asMatch) name = asMatch[1].trim();
-        }
-        
-        let tutarIndex = lowerText.indexOf("tutar");
-        if (tutarIndex !== -1) {
-            let cutPos = tutarIndex + 5; 
-            let afterTutar = text.substring(cutPos).replace(/^[:\-—\s]+/, '').trim();
-            if (afterTutar) { product = afterTutar; }
-        }
-    } else if (media === 'Facebook') {
-        // Serbest format isim (İlk satırı isim kabul et, çok uzun değilse ve sayı içermiyorsa)
-        if (lines.length > 0 && lines[0].length < 30 && !/\d/.test(lines[0])) {
-            name = lines[0];
-        }
-        
-        // Ürün adı tespiti (Mesajlaşmadaki bağlam)
-        for (let i = 0; i < lines.length; i++) {
-            let lLower = lines[i].toLocaleLowerCase('tr-TR');
-            if (lLower.includes('telefon') || lLower.includes('koltuk') || lLower.includes('yatak') || lLower.includes('dolap')) {
-                product = lines[i].substring(0, 50); // İlgili mesajı ürün adı olarak al (kısaltarak)
-                break;
-            }
-        }
-    }
-
-    // Klasik isim arama (eğer yukarıdakiler bulamazsa)
-    if (!name) {
-        for (let i = 0; i < lines.length; i++) {
-            let lLower = lines[i].toLocaleLowerCase('tr-TR');
-            if (lLower.startsWith('ad') || lLower.startsWith('isim') || lLower.startsWith('müşteri')) {
-                name = lines[i].split(/[:\-—]/)[1]?.trim() || "";
-                if(name) break;
-            }
-        }
-    }
-
-    if (!product && media !== 'Web Sitesi Form' && media !== 'Facebook') {
-        for (let i = 0; i < lines.length; i++) {
-            let lLower = lines[i].toLocaleLowerCase('tr-TR');
-            if (lLower.includes('sku') && lLower.includes('adet')) continue;
-            if (lLower.includes('ürün') || lLower.includes('urun') || lLower.includes('model') || lLower.includes('ilgi')) {
-                let p = lines[i].split(/[:\-—]/);
-                let potProd = p.length > 1 ? p.slice(1).join('-').trim() : lines[i];
-                potProd = potProd.replace(/ürün|urun|model|ilgilenilen|ilgi/gi, '').trim();
-                if(potProd) { product = potProd; break; }
-            }
-        }
-    }
-
-    // 5. Akıllı Kategori Çıkarımı
+    
+    // Kategori Kütüphanesi
     var catMap = {
         'Beyaz Eşya': ['buzdolabı', 'çamaşır', 'bulaşık', 'fırın', 'ocak', 'davlumbaz', 'derin dondurucu', 'kurutma', 'ankastre', 'arçelik', 'beko', 'vestel', 'bosch', 'profilo', 'altus', 'electrolux', 'siemens', 'hoover', 'silverline', 'uğur'],
-        'Elektrikli-Benzinli Araç': ['benzinli', 'elektrikli motor', 'scooter', 'motosiklet', 'atv', 'motor', 'volta', 'rks', 'arora', 'kuba', 'moped', 'ebike', 'bisiklet', 'cc', 'kuba', 'yuki', 'kral', 'mondial', 'bajaj', 'kanuni'],
+        'Elektrikli-Benzinli Araç': ['benzinli', 'elektrikli motor', 'scooter', 'motosiklet', 'atv', 'motor', 'volta', 'rks', 'arora', 'kuba', 'moped', 'ebike', 'bisiklet', 'cc', 'yuki', 'kral', 'mondial', 'bajaj', 'kanuni'],
         'Elektronik': ['cep telefonu', 'akıllı telefon', 'tv', 'televizyon', 'pc', 'bilgisayar', 'tablet', 'kulaklık', 'akıllı saat', 'playstation', 'laptop', 'iphone', 'apple', 'samsung', 'xiaomi', 'poco', 'casper', 'lenovo', 'asus', 'general mobile', 'huawei', 'honor', 'vivo', 'oppo', 'omix', 'tcl', 'redmi', 'realme', 'tecno', 'infinix', 'reeder'],
         'Mobilya': ['koltuk', 'kanepe', 'masa', 'sandalye', 'dolap', 'sehpa', 'berjer', 'vitrin', 'konsol', 'tv ünitesi', 'gardırop', 'yatak odası', 'yemek odası', 'genç odası', 'zigon', 'kose', 'köşe takımı', 'çekyat', 'puf', 'şifonyer', 'komodin'],
         'Baza+Yatak+Başlık': ['baza', 'yatak', 'başlık', 'karyola', 'bambi', 'puffy', 'yatsan', 'işbir', 'yataş', 'idaş', 'istikbal', 'bellona', 'mondi'],
@@ -900,19 +836,108 @@ function parseCustomerText() {
         'Ayakkabı': ['ayakkabı', 'bot', 'çizme', 'terlik', 'spor ayakkabı', 'sneaker', 'nike', 'adidas', 'puma', 'kinetix', 'lumberjack', 'skechers', 'vans', 'polaris', 'flo', 'defacto', 'lc waikiki', 'koton', 'mavi', 'colins']
     };
 
-    let searchArea = product ? product.toLocaleLowerCase('tr-TR') : text.toLocaleLowerCase('tr-TR').replace(/telefon\s*\d+/g, '').replace(/e-posta/g, '');
-
-    for (let cat in catMap) {
-        let keywords = catMap[cat];
-        for (let i = 0; i < keywords.length; i++) {
-            if (searchArea.includes(keywords[i])) { category = cat; break; }
+    // 4. İsim ve Ürün Çıkarımı
+    if (media === 'Web Sitesi Form') {
+        let nameMatch = text.match(/Talep\s*#\d+\s*[—\-]\s*(.+)/i);
+        if (nameMatch) {
+            name = nameMatch[1].trim();
+        } else {
+            let asMatch = text.match(/Ad Soyad(.*?)(?:Telefon|E-posta|TC Kimlik)/i);
+            if (asMatch) name = asMatch[1].trim();
         }
-        if (category) break;
+        
+        let tutarIdx = lowerText.indexOf("tutar");
+        if (tutarIdx !== -1) {
+            let cutPos = tutarIdx + 5; 
+            let afterTutar = text.substring(cutPos).replace(/^[:\-—\s]+/, '').trim();
+            if (afterTutar) { product = afterTutar; }
+        } else {
+            let fallbackMatch = text.match(/(?:Ürün|Urun)\s*SKU\s*Adet\s*Taksit\s*Tutar(.*?)$/i);
+            if (fallbackMatch && fallbackMatch[1].trim()) { product = fallbackMatch[1].trim(); }
+        }
+
+    } else if (media === 'Facebook') {
+        // İsim Tespiti
+        if (lines.length > 0 && lines[0].length < 30 && !/\d/.test(lines[0])) { name = lines[0]; }
+        
+        // Anti-Spam Bot Filtresi (Facebook mesajlarındaki çöp satırları atar)
+        let cleanLines = lines.filter(l => {
+            let low = l.toLocaleLowerCase('tr-TR');
+            return !low.includes('isim soyisim') && 
+                   !low.includes('telefon numara') && 
+                   !low.includes('irtibat numara') &&
+                   !low.includes('bu konuşmayı ata') &&
+                   !low.includes('reklama yanıt verdi') &&
+                   !low.includes('yapay zeka') &&
+                   !low.includes('en son uygulamayı kullan');
+        });
+
+        // Kategori ve Ürün Bulma (Sadece Temiz Satırlarda)
+        let foundKw = null;
+        for (let cat in catMap) {
+            let keywords = catMap[cat];
+            for (let kw of keywords) {
+                for (let line of cleanLines) {
+                    if (line.toLocaleLowerCase('tr-TR').includes(kw)) {
+                        foundKw = kw;
+                        // Uzun reklam metnini almak yerine sadece yakalanan anahtar kelimeyi BÜYÜK HARFLE ürün adı yap.
+                        product = kw.toLocaleUpperCase('tr-TR');
+                        category = cat;
+                        break;
+                    }
+                }
+                if (foundKw) break;
+            }
+            if (foundKw) break;
+        }
+
+    } else {
+        // İsim arama (WhatsApp vb. için)
+        if (!name) {
+            for (let i = 0; i < lines.length; i++) {
+                let lLower = lines[i].toLocaleLowerCase('tr-TR');
+                if (lLower.startsWith('ad') || lLower.startsWith('isim') || lLower.startsWith('müşteri')) {
+                    name = lines[i].split(/[:\-—]/)[1]?.trim() || "";
+                    if(name) break;
+                }
+            }
+        }
+
+        // Ürün arama (WhatsApp vb. için)
+        if (!product) {
+            for (let i = 0; i < lines.length; i++) {
+                let lLower = lines[i].toLocaleLowerCase('tr-TR');
+                if (lLower.includes('sku') && lLower.includes('adet')) continue;
+                if (lLower.includes('ürün') || lLower.includes('urun') || lLower.includes('model') || lLower.includes('ilgi')) {
+                    let p = lines[i].split(/[:\-—]/);
+                    let potProd = p.length > 1 ? p.slice(1).join('-').trim() : lines[i];
+                    potProd = potProd.replace(/ürün|urun|model|ilgilenilen|ilgi/gi, '').trim();
+                    if(potProd) { product = potProd; break; }
+                }
+            }
+        }
     }
 
+    // 5. Akıllı Kategori Çıkarımı (Üstte bulunamadıysa metnin genelinden tarar)
+    if (!category) {
+        let searchArea = product ? product.toLocaleLowerCase('tr-TR') : text.toLocaleLowerCase('tr-TR')
+             .replace(/telefon\s*numara.*?/g, '')
+             .replace(/isim\s*soyisim.*?/g, '');
+
+        for (let cat in catMap) {
+            let keywords = catMap[cat];
+            for (let i = 0; i < keywords.length; i++) {
+                if (searchArea.includes(keywords[i])) { category = cat; break; }
+            }
+            if (category) break;
+        }
+    }
+
+    // Hiçbir şey bulunamazsa varsayılanlar
     if (!product) product = "GENEL ÜRÜN BİLGİSİ";
     if (!category) category = "GENEL ÜRÜN BİLGİSİ";
 
+    // Forma Aktarma
     var rows = document.querySelectorAll('#inputContainer > .entry-card');
     var targetRow = null;
     
