@@ -31,6 +31,7 @@ body.dark{
   --scroll-thumb:#363e5f;
   --shadow-sm: 0 4px 6px -1px rgba(0,0,0,0.3);
   --shadow-md: 0 10px 25px -5px rgba(0,0,0,0.4);
+  --shadow-glow: 0 0 20px rgba(14, 165, 233, 0.15);
   --sys-blue: #0ea5e9;
   --sys-green: #10b981;
   --sys-orange: #f59e0b;
@@ -57,6 +58,7 @@ body{
   --scroll-thumb:#cbd5e1;
   --shadow-sm: 0 4px 6px -1px rgba(0,0,0,0.05);
   --shadow-md: 0 10px 25px -5px rgba(0,0,0,0.05), 0 8px 10px -6px rgba(0,0,0,0.01);
+  --shadow-glow: 0 10px 30px rgba(14, 165, 233, 0.1);
   --sys-blue: #0ea5e9;
   --sys-green: #10b981;
   --sys-orange: #f59e0b;
@@ -75,8 +77,8 @@ body{background:var(--bg);color:var(--text);font-family:'Plus Jakarta Sans',sans
 @keyframes pulse-ring{0%{box-shadow:0 0 0 0 rgba(16,185,129,.4)}70%{box-shadow:0 0 0 6px rgba(16,185,129,0)}100%{box-shadow:0 0 0 0 rgba(16,185,129,0)}}
 .pulse{width:8px;height:8px;border-radius:50%;background:#10b981;box-shadow:0 0 0 0 rgba(16,185,129,.4);animation:pulse-ring 2s infinite;flex-shrink:0}
 
-.card{background:var(--card-bg);border-radius:1.25rem;border:1px solid var(--border);box-shadow:var(--shadow-sm);overflow:hidden; transition: box-shadow 0.3s ease, transform 0.3s ease;}
-.card:hover { box-shadow: var(--shadow-md); }
+.card{background:var(--card-bg);border-radius:1.25rem;border:1px solid var(--border);box-shadow:var(--shadow-sm);overflow:hidden; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);}
+.card:hover { box-shadow: var(--shadow-glow); transform: translateY(-2px); border-color: rgba(14, 165, 233, 0.3); }
 
 .inp-label{display:block;font-size:.75rem;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--text3);margin-bottom:.4rem}
 .inp{width:100%;padding:.65rem 1rem;font-size:.95rem;font-weight:600;color:var(--text);background:var(--inp-bg);border:1px solid var(--inp-border);border-radius:.875rem;outline:none;transition:all .25s cubic-bezier(0.4, 0, 0.2, 1);height:48px;font-family:'Plus Jakarta Sans',sans-serif}
@@ -94,7 +96,7 @@ select.inp{appearance:none;line-height:1.5;background-image:url("data:image/svg+
 .btn-danger:hover{transform:translateY(-2px);box-shadow:0 6px 16px rgba(239,68,68,.3)}
 .btn-sm{height:38px;padding:.4rem 1rem;font-size:.85rem}
 .btn-icon{width:38px;height:38px;padding:0;background:var(--surface2);border:1px solid var(--border);border-radius:10px;color:var(--text3);transition:all 0.2s}
-.btn-icon:hover{background:var(--border);color:var(--text);transform:scale(1.05)}
+.btn-icon:hover{background:var(--sys-blue);color:#fff;transform:scale(1.05); border-color:var(--sys-blue);}
 
 .nav-tab{padding:.6rem 1.2rem;border-radius:.75rem;font-size:.9rem;font-weight:700;color:var(--text3);cursor:pointer;transition:all .3s cubic-bezier(0.4, 0, 0.2, 1);white-space:nowrap;user-select:none;display:flex;align-items:center;gap:0.4rem;}
 .nav-tab.active{background:#0ea5e9;color:#fff;box-shadow:0 4px 12px rgba(14,165,233,.3); transform:translateY(-1px);}
@@ -105,10 +107,10 @@ select.inp{appearance:none;line-height:1.5;background-image:url("data:image/svg+
 .tbl-row:hover td{background:var(--tbl-hover)}
 .tbl-row:last-child td{border-bottom:none}
 
-.kpi-card{position:relative;background:var(--card-bg);border-radius:1.25rem;border:1px solid var(--border);padding:1.4rem;border-left:4px solid var(--accent,#0ea5e9);box-shadow:var(--shadow-sm);transition:all .3s ease;overflow:hidden;}
-.kpi-card:hover{box-shadow:var(--shadow-md);transform:translateY(-3px);}
-.kpi-card .kpi-icon-bg { position:absolute; right:-15px; bottom:-15px; font-size:5rem; color:var(--accent); opacity:0.07; transform:rotate(-15deg); transition:all 0.3s ease; pointer-events:none;}
-.kpi-card:hover .kpi-icon-bg { transform:rotate(0deg) scale(1.1); opacity:0.12; }
+.kpi-card{position:relative;background:var(--card-bg);border-radius:1.25rem;border:1px solid var(--border);padding:1.4rem;border-left:4px solid var(--accent,#0ea5e9);box-shadow:var(--shadow-sm);transition:all .3s cubic-bezier(0.4, 0, 0.2, 1);overflow:hidden;}
+.kpi-card:hover{box-shadow:var(--shadow-md);transform:translateY(-4px); border-color:var(--accent);}
+.kpi-card .kpi-icon-bg { position:absolute; right:-15px; bottom:-15px; font-size:5rem; color:var(--accent); opacity:0.07; transform:rotate(-15deg); transition:all 0.4s ease; pointer-events:none;}
+.kpi-card:hover .kpi-icon-bg { transform:rotate(0deg) scale(1.15); opacity:0.12; }
 
 .entry-card{background:var(--card-bg);border:1px solid var(--border);border-radius:1rem;padding:1.5rem;transition:all .3s ease;box-shadow:var(--shadow-sm)}
 .entry-card:hover{border-color:#0ea5e9; box-shadow:var(--shadow-md)}
@@ -119,7 +121,6 @@ select.inp{appearance:none;line-height:1.5;background-image:url("data:image/svg+
 .prog-bg{background:var(--prog-bg);border-radius:6px;height:8px;overflow:hidden}
 .prog-fill{height:100%;border-radius:6px;transition:width 0.8s cubic-bezier(0.4, 0, 0.2, 1)}
 
-/* Toast Notification */
 .toast { position:fixed; bottom:-100px; left:50%; transform:translateX(-50%); background:var(--sys-green); color:#fff; padding:12px 24px; border-radius:50px; font-weight:700; font-size:1rem; box-shadow:0 10px 25px rgba(16,185,129,0.4); transition:bottom 0.4s cubic-bezier(0.4, 0, 0.2, 1); z-index:9999; display:flex; align-items:center; gap:8px; pointer-events:none;}
 .toast.show { bottom: 30px; }
 
@@ -153,10 +154,12 @@ select.inp{appearance:none;line-height:1.5;background-image:url("data:image/svg+
 }
 
 .grid-2col{display:grid;grid-template-columns:1fr 1fr;gap:1.25rem}
+.grid-3col{display:grid;grid-template-columns:1fr 1fr 1fr;gap:1.25rem}
 .grid-kpi{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1rem;margin-bottom:1.5rem}
 
 @media(max-width:1024px){
   .grid-2col{grid-template-columns:1fr}
+  .grid-3col{grid-template-columns:1fr}
   .app-header { top: 0.5rem; }
 }
 
@@ -175,7 +178,6 @@ select.inp{appearance:none;line-height:1.5;background-image:url("data:image/svg+
   #mainApp{padding:.5rem .5rem 5rem}
   .grid-kpi{grid-template-columns:1fr}
   .nav-tab{padding:.5rem .75rem;font-size:.8rem}
-  .chart-wrap{height:200px}
   .kpi-card{padding:1.25rem}
   .tabs-row{gap:.35rem}
   .sec-header{padding:1rem 1.25rem}
@@ -195,6 +197,8 @@ body.dark .theme-toggle .knob{transform:translateX(20px)}
 .trend-up {background:rgba(16, 185, 129, 0.15); color:var(--sys-green);}
 .trend-down {background:rgba(239, 68, 68, 0.15); color:var(--sys-red);}
 
+/* Konfeti CSS */
+.confetti { position: fixed; z-index: 9999; pointer-events: none; }
 </style>
 </head>
 <body>
@@ -202,10 +206,10 @@ body.dark .theme-toggle .knob{transform:translateX(20px)}
 <div id="loginScreen" style="position:fixed;inset:0;z-index:1000;background:var(--bg);display:flex;align-items:center;justify-content:center;padding:1rem; transition: opacity 0.4s ease;">
   <div style="background:var(--card-bg);border:1px solid var(--border);border-radius:1.75rem;padding:3rem 2.5rem;width:100%;max-width:400px;text-align:center;box-shadow:var(--shadow-md)">
     <div style="width:72px;height:72px;background:linear-gradient(135deg,#0ea5e9,#6366f1);border-radius:20px;display:flex;align-items:center;justify-content:center;margin:0 auto 1.5rem;box-shadow:0 10px 25px rgba(14,165,233,.4)">
-      <i class="fas fa-chart-line" style="color:#fff;font-size:1.8rem"></i>
+      <i class="fas fa-bolt" style="color:#fff;font-size:1.8rem"></i>
     </div>
     <h2 style="font-size:1.6rem;font-weight:800;color:var(--text);margin-bottom:.3rem">HEDEF AVM</h2>
-    <p style="font-size:.75rem;font-weight:800;color:var(--text3);text-transform:uppercase;letter-spacing:.15em;margin-bottom:2rem">E-TİCARET CRM PANELİ</p>
+    <p style="font-size:.75rem;font-weight:800;color:var(--text3);text-transform:uppercase;letter-spacing:.15em;margin-bottom:2rem">Gelişmiş CRM Platformu</p>
     <div style="position:relative;margin-bottom:1rem">
       <i class="fas fa-lock" style="position:absolute;left:1.25rem;top:50%;transform:translateY(-50%);color:var(--text3);font-size:1rem"></i>
       <input type="password" id="loginPass" class="inp" style="padding-left:3rem;height:52px;font-size:1.1rem;text-align:center;letter-spacing:.2em; border-radius:1rem;" placeholder="Şifrenizi giriniz">
@@ -221,7 +225,7 @@ body.dark .theme-toggle .knob{transform:translateX(20px)}
     <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem;margin-bottom:1rem">
       <div style="display:flex;align-items:center;gap:1rem">
         <div style="width:46px;height:46px;background:linear-gradient(135deg,#0ea5e9,#6366f1);border-radius:12px;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 15px rgba(14,165,233,.35);flex-shrink:0">
-          <i class="fas fa-chart-pie" style="color:#fff;font-size:1.2rem"></i>
+          <i class="fas fa-layer-group" style="color:#fff;font-size:1.2rem"></i>
         </div>
         <div>
           <div style="font-size:1.3rem;font-weight:800;color:var(--text);line-height:1.1">HEDEF AVM CRM</div>
@@ -249,7 +253,7 @@ body.dark .theme-toggle .knob{transform:translateX(20px)}
       <div class="nav-tab active" onclick="switchTab('entry')" id="tab-entry"><i class="fas fa-user-plus"></i> Müşteri Kayıt</div>
       <div class="nav-tab" onclick="switchTab('category')" id="tab-category"><i class="fas fa-tags"></i> Kategori Analizi</div>
       <div class="nav-tab" onclick="switchTab('performance')" id="tab-performance"><i class="fas fa-trophy"></i> Performans</div>
-      <div class="nav-tab" onclick="switchTab('sales')" id="tab-sales"><i class="fas fa-shopping-bag"></i> Satışa Dönenler</div>
+      <div class="nav-tab" onclick="switchTab('sales')" id="tab-sales"><i class="fas fa-bolt"></i> Satışa Dönenler</div>
       <div class="nav-tab" onclick="switchTab('report')" id="tab-report"><i class="fas fa-file-invoice"></i> Gelişmiş Rapor</div>
     </div>
   </header>
@@ -306,7 +310,25 @@ body.dark .theme-toggle .knob{transform:translateX(20px)}
       </div>
     </div>
     
-    <div class="grid-2col" style="margin-bottom:1.5rem">
+    <!-- YENİ: Grafik ve Canlı Akış Alanı -->
+    <div class="grid-2col" style="margin-bottom:1.5rem; grid-template-columns: 2fr 1fr;">
+       <div class="card" style="padding:1.5rem;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
+             <div style="font-size:.85rem;font-weight:800;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;"><i class="fas fa-chart-line mr-2" style="color:var(--sys-blue)"></i>Günlük Ciro Trendi (₺)</div>
+          </div>
+          <div style="position: relative; height: 280px; width: 100%;">
+             <canvas id="salesChart"></canvas>
+          </div>
+       </div>
+       <div class="card" style="padding:1.5rem; display:flex; flex-direction:column; border-top: 4px solid var(--sys-green);">
+          <div style="font-size:.85rem;font-weight:800;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:1rem;"><i class="fas fa-bolt mr-2" style="color:var(--sys-green)"></i>Canlı Satış Akışı</div>
+          <div id="liveSalesFeed" style="flex:1; overflow-y:auto; padding-right:0.5rem; display:flex; flex-direction:column; gap:0.75rem;">
+              <div style="text-align:center; color:var(--text3); font-size:0.85rem; padding: 2rem 0;">Veriler yükleniyor...</div>
+          </div>
+       </div>
+    </div>
+
+    <div class="grid-3col" style="margin-bottom:1.5rem">
       <div class="card" style="padding:1.5rem; display:flex; flex-direction:column;">
         <div style="font-size:.75rem;font-weight:800;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:1rem"><i class="fas fa-list-ul mr-2" style="color:var(--sys-blue)"></i>Medya Kanalı Dağılımı</div>
         <div id="mediaListContainer" style="max-height: 250px; overflow-y: auto; padding-right: 0.5rem; flex:1;"></div>
@@ -315,18 +337,18 @@ body.dark .theme-toggle .knob{transform:translateX(20px)}
         <div style="font-size:.75rem;font-weight:800;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:1rem"><i class="fas fa-list-check mr-2" style="color:var(--sys-purple)"></i>Görüşme Sonuçları</div>
         <div id="resultListContainer" style="max-height: 250px; overflow-y: auto; padding-right: 0.5rem; flex:1;"></div>
       </div>
-    </div>
-    <div class="card">
-      <div class="sec-header">
-        <div class="sec-icon" style="background:rgba(245, 158, 11, 0.1);color:var(--sys-orange)"><i class="fas fa-medal text-xl"></i></div>
-        <div><div style="font-size:1.1rem;font-weight:800;color:var(--text)">En Yüksek Cirolu Şubeler</div><div style="font-size:.75rem;font-weight:600;color:var(--text3)">Bu dönemin ilk 5 şubesi</div></div>
+      <div class="card" style="display:flex; flex-direction:column;">
+        <div class="sec-header" style="padding: 1rem 1.5rem;">
+          <div class="sec-icon" style="background:rgba(245, 158, 11, 0.1);color:var(--sys-orange); width:32px; height:32px;"><i class="fas fa-medal"></i></div>
+          <div><div style="font-size:1rem;font-weight:800;color:var(--text)">En İyi Şubeler</div></div>
+        </div>
+        <div id="dashTopBranches" style="padding:1rem 1.5rem; flex:1; overflow-y:auto;"><div style="display:flex;justify-content:center;padding:2rem"><div class="loader"></div></div></div>
       </div>
-      <div id="dashTopBranches" style="padding:1.25rem 1.5rem"><div style="display:flex;justify-content:center;padding:2rem"><div class="loader"></div></div></div>
     </div>
   </div>
 
   <div id="view-entry" class="tab-content active">
-    <div class="card border-t-4 border-t-brand-500" style="border-top: 4px solid var(--sys-blue);">
+    <div class="card" style="border-top: 4px solid var(--sys-blue);">
       <div class="sec-header">
         <div class="sec-icon" style="background:rgba(14, 165, 233, 0.1);color:var(--sys-blue)"><i class="fas fa-user-plus text-xl"></i></div>
         <div style="flex:1">
@@ -336,13 +358,12 @@ body.dark .theme-toggle .knob{transform:translateX(20px)}
       </div>
       <div style="padding:1.5rem">
         
-        <!-- YENİ EKLENEN: AKILLI ÇÖZÜMLEYİCİ -->
         <div style="background:var(--surface2); border:1px dashed var(--sys-blue); border-radius:1rem; padding:1.25rem; margin-bottom:1.5rem; transition:all 0.3s;" id="parserCard">
           <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.75rem; flex-wrap:wrap; gap:0.5rem;">
-            <div style="font-size:0.85rem; font-weight:800; color:var(--text); text-transform:uppercase; letter-spacing:0.05em;"><i class="fas fa-magic" style="color:var(--sys-blue); margin-right:0.4rem;"></i>Akıllı Metin Çözümleyici</div>
+            <div style="font-size:0.85rem; font-weight:800; color:var(--text); text-transform:uppercase; letter-spacing:0.05em;"><i class="fas fa-magic" style="color:var(--sys-blue); margin-right:0.4rem;"></i>Yapay Zeka Metin Çözümleyici</div>
             <button class="btn btn-sm btn-primary" onclick="parseCustomerText()"><i class="fas fa-bolt mr-1"></i> Çözümle ve Satıra Aktar</button>
           </div>
-          <textarea id="parseArea" class="inp" style="height:80px; resize:vertical; font-size:0.85rem; padding:0.75rem;" placeholder="WhatsApp, SMS veya Notlar'dan gelen karmaşık metni buraya yapıştırın... (Örn: Ali Yılmaz 05554443322 Kavacık şubesi mutfak masası bakıyor)"></textarea>
+          <textarea id="parseArea" class="inp" style="height:80px; resize:vertical; font-size:0.85rem; padding:0.75rem;" placeholder="WhatsApp, E-Posta veya Notlar'dan gelen karmaşık metni buraya yapıştırın..."></textarea>
         </div>
         
         <div id="inputContainer" style="display:flex;flex-direction:column;gap:1rem"></div>
@@ -408,12 +429,17 @@ body.dark .theme-toggle .knob{transform:translateX(20px)}
 
   <div id="view-sales" class="tab-content">
     <div class="card" style="display:flex;flex-direction:column;min-height:600px; border-top:4px solid var(--sys-green);">
-      <div class="sec-header" style="justify-content:space-between; background:var(--surface2)">
-        <div style="display:flex;align-items:center;gap:.75rem">
+      <div class="sec-header" style="justify-content:space-between; background:var(--surface2); flex-wrap:wrap;">
+        <div style="display:flex;align-items:center;gap:.75rem; margin-bottom: 0.5rem;">
           <div class="sec-icon" style="background:rgba(16, 185, 129, 0.1);color:var(--sys-green)"><i class="fas fa-shopping-bag text-xl"></i></div>
           <div><div style="font-size:1.1rem;font-weight:800;color:var(--text)">Satışa Dönenler</div><div style="font-size:.75rem;font-weight:600;color:var(--text3)">Tüm başarılı satış kayıtları</div></div>
         </div>
-        <div>
+        <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+          <!-- YENİ: Arama Çubuğu -->
+          <div style="position:relative;">
+             <i class="fas fa-search" style="position:absolute; left:12px; top:50%; transform:translateY(-50%); color:var(--text3); font-size:0.85rem;"></i>
+             <input type="text" id="salesSearchInput" class="inp" placeholder="İsim veya ürün ara..." onkeyup="salesCurrentPage=1; updateSalesView();" style="height:38px; padding-left:2.2rem; width:220px; font-size:0.85rem; border-radius:0.75rem;">
+          </div>
           <select id="salesBranchFilter" class="inp" style="height:38px; padding:0.2rem 2.2rem 0.2rem 1rem; font-size:0.85rem; width:auto; border-radius:0.75rem;" onchange="salesCurrentPage=1; updateSalesView();">
             <option value="all">Tüm Şubeler</option>
           </select>
@@ -431,7 +457,7 @@ body.dark .theme-toggle .knob{transform:translateX(20px)}
          </div>
       </div>
 
-      <div id="latestSalesContainer" style="padding:1.5rem;display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:1.25rem; background:var(--card-bg);">
+      <div id="latestSalesContainer" style="padding:1.5rem;display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:1.25rem; background:var(--card-bg);">
         <div style="display:flex;justify-content:center;padding:4rem;grid-column:1/-1"><div class="loader"></div></div>
       </div>
       
@@ -537,7 +563,7 @@ body.dark .theme-toggle .knob{transform:translateX(20px)}
     </div>
   </div>
 
-</div><!-- /mainApp -->
+</div>
 
 <div id="branchDetailModal" class="modal-bg">
   <div class="modal-content" style="background:var(--card-bg);border:1px solid var(--border);border-radius:1.5rem;width:100%;max-width:540px;max-height:90vh;overflow-y:auto;box-shadow:var(--shadow-md)">
@@ -587,58 +613,47 @@ const TABS = ['entry', 'dashboard', 'category', 'performance', 'sales', 'report'
 function toggleTheme(){
   var isDark=document.body.classList.toggle('dark');
   localStorage.setItem('theme',isDark?'dark':'light');
+  if(window.salesChartInstance) renderDashCharts(); // Grafiği temaya göre güncelle
 }
 (function(){
   if(localStorage.getItem('theme')==='dark') document.body.classList.add('dark');
 })();
 
-var allRecordsData=[], branchStatsData=[];
+var allRecordsData=[], branchStatsData=[], allSalesFiltered=[];
 var currentReportData = [];
 var currentTab='entry';
 var catAnalyticsRendered=false;
 var previousSalesCount = -1;
-
 var salesCurrentPage = 1;
 var salesItemsPerPage = 12;
-var allSalesFiltered = [];
 
 function showWarning(title, message) {
     document.getElementById('warningTitle').textContent = title;
     document.getElementById('warningTitle').style.color = 'var(--text)';
-    
     document.getElementById('warningIcon').className = 'fas fa-exclamation-triangle';
     document.getElementById('warningIcon').style.color = 'var(--sys-red)';
     document.getElementById('warningIconBg').style.background = 'rgba(239, 68, 68, 0.1)';
-    
     document.getElementById('warningMessage').textContent = message;
-    
     var btn = document.getElementById('warningBtn');
     btn.className = 'btn btn-danger';
     btn.style.background = 'linear-gradient(135deg,#ef4444,#dc2626)';
     btn.style.color = '#fff';
-    
     document.querySelector('#warningModal .modal-content').style.borderColor = 'var(--sys-red)';
-    
     document.getElementById('warningModal').classList.add('show');
 }
 
 function showSuccess(message) {
     document.getElementById('warningTitle').textContent = 'Başarılı';
     document.getElementById('warningTitle').style.color = 'var(--sys-green)';
-    
     document.getElementById('warningIcon').className = 'fas fa-check-circle';
     document.getElementById('warningIcon').style.color = 'var(--sys-green)';
     document.getElementById('warningIconBg').style.background = 'rgba(16, 185, 129, 0.1)';
-    
     document.getElementById('warningMessage').textContent = message;
-    
     var btn = document.getElementById('warningBtn');
     btn.className = 'btn';
     btn.style.background = 'var(--sys-green)';
     btn.style.color = '#fff';
-    
     document.querySelector('#warningModal .modal-content').style.borderColor = 'var(--sys-green)';
-    
     document.getElementById('warningModal').classList.add('show');
 }
 
@@ -652,6 +667,30 @@ function showToast(msg) {
     }
 }
 
+// Konfeti Efekti Fonksiyonu (YENİ)
+function fireConfetti() {
+    const colors = ['#0ea5e9', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#e11d48'];
+    for(let i=0; i<80; i++) {
+        let conf = document.createElement('div');
+        conf.className = 'confetti';
+        conf.style.width = (Math.random() * 8 + 4) + 'px';
+        conf.style.height = (Math.random() * 12 + 6) + 'px';
+        conf.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+        conf.style.top = '-20px';
+        conf.style.left = Math.random() * 100 + 'vw';
+        conf.style.opacity = Math.random() + 0.5;
+        conf.style.transform = 'rotate(' + Math.random() * 360 + 'deg)';
+        conf.style.transition = 'all ' + (Math.random() * 2 + 1.5) + 's cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+        document.body.appendChild(conf);
+        
+        setTimeout(() => {
+            conf.style.top = '100vh';
+            conf.style.transform = 'rotate(' + Math.random() * 720 + 'deg) translateX(' + (Math.random() * 100 - 50) + 'px)';
+        }, 20);
+        setTimeout(() => { conf.remove(); }, 3500);
+    }
+}
+
 function getTodayDT() {
     var n = new Date();
     return new Date(n.getTime() - n.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
@@ -662,10 +701,8 @@ function parseTurkishFloat(val) {
   if (typeof val === 'number') return val;
   var s = String(val).trim();
   s = s.replace(/[^\d,.-]/g, ''); 
-  
   var lastDot = s.lastIndexOf('.');
   var lastComma = s.lastIndexOf(',');
-  
   if (lastComma > -1 && lastDot > -1) {
       if (lastComma > lastDot) s = s.replace(/\./g, '').replace(',', '.');
       else s = s.replace(/,/g, '');
@@ -676,7 +713,6 @@ function parseTurkishFloat(val) {
       if (parts.length > 2) s = s.replace(/\./g, '');
       else if (parts[1].length === 3) s = s.replace(/\./g, '');
   }
-  
   var f = parseFloat(s);
   return isNaN(f) ? 0 : f;
 }
@@ -695,10 +731,7 @@ function isRecordSale(r) {
 
 function parseAnyDate(dStr) {
     if (!dStr) return 0;
-    
     var str = String(dStr).trim();
-    
-    // 1. Öncelikli olarak Türkçe DD.MM.YYYY formatını yakala (Amerikan formatına kaymasını engeller)
     var trRegex = /^(\d{1,2})\.(\d{1,2})\.(\d{4})(?:\s+(\d{1,2}:\d{1,2}))?/;
     var match = str.match(trRegex);
     if (match) {
@@ -710,21 +743,14 @@ function parseAnyDate(dStr) {
         var d2 = new Date(isoStr);
         if (!isNaN(d2.getTime())) return d2.getTime();
     }
-
-    // 2. Yukarıdaki şarta uymazsa standart (ISO) formatı olarak okumayı dene
     var d = new Date(str);
     if (!isNaN(d.getTime())) return d.getTime();
-
     return 0;
 }
 
-// --- YENİ EKLENEN AKILLI ÇÖZÜMLEYİCİ FONKSİYONU ---
 function parseCustomerText() {
     var text = document.getElementById('parseArea').value.trim();
-    if (!text) {
-        showWarning('Boş Metin', 'Lütfen çözümlenecek müşteri bilgilerini kutucuğa yapıştırın.');
-        return;
-    }
+    if (!text) { showWarning('Boş Metin', 'Lütfen çözümlenecek müşteri bilgilerini kutucuğa yapıştırın.'); return; }
 
     var name = "", phone = "", branch = "", media = "", category = "", product = "";
     var lowerText = text.toLocaleLowerCase('tr-TR');
@@ -737,7 +763,7 @@ function parseCustomerText() {
         if (rawPhone.length >= 10) phone = "0" + rawPhone.slice(-10);
     }
 
-    // MÜKERRER KAYIT KONTROLÜ
+    // SPAM VE MÜKERRER KONTROLÜ (Satır açmadan önce)
     if (phone) {
         let compContact = getCompareNum(phone);
         if (compContact.length >= 7) {
@@ -763,7 +789,7 @@ function parseCustomerText() {
     });
 
     // 3. Medya Çıkarımı
-    if (lowerText.includes('talep #') || lowerText.includes('tc kimlik') || lowerText.includes('sepet') || (lowerText.includes('sku') && lowerText.includes('tutar'))) {
+    if (lowerText.includes('talep #') || lowerText.includes('tc kimlik') || lowerText.includes('sepet') || lowerText.includes('ürünsku')) {
         media = 'Web Sitesi Form';
     } else {
         ['instagram', 'whatsapp', 'facebook', 'çağrı', 'web sitesi form', 'sms link'].forEach(m => {
@@ -772,7 +798,9 @@ function parseCustomerText() {
         if (!media) media = 'Whatsapp'; 
     }
 
-    // 4. İsim Çıkarımı
+    // 4. İsim ve Ürün Çıkarımı
+    var lines = text.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+
     if (media === 'Web Sitesi Form') {
         let nameMatch = text.match(/Talep\s*#\d+\s*[—\-]\s*(.+)/i);
         if (nameMatch) {
@@ -781,10 +809,19 @@ function parseCustomerText() {
             let asMatch = text.match(/Ad Soyad(.*?)(?:Telefon|E-posta|TC Kimlik)/i);
             if (asMatch) name = asMatch[1].trim();
         }
+        
+        let lowerTextForProd = text.toLocaleLowerCase('tr-TR');
+        let tutarIndex = lowerTextForProd.lastIndexOf("tutar");
+        
+        if (tutarIndex !== -1) {
+            let cutPos = tutarIndex + 5; 
+            let afterTutar = text.substring(cutPos).replace(/^[:\-—\s]+/, '').trim();
+            if (afterTutar) {
+                product = afterTutar;
+            }
+        }
     }
 
-    var lines = text.split('\n').map(l => l.trim()).filter(l => l.length > 0);
-    
     if (!name) {
         for (let i = 0; i < lines.length; i++) {
             let lLower = lines[i].toLocaleLowerCase('tr-TR');
@@ -801,77 +838,46 @@ function parseCustomerText() {
         }
     }
 
-    // 5. Ürün Çıkarımı (YENİ KESİN ALGORİTMA)
-    if (!product) {
+    if (!product && media !== 'Web Sitesi Form') {
         for (let i = 0; i < lines.length; i++) {
             let lLower = lines[i].toLocaleLowerCase('tr-TR');
-
-            // Senaryo 1: Web formundan gelen yapışık veya boşluklu tablo başlıkları
-            if (lLower.includes('sku') && lLower.includes('tutar')) {
-                let tutarIndex = lLower.indexOf('tutar');
-                let afterTutar = lines[i].substring(tutarIndex + 5).replace(/^[:\-—\s]+/, '').trim();
-                
-                if (afterTutar.length > 0) {
-                    product = afterTutar;
-                    break;
-                } else if (i + 1 < lines.length) {
-                    product = lines[i + 1].trim();
-                    break;
-                }
-            }
-        }
-    }
-
-    if (!product) {
-        // Senaryo 2: Normal Whatsapp mesajları
-        for (let i = 0; i < lines.length; i++) {
-            let lLower = lines[i].toLocaleLowerCase('tr-TR');
-            
             if (lLower.includes('sku') && lLower.includes('adet')) continue;
-
             if (lLower.includes('ürün') || lLower.includes('urun') || lLower.includes('model') || lLower.includes('ilgi')) {
                 let p = lines[i].split(/[:\-—]/);
                 let potProd = p.length > 1 ? p.slice(1).join('-').trim() : lines[i];
                 potProd = potProd.replace(/ürün|urun|model|ilgilenilen|ilgi/gi, '').trim();
-                if(potProd) {
-                    product = potProd;
-                    break;
-                }
+                if(potProd) { product = potProd; break; }
             }
         }
     }
 
-    // 6. GELİŞMİŞ KATEGORİ ÇIKARIMI
+    // 5. Kategori Çıkarımı
     var catMap = {
         'Mobilya': ['koltuk', 'kanepe', 'masa', 'sandalye', 'dolap', 'sehpa', 'berjer', 'vitrin', 'konsol', 'tv ünitesi', 'gardırop', 'yatak odası', 'yemek odası', 'genç odası', 'zigon'],
         'Baza+Yatak+Başlık': ['baza', 'yatak', 'başlık', 'karyola', 'bambi', 'puffy', 'yatsan'],
         'Bebek ve Çocuk': ['bebek', 'çoçuk', 'çocuk', 'beşik', 'oyuncak', 'mama sandalyesi', 'puset', 'akülü araba'],
-        'Beyaz Eşya': ['buzdolabı', 'çamaşır', 'bulaşık', 'fırın', 'ocak', 'davlumbaz', 'derin dondurucu', 'kurutma', 'ankastre', 'arçelik', 'beko', 'vestel', 'bosch', 'profilo', 'altus', 'electrolux', 'siemens', 'samsung'],
-        'Elektrikli Ev Aletleri': ['süpürge', 'ütü', 'blender', 'tost', 'rondo', 'çaycı', 'kahve', 'mikser', 'fritöz', 'klima', 'vantilatör', 'ısıtıcı', 'airfryer', 'dyson', 'philips', 'tefal', 'fakir', 'arzum', 'braun', 'delonghi'],
-        'Elektrikli-Benzinli Araç': ['benzinli', 'elektrikli motor', 'scooter', 'motosiklet', 'atv', 'motor', 'volta', 'rks', 'arora', 'kuba', 'moped', 'ebike', 'bisiklet'],
-        'Elektronik': ['cep telefonu', 'akıllı telefon', 'tv', 'televizyon', 'pc', 'bilgisayar', 'tablet', 'kulaklık', 'akıllı saat', 'hoparlör', 'oyun konsolu', 'playstation', 'laptop', 'iphone', 'apple', 'redmi', 'xiaomi', 'poco', 'tecno', 'tcl', 'casper', 'lenovo', 'asus', 'general mobile', 'omix', 'infinix', 'huawei', 'honor', 'vivo', 'oppo', 'realme'],
+        'Beyaz Eşya': ['buzdolabı', 'çamaşır', 'bulaşık', 'fırın', 'ocak', 'davlumbaz', 'derin dondurucu', 'kurutma', 'ankastre', 'arçelik', 'beko', 'vestel', 'bosch', 'profilo', 'altus', 'electrolux', 'siemens'],
+        'Elektrikli Ev Aletleri': ['süpürge', 'ütü', 'blender', 'tost', 'rondo', 'çaycı', 'kahve', 'mikser', 'fritöz', 'klima', 'vantilatör', 'ısıtıcı', 'airfryer', 'dyson', 'philips', 'tefal', 'fakir', 'arzum'],
+        'Elektrikli-Benzinli Araç': ['benzinli', 'elektrikli motor', 'scooter', 'motosiklet', 'atv', 'motor', 'volta', 'rks', 'arora', 'kuba', 'moped', 'ebike', 'bisiklet', 'cc'],
+        'Elektronik': ['cep telefonu', 'akıllı telefon', 'tv', 'televizyon', 'pc', 'bilgisayar', 'tablet', 'kulaklık', 'akıllı saat', 'playstation', 'laptop', 'iphone', 'apple', 'samsung', 'xiaomi', 'poco', 'casper', 'lenovo', 'asus', 'general mobile', 'huawei', 'honor', 'vivo', 'oppo'],
         'Ev Dekorasyonu': ['dekorasyon', 'tablo', 'ayna', 'avize', 'abajur', 'duvar saati'],
         'Halı': ['halı', 'kilim', 'yolluk', 'merinos', 'padişah', 'dinarsu', 'saray'],
         'Kişisel Aksesuar': ['kol saati', 'çanta', 'cüzdan', 'kemer', 'parfüm', 'saat'],
         'Tekstil': ['nevresim', 'pike', 'battaniye', 'yorgan', 'havlu', 'perde', 'bornoz', 'taç', 'karaca', 'linens', 'english home', 'madame coco'],
-        'Züccaciye': ['tabak', 'bardak', 'tencere', 'tava', 'çatal', 'kaşık', 'bıçak', 'kase', 'fincan', 'yemek takımı', 'su takımı', 'emsan', 'schafer', 'korkmaz', 'jumbo', 'karaca', 'bernardo', 'güral', 'kütahya'],
-        'Ayakkabı': ['ayakkabı', 'bot', 'çizme', 'terlik', 'spor ayakkabı', 'sneaker', 'nike', 'adidas', 'puma', 'kinetix', 'lumberjack', 'skechers', 'vans', 'converse']
+        'Züccaciye': ['tabak', 'bardak', 'tencere', 'tava', 'çatal', 'kaşık', 'bıçak', 'kase', 'fincan', 'yemek takımı', 'emsan', 'schafer', 'korkmaz', 'jumbo', 'bernardo', 'güral', 'kütahya'],
+        'Ayakkabı': ['ayakkabı', 'bot', 'çizme', 'terlik', 'spor ayakkabı', 'sneaker', 'nike', 'adidas', 'puma', 'kinetix', 'lumberjack', 'skechers', 'vans']
     };
 
-    let searchArea = product ? product.toLocaleLowerCase('tr-TR') : lowerText.replace(/telefon\s*\d+/g, '').replace(/e-posta/g, '').replace(/tc kimlik/g, '');
+    let searchArea = product ? product.toLocaleLowerCase('tr-TR') : text.toLocaleLowerCase('tr-TR').replace(/telefon\s*\d+/g, '').replace(/e-posta/g, '');
 
     for (let cat in catMap) {
         let keywords = catMap[cat];
         for (let i = 0; i < keywords.length; i++) {
-            if (searchArea.includes(keywords[i])) {
-                category = cat;
-                break;
-            }
+            if (searchArea.includes(keywords[i])) { category = cat; break; }
         }
         if (category) break;
     }
 
-    // Hedef satırı bul veya oluştur
     var rows = document.querySelectorAll('#inputContainer > .entry-card');
     var targetRow = null;
     
@@ -883,21 +889,17 @@ function parseCustomerText() {
         let lastRow = rows[rows.length - 1];
         let nVal = lastRow.querySelector('.inp-name').value;
         let pVal = lastRow.querySelector('.inp-contact').value;
-        if (!nVal && !pVal) {
-            targetRow = lastRow; 
-        } else {
+        if (!nVal && !pVal) { targetRow = lastRow; } 
+        else {
             addInputRow(); 
             rows = document.querySelectorAll('#inputContainer > .entry-card');
             targetRow = rows[rows.length - 1];
         }
     }
 
-    // Bilgileri yerleştir
     if (branch) targetRow.querySelector('.inp-branch').value = branch;
     if (name) targetRow.querySelector('.inp-name').value = name;
-    if (phone) {
-        targetRow.querySelector('.inp-contact').value = phone;
-    }
+    if (phone) targetRow.querySelector('.inp-contact').value = phone;
     if (media) {
         let mSelect = targetRow.querySelector('.inp-media');
         Array.from(mSelect.options).forEach(opt => {
@@ -912,7 +914,6 @@ function parseCustomerText() {
     }
     if (product) targetRow.querySelector('.inp-product').value = product;
 
-    // Görsel geri bildirim
     document.getElementById('parseArea').value = '';
     targetRow.style.boxShadow = '0 0 0 4px rgba(14, 165, 233, 0.3)';
     targetRow.style.borderColor = 'var(--sys-blue)';
@@ -931,20 +932,15 @@ function playNotificationSound() {
     try {
         var ctx = new (window.AudioContext || window.webkitAudioContext)();
         function playNote(freq, time, duration, vol) {
-            var osc = ctx.createOscillator();
-            var gain = ctx.createGain();
-            osc.connect(gain);
-            gain.connect(ctx.destination);
-            osc.type = 'sine';
-            osc.frequency.value = freq;
+            var osc = ctx.createOscillator(); var gain = ctx.createGain();
+            osc.connect(gain); gain.connect(ctx.destination);
+            osc.type = 'sine'; osc.frequency.value = freq;
             gain.gain.setValueAtTime(vol, time);
             gain.gain.exponentialRampToValueAtTime(0.001, time + duration);
-            osc.start(time);
-            osc.stop(time + duration);
+            osc.start(time); osc.stop(time + duration);
         }
         var t = ctx.currentTime;
-        playNote(523.25, t, 0.15, 0.1); 
-        playNote(659.25, t + 0.1, 0.3, 0.15); 
+        playNote(523.25, t, 0.15, 0.1); playNote(659.25, t + 0.1, 0.3, 0.15); 
     } catch(e) {}
 }
 
@@ -961,9 +957,7 @@ function doLogin(){
         fetchData();
         setInterval(fetchData, 5000);
     }, 400);
-  } else {
-    document.getElementById('loginError').style.display='block';
-  }
+  } else { document.getElementById('loginError').style.display='block'; }
 }
 document.getElementById('loginBtn').addEventListener('click',doLogin);
 document.getElementById('loginPass').addEventListener('keydown',function(e){if(e.key==='Enter') doLogin();});
@@ -981,10 +975,7 @@ function switchTab(tab){
   });
   if(tab==='dashboard') renderDashCharts();
   if(tab==='category'){
-    if(!catAnalyticsRendered && allRecordsData.length>0){
-      catAnalyticsRendered=true;
-      renderCategoryAnalytics();
-    }
+    if(!catAnalyticsRendered && allRecordsData.length>0){ catAnalyticsRendered=true; renderCategoryAnalytics(); }
   }
 }
 
@@ -998,7 +989,6 @@ function populatePeriodSelector(){
   for(var i=-6;i<=2;i++){
     var d=new Date(n.getFullYear(),n.getMonth()+i,1);
     var v=TR_MONTHS[d.getMonth()]+' '+d.getFullYear();
-    
     var o1=document.createElement('option'); o1.value=v; o1.textContent=v; if(i===0) o1.selected=true; s.appendChild(o1);
     var o2=document.createElement('option'); o2.value=v; o2.textContent=v; if(i===0) o2.selected=true; rs.appendChild(o2);
     var o3=document.createElement('option'); o3.value=v; o3.textContent=v; if(i===0) o3.selected=true; re.appendChild(o3);
@@ -1010,9 +1000,7 @@ function populateSalesBranchFilter() {
     if (!sel) return;
     var currVal = sel.value;
     var html = '<option value="all">Tüm Şubeler</option>';
-    BRANCHES.forEach(function(b) {
-        html += '<option value="'+b+'">'+b.replace(/ Şubesi/gi, '')+'</option>';
-    });
+    BRANCHES.forEach(function(b) { html += '<option value="'+b+'">'+b.replace(/ Şubesi/gi, '')+'</option>'; });
     sel.innerHTML = html;
     if(currVal) sel.value = currVal;
 }
@@ -1029,24 +1017,16 @@ async function fetchData(){
     var res=await fetch(GAS_URL+'?action=getDashboardData&period='+encodeURIComponent(period)+'&t='+Date.now(),{method:'GET',redirect:'follow'});
     var data=await res.json();
     if(data.records){
-      allRecordsData=(data.records||[]).sort(function(a,b){
-        return parseAnyDate(b.timestamp || b.date) - parseAnyDate(a.timestamp || a.date);
-      });
-      
+      allRecordsData=(data.records||[]).sort(function(a,b){ return parseAnyDate(b.timestamp || b.date) - parseAnyDate(a.timestamp || a.date); });
       branchStatsData = data.stats.sort((a,b) => b.totalRevenue - a.totalRevenue);
       updateKPIsFromGlobal(data.global);
-      
       renderPerformance();
       updateSalesView(); 
       renderDashTopBranches();
       
       if(currentTab==='dashboard') renderDashCharts();
-      if(currentTab==='category'){
-        catAnalyticsRendered=true;
-        renderCategoryAnalytics();
-      } else {
-        catAnalyticsRendered=false;
-      }
+      if(currentTab==='category'){ catAnalyticsRendered=true; renderCategoryAnalytics(); } 
+      else { catAnalyticsRendered=false; }
       
       var el=document.getElementById('lastUpdateTime');
       if(el) el.textContent=new Date().toLocaleTimeString('tr-TR',{hour:'2-digit',minute:'2-digit', second:'2-digit'});
@@ -1069,13 +1049,103 @@ function updateKPIsFromGlobal(globalData){
   document.getElementById('globalTopVolCat').textContent = globalData.topVolCat || '-';
   document.getElementById('globalTopVolCount').textContent = (globalData.topVolCount || 0) + ' SATIŞ';
 
-  if (previousSalesCount !== -1 && globalData.totalSalesCount > previousSalesCount) {
-      playNotificationSound();
-  }
+  if (previousSalesCount !== -1 && globalData.totalSalesCount > previousSalesCount) { playNotificationSound(); }
   previousSalesCount = globalData.totalSalesCount;
 }
 
 function renderDashCharts(){
+  // --- ÇİZGİ GRAFİK (CİRO TRENDİ) ---
+  var ctx = document.getElementById('salesChart');
+  if(ctx) {
+      // Satışları gün bazında grupla
+      var salesByDate = {};
+      allSalesFiltered.forEach(function(s) {
+          var t = parseAnyDate(s.timestamp || s.date);
+          if (t > 0) {
+              var d = new Date(t);
+              var dStr = d.toLocaleDateString('tr-TR', {day:'2-digit', month:'short'});
+              salesByDate[dStr] = (salesByDate[dStr] || 0) + parseTurkishFloat(s.amount);
+          }
+      });
+      
+      // Son 7-10 günü sırayla göster
+      var labels = [], chartData = [];
+      var keys = Object.keys(salesByDate).sort(function(a,b) { 
+          // Basit sıralama için, aylar aynıysa güne göre (Bu kısım aynı ay içinde mükemmel çalışır)
+          return parseInt(a) - parseInt(b);
+      });
+      
+      // Eğeri veri yoksa dummy data koyalım şık dursun
+      if(keys.length === 0) {
+          labels = ['1 Tem', '2 Tem', '3 Tem', '4 Tem', '5 Tem'];
+          chartData = [0, 0, 0, 0, 0];
+      } else {
+          keys.slice(-10).forEach(k => { labels.push(k); chartData.push(salesByDate[k]); });
+      }
+
+      var isDark = document.body.classList.contains('dark');
+      var gridColor = isDark ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.05)';
+      var textColor = isDark ? '#94a3b8' : '#64748b';
+
+      if(window.salesChartInstance) { window.salesChartInstance.destroy(); }
+      
+      window.salesChartInstance = new Chart(ctx, {
+          type: 'line',
+          data: {
+              labels: labels,
+              datasets: [{
+                  label: 'Günlük Ciro (₺)',
+                  data: chartData,
+                  borderColor: '#0ea5e9',
+                  backgroundColor: 'rgba(14, 165, 233, 0.1)',
+                  borderWidth: 3,
+                  pointBackgroundColor: '#0ea5e9',
+                  pointBorderColor: '#fff',
+                  pointBorderWidth: 2,
+                  pointRadius: 4,
+                  pointHoverRadius: 6,
+                  fill: true,
+                  tension: 0.4
+              }]
+          },
+          options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              plugins: { legend: { display: false }, tooltip: {
+                  callbacks: {
+                      label: function(context) { return '₺' + new Intl.NumberFormat('tr-TR').format(context.raw); }
+                  }
+              }},
+              scales: {
+                  y: { beginAtZero: true, grid: { color: gridColor }, ticks: { color: textColor, callback: function(value) { return '₺' + value/1000 + 'k'; } } },
+                  x: { grid: { display: false }, ticks: { color: textColor } }
+              }
+          }
+      });
+  }
+
+  // --- CANLI AKIŞ (YENİ) ---
+  var feedContainer = document.getElementById('liveSalesFeed');
+  if(feedContainer) {
+      var latestSales = allSalesFiltered.slice(0, 5);
+      if(!latestSales.length) {
+          feedContainer.innerHTML = '<div style="text-align:center;color:var(--text3);padding:2rem 0;font-size:0.85rem;">Bekleyen satış yok.</div>';
+      } else {
+          var fmt=function(n){return '₺'+new Intl.NumberFormat('tr-TR',{maximumFractionDigits:0}).format(n||0);};
+          feedContainer.innerHTML = latestSales.map(function(s) {
+              var branchClean = s.branch.replace(/ Şubesi/gi, '');
+              var amount = fmt(parseTurkishFloat(s.amount));
+              return '<div style="display:flex; justify-content:space-between; align-items:center; padding:0.875rem 1rem; background:var(--surface2); border:1px solid var(--border); border-radius:1rem; transition:transform 0.2s;" onmouseover="this.style.transform=\'translateY(-2px)\'" onmouseout="this.style.transform=\'translateY(0)\'">'
+                   + '<div style="display:flex; align-items:center; gap:0.75rem;">'
+                   + '<div style="width:36px; height:36px; border-radius:50%; background:rgba(16,185,129,0.1); color:var(--sys-green); display:flex; align-items:center; justify-content:center; flex-shrink:0;"><i class="fas fa-check"></i></div>'
+                   + '<div><div style="font-size:0.9rem; font-weight:800; color:var(--text);">' + s.name + '</div><div style="font-size:0.75rem; color:var(--text3); font-weight:600;">' + branchClean + ' &bull; ' + s.category + '</div></div>'
+                   + '</div>'
+                   + '<div style="font-weight:800; color:var(--sys-green); font-family:monospace; font-size:1.05rem;">' + amount + '</div>'
+                   + '</div>';
+          }).join('');
+      }
+  }
+
   var ALLOWED_MEDIA=['Whatsapp','Instagram','Web Sitesi Form','Facebook','Çağrı','SMS LİNK'];
   var mediaCounts={};
   allRecordsData.forEach(function(r){
@@ -1086,21 +1156,13 @@ function renderDashCharts(){
 
   var resCounts={};
   allRecordsData.forEach(function(r){
-    if (isRecordSale(r)) {
-        resCounts['Satışa Döndü'] = (resCounts['Satışa Döndü'] || 0) + 1;
-    } else {
-        var resultClean = (r.result || '').trim();
-        var lowerRes = resultClean.toLowerCase();
-        
-        if (lowerRes === 'müşteri mağazaya gelecek' || lowerRes === 'mağazaya gelecek') {
-            resCounts['Mağazaya Gelecek'] = (resCounts['Mağazaya Gelecek'] || 0) + 1;
-        } else if (lowerRes === 'tekrar aranacak') {
-            resCounts['Tekrar Aranacak'] = (resCounts['Tekrar Aranacak'] || 0) + 1;
-        } else if (lowerRes === 'bilgi verildi, olumsuz' || lowerRes === 'olumsuz') {
-            resCounts['Bilgi Verildi, Olumsuz'] = (resCounts['Bilgi Verildi, Olumsuz'] || 0) + 1;
-        } else if (lowerRes === 'borç nedeniyle satış i̇ptal' || lowerRes === 'borç nedeniyle satış iptal') {
-            resCounts['Borç Nedeniyle Satış İptal'] = (resCounts['Borç Nedeniyle Satış İptal'] || 0) + 1;
-        }
+    if (isRecordSale(r)) { resCounts['Satışa Döndü'] = (resCounts['Satışa Döndü'] || 0) + 1; } 
+    else {
+        var lowerRes = (r.result || '').trim().toLowerCase();
+        if (lowerRes === 'müşteri mağazaya gelecek' || lowerRes === 'mağazaya gelecek') { resCounts['Mağazaya Gelecek'] = (resCounts['Mağazaya Gelecek'] || 0) + 1; } 
+        else if (lowerRes === 'tekrar aranacak') { resCounts['Tekrar Aranacak'] = (resCounts['Tekrar Aranacak'] || 0) + 1; } 
+        else if (lowerRes === 'bilgi verildi, olumsuz' || lowerRes === 'olumsuz') { resCounts['Bilgi Verildi, Olumsuz'] = (resCounts['Bilgi Verildi, Olumsuz'] || 0) + 1; } 
+        else if (lowerRes === 'borç nedeniyle satış i̇ptal' || lowerRes === 'borç nedeniyle satış iptal') { resCounts['Borç Nedeniyle Satış İptal'] = (resCounts['Borç Nedeniyle Satış İptal'] || 0) + 1; }
     }
   });
   
@@ -1109,10 +1171,7 @@ function renderDashCharts(){
   var renderList = function(containerId, dataArr) {
     var c = document.getElementById(containerId);
     if(!c) return;
-    if(!dataArr.length) {
-        c.innerHTML = '<div style="text-align:center;color:var(--text3);padding:3rem 0;font-size:0.9rem;font-weight:600;">Kayıt bulunamadı.</div>';
-        return;
-    }
+    if(!dataArr.length) { c.innerHTML = '<div style="text-align:center;color:var(--text3);padding:3rem 0;font-size:0.9rem;font-weight:600;">Kayıt bulunamadı.</div>'; return; }
     var maxCount = dataArr[0].count; 
     c.innerHTML = dataArr.map(function(item, i) {
         var pct = maxCount > 0 ? Math.round((item.count / maxCount) * 100) : 0;
@@ -1168,11 +1227,7 @@ function buildCatStats(){
     var cat=r.category||'Diğer';
     if(!catStats[cat]) catStats[cat]={volume:0,sales:0,revenue:0};
     catStats[cat].volume++;
-    
-    if(isRecordSale(r)){
-      catStats[cat].sales++;
-      catStats[cat].revenue+=parseTurkishFloat(r.amount);
-    }
+    if(isRecordSale(r)){ catStats[cat].sales++; catStats[cat].revenue+=parseTurkishFloat(r.amount); }
   });
   return Object.entries(catStats).filter(function(e){return e[1].volume>0;}).sort(function(a,b){return b[1].volume-a[1].volume;});
 }
@@ -1295,9 +1350,7 @@ function renderPerformance(){
     var clean=s.branch.replace(/ Şubesi/gi,'');
     var conv=s.arandi>0?((s.salesCount||0)/s.arandi*100).toFixed(1):0;
     var cc=parseFloat(conv)>20?'var(--sys-green)':parseFloat(conv)>10?'var(--sys-orange)':'var(--sys-red)';
-    
     var borderStyle = i === 0 ? 'border-left: 6px solid var(--sys-orange);' : i === 1 ? 'border-left: 6px solid #94a3b8;' : i === 2 ? 'border-left: 6px solid #f97316;' : 'border-left: 6px solid transparent;';
-
     return '<div onclick="openBranchDetails(\''+s.branch+'\')" style="display:grid;grid-template-columns:2fr 1fr 1fr 1fr 1.5fr;gap:.5rem;align-items:center;padding:1.25rem 1.5rem;background:var(--card-bg);border:1px solid var(--border); '+borderStyle+' border-radius:1rem;margin-bottom:.75rem;cursor:pointer;transition:all .25s ease; box-shadow:var(--shadow-sm)" onmouseover="this.style.borderColor=\'var(--sys-blue)\';this.style.transform=\'translateY(-3px)\';this.style.boxShadow=\'var(--shadow-md)\'" onmouseout="this.style.borderColor=\'var(--border)\';this.style.transform=\'translateY(0)\';this.style.boxShadow=\'var(--shadow-sm)\'">'
       +'<div style="display:flex;align-items:center;gap:.875rem"><span style="width:28px;height:28px;border-radius:8px;background:var(--surface2);display:flex;align-items:center;justify-content:center;font-size:.8rem;font-weight:800;color:var(--text3);font-family:monospace;border:1px solid var(--border)">#'+(i+1)+'</span><span style="font-weight:800;color:var(--text);font-size:1.05rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+clean+'</span></div>'
       +'<div style="text-align:center"><span style="font-weight:800;color:var(--sys-blue);font-family:monospace;font-size:1.1rem">'+s.arandi+'</span><span style="color:var(--text3);font-size:.85rem;font-weight:600"> / '+(s.aranmadi||0)+'</span></div>'
@@ -1311,9 +1364,7 @@ function renderPerformance(){
 function openBranchDetails(branchName){
   var stat=branchStatsData.find(function(s){return s.branch===branchName;});
   if(!stat) return;
-  
   var recs=allRecordsData.filter(function(r){return r.branch===branchName && isRecordSale(r);});
-  
   var catC={};
   recs.forEach(function(r){var c=r.category||'Diğer';catC[c]=(catC[c]||0)+1;});
   var top4=Object.entries(catC).sort(function(a,b){return b[1]-a[1];}).slice(0,4);
@@ -1331,24 +1382,27 @@ function openBranchDetails(branchName){
       +'<div style="display:flex;align-items:center;gap:.75rem"><div class="prog-bg" style="width:80px"><div class="prog-fill" style="width:'+pct+'%;background:'+COLORS[i]+'"></div></div><span style="font-size:.8rem;font-weight:800;color:var(--text3);width:50px;text-align:right;font-family:monospace">'+count+' adet</span></div>'
       +'</div>';
   }).join(''):'<p style="font-size:.9rem;color:var(--text3);font-style:italic;padding:1rem 0;">Henüz satış verisi yok.</p>';
-  
-  var modal = document.getElementById('branchDetailModal');
-  modal.classList.add('show');
+  document.getElementById('branchDetailModal').classList.add('show');
 }
 
 function updateSalesView() {
     var branchFilter = document.getElementById('salesBranchFilter').value;
-    var currentPeriod = document.getElementById('currentPeriod') ? document.getElementById('currentPeriod').value : null;
+    var searchFilter = document.getElementById('salesSearchInput') ? document.getElementById('salesSearchInput').value.toLowerCase('tr-TR') : "";
     
     allSalesFiltered = allRecordsData.filter(function(r) {
         var isSale = isRecordSale(r);
         var matchBranch = (branchFilter === 'all') || (r.branch === branchFilter);
-        return isSale && matchBranch;
+        
+        var matchSearch = true;
+        if(searchFilter) {
+            let n = (r.name || '').toLowerCase('tr-TR');
+            let p = (r.product || '').toLowerCase('tr-TR');
+            matchSearch = n.includes(searchFilter) || p.includes(searchFilter);
+        }
+        return isSale && matchBranch && matchSearch;
     });
 
-    allSalesFiltered.sort(function(a, b) {
-        return parseAnyDate(b.timestamp || b.date) - parseAnyDate(a.timestamp || a.date);
-    });
+    allSalesFiltered.sort(function(a, b) { return parseAnyDate(b.timestamp || b.date) - parseAnyDate(a.timestamp || a.date); });
 
     var totalCount = allSalesFiltered.length;
     var totalRev = allSalesFiltered.reduce((sum, r) => sum + parseTurkishFloat(r.amount), 0);
@@ -1363,7 +1417,6 @@ function updateSalesView() {
 function renderSalesGrid() {
     var c = document.getElementById('latestSalesContainer');
     if(!c) return;
-
     var totalPages = Math.ceil(allSalesFiltered.length / salesItemsPerPage) || 1;
     if (salesCurrentPage > totalPages) salesCurrentPage = totalPages;
     if (salesCurrentPage < 1) salesCurrentPage = 1;
@@ -1389,12 +1442,10 @@ function renderSalesGrid() {
         if (t > 0) {
             var d = new Date(t);
             ds = d.toLocaleDateString('tr-TR',{day:'2-digit',month:'long'}) + ' ' + d.toLocaleTimeString('tr-TR',{hour:'2-digit',minute:'2-digit'});
-        } else {
-            ds = s.date || '';
-        }
+        } else { ds = s.date || ''; }
         var prod=(s.product||s.category||'');
         var finalAmount = parseTurkishFloat(s.amount);
-        return '<div style="background:var(--card-bg);border:1px solid var(--border);border-top:3px solid var(--sys-green);border-radius:1rem;padding:1.5rem;display:flex;flex-direction:column;gap:1rem;transition:all .3s ease; box-shadow:var(--shadow-sm)" onmouseover="this.style.borderColor=\'var(--sys-green)\'; this.style.transform=\'translateY(-2px)\'; this.style.boxShadow=\'var(--shadow-md)\'" onmouseout="this.style.borderTopColor=\'var(--sys-green)\';this.style.borderColor=\'var(--border)\'; this.style.transform=\'translateY(0)\'; this.style.boxShadow=\'var(--shadow-sm)\'">'
+        return '<div style="background:var(--card-bg);border:1px solid var(--border);border-top:3px solid var(--sys-green);border-radius:1rem;padding:1.5rem;display:flex;flex-direction:column;gap:1rem;transition:all .3s cubic-bezier(0.4, 0, 0.2, 1); box-shadow:var(--shadow-sm)" onmouseover="this.style.borderColor=\'var(--sys-green)\'; this.style.transform=\'translateY(-3px)\'; this.style.boxShadow=\'var(--shadow-md)\'" onmouseout="this.style.borderTopColor=\'var(--sys-green)\';this.style.borderColor=\'var(--border)\'; this.style.transform=\'translateY(0)\'; this.style.boxShadow=\'var(--shadow-sm)\'">'
           +'<div style="display:flex;justify-content:space-between;align-items:center">'
           +'<div style="width:36px;height:36px;background:rgba(16, 185, 129, 0.1);border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0"><i class="fas fa-check" style="color:var(--sys-green);font-size:.9rem"></i></div>'
           +'<span style="font-size:.8rem;font-weight:700;color:var(--text3)">'+ds+'</span>'
@@ -1411,18 +1462,13 @@ function renderSalesGrid() {
     }).join('');
 }
 
-function changeSalesPage(dir) {
-    salesCurrentPage += dir;
-    renderSalesGrid();
-}
+function changeSalesPage(dir) { salesCurrentPage += dir; renderSalesGrid(); }
 
 async function fetchAdvancedReport() {
     let sP = document.getElementById('reportStartPeriod').value;
     let eP = document.getElementById('reportEndPeriod').value;
     let cat = document.getElementById('reportCategory').value;
-    
-    let btn = event.currentTarget;
-    let orig = btn.innerHTML;
+    let btn = event.currentTarget; let orig = btn.innerHTML;
     btn.innerHTML = '<span class="loader" style="width:18px;height:18px;margin-right:8px;border-top-color:transparent;"></span> Rapor Hazırlanıyor...';
     btn.disabled = true;
 
@@ -1433,8 +1479,7 @@ async function fetchAdvancedReport() {
             body: JSON.stringify({ action: 'getAdvancedReport', data: { startPeriod: sP, endPeriod: eP, category: cat } })
         });
         
-        let text = await res.text();
-        let result = JSON.parse(text);
+        let text = await res.text(); let result = JSON.parse(text);
 
         if (result.status === 'success') {
             currentReportData = result.records;
@@ -1442,7 +1487,6 @@ async function fetchAdvancedReport() {
             
             document.getElementById('reportKpiWrap').style.display = 'grid';
             document.getElementById('reportTableWrap').style.display = 'block';
-            
             document.getElementById('repTotalLeads').textContent = result.totalLeads;
             document.getElementById('repTotalSales').textContent = result.totalSales;
             
@@ -1456,26 +1500,17 @@ async function fetchAdvancedReport() {
                 let pct = prev > 0 ? (diff / prev) * 100 : (curr > 0 ? 100 : 0);
                 let pctAbs = Math.abs(pct).toFixed(1);
                 
-                if(diff > 0) {
-                   el.className = "trend-badge trend-up";
-                   el.innerHTML = `<i class="fas fa-arrow-up mr-1"></i> %${pctAbs} Artış`;
-                } else if(diff < 0) {
-                   el.className = "trend-badge trend-down";
-                   el.innerHTML = `<i class="fas fa-arrow-down mr-1"></i> %${pctAbs} Azalış`;
-                } else {
-                   el.className = "trend-badge";
-                   el.style.background = "var(--surface2)"; el.style.color = "var(--text3)";
-                   el.innerHTML = `Değişim Yok`;
-                }
+                if(diff > 0) { el.className = "trend-badge trend-up"; el.innerHTML = `<i class="fas fa-arrow-up mr-1"></i> %${pctAbs} Artış`; } 
+                else if(diff < 0) { el.className = "trend-badge trend-down"; el.innerHTML = `<i class="fas fa-arrow-down mr-1"></i> %${pctAbs} Azalış`; } 
+                else { el.className = "trend-badge"; el.style.background = "var(--surface2)"; el.style.color = "var(--text3)"; el.innerHTML = `Değişim Yok`; }
             };
 
             renderTrend('repSalesTrend', result.totalSales, result.prevTotalSales);
             renderTrend('repRevTrend', result.totalRevenue, result.prevTotalRevenue);
             
             let tbody = document.getElementById('reportTableBody');
-            if (currentReportData.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:2rem;color:var(--text3);font-weight:600;">Bu filtreye uygun geçerli satış bulunamadı.</td></tr>';
-            } else {
+            if (currentReportData.length === 0) { tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:2rem;color:var(--text3);font-weight:600;">Bu filtreye uygun geçerli satış bulunamadı.</td></tr>'; } 
+            else {
                 tbody.innerHTML = currentReportData.map((r, i) => {
                     let d = new Date(r.timestamp);
                     let ds = isNaN(d) ? r.date : d.toLocaleDateString('tr-TR') + ' ' + d.toLocaleTimeString('tr-TR',{hour:'2-digit',minute:'2-digit'});
@@ -1492,219 +1527,66 @@ async function fetchAdvancedReport() {
                 }).join('');
             }
         }
-    } catch (e) {
-        showWarning('Bağlantı Hatası', 'Rapor verileri alınırken sorun oluştu.');
-    } finally {
-        btn.innerHTML = orig;
-        btn.disabled = false;
-    }
+    } catch (e) { showWarning('Bağlantı Hatası', 'Rapor verileri alınırken sorun oluştu.'); } 
+    finally { btn.innerHTML = orig; btn.disabled = false; }
 }
 
 function exportReportExcel() {
     if(!currentReportData || currentReportData.length === 0) return showWarning("Eksik İşlem", "Dışa aktarılacak veri yok.");
     let csv = "\uFEFFTarih;Şube;Müşteri;İletişim;Kategori;Ürün;Tutar\n";
-    currentReportData.forEach(r => {
-        let amt = r.amount.toString().replace('.', ',');
-        csv += `${r.date};${r.branch.replace(/ Şubesi/gi, '')};${r.name};${r.contact};${r.category};${r.product};${amt}\n`;
-    });
-    let blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-    let url = URL.createObjectURL(blob);
-    let a = document.createElement("a");
-    a.href = url;
-    a.download = `Satis_Raporu.csv`;
-    a.click();
+    currentReportData.forEach(r => { let amt = r.amount.toString().replace('.', ','); csv += `${r.date};${r.branch.replace(/ Şubesi/gi, '')};${r.name};${r.contact};${r.category};${r.product};${amt}\n`; });
+    let blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' }); let url = URL.createObjectURL(blob); let a = document.createElement("a");
+    a.href = url; a.download = `Satis_Raporu.csv`; a.click();
 }
 
 function exportReportPDF() {
     if(!currentReportData || currentReportData.length === 0) return showWarning("Eksik İşlem", "Dışa aktarılacak veri yok.");
     
-    let sM = document.getElementById('reportStartPeriod').value;
-    let eM = document.getElementById('reportEndPeriod').value;
-    let cat = document.getElementById('reportCategory').value;
-    
-    let now = new Date();
-    let dateStr = now.toLocaleDateString('tr-TR') + ' ' + now.toLocaleTimeString('tr-TR', {hour:'2-digit', minute:'2-digit'});
-    let TL = '\u20ba';
-    let fmt = function(n){ return TL+new Intl.NumberFormat('tr-TR',{maximumFractionDigits:0}).format(n||0); };
+    let sM = document.getElementById('reportStartPeriod').value; let eM = document.getElementById('reportEndPeriod').value; let cat = document.getElementById('reportCategory').value;
+    let now = new Date(); let dateStr = now.toLocaleDateString('tr-TR') + ' ' + now.toLocaleTimeString('tr-TR', {hour:'2-digit', minute:'2-digit'});
+    let TL = '\u20ba'; let fmt = function(n){ return TL+new Intl.NumberFormat('tr-TR',{maximumFractionDigits:0}).format(n||0); };
 
-    let tLeads = document.getElementById('repTotalLeads').textContent;
-    let tSales = document.getElementById('repTotalSales').textContent;
-    let tConv = document.getElementById('repConversion').textContent;
-    let tRev = document.getElementById('repTotalRevenue').textContent;
+    let tLeads = document.getElementById('repTotalLeads').textContent; let tSales = document.getElementById('repTotalSales').textContent;
+    let tConv = document.getElementById('repConversion').textContent; let tRev = document.getElementById('repTotalRevenue').textContent;
 
     let tableRows = currentReportData.map((r, i) => {
-       return `<tr>
-          <td class="col-date">${r.date}</td>
-          <td class="col-branch">${r.branch.replace(/ Şubesi/gi, '')}</td>
-          <td class="col-name">${r.name}</td>
-          <td class="col-contact">${r.contact}</td>
-          <td class="col-cat"><span class="badge purple">${r.category}</span></td>
-          <td class="col-prod">${r.product}</td>
-          <td class="col-amt amount">${fmt(r.amount)}</td>
-       </tr>`;
+       return `<tr><td class="col-date">${r.date}</td><td class="col-branch">${r.branch.replace(/ Şubesi/gi, '')}</td><td class="col-name">${r.name}</td><td class="col-contact">${r.contact}</td><td class="col-cat"><span class="badge purple">${r.category}</span></td><td class="col-prod">${r.product}</td><td class="col-amt amount">${fmt(r.amount)}</td></tr>`;
     }).join('');
 
-    var html=`<!DOCTYPE html>
-    <html lang="tr">
-    <head>
-    <meta charset="UTF-8">
-    <title>HEDEF AVM CRM - Gelişmiş Rapor</title>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <style>
-    :root { --font: 'Plus Jakarta Sans', sans-serif; }
-    * { box-sizing:border-box; margin:0; padding:0; font-family:var(--font); }
-    body { background:#f8fafc; color:#1e293b; font-size:12px; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
-    .container { max-width:1100px; margin:0 auto; padding:40px; }
-    .header { background: linear-gradient(135deg, #0ea5e9, #6366f1); color:#fff; padding:32px 40px; border-radius:20px; margin-bottom:30px; box-shadow: 0 10px 25px -5px rgba(14,165,233,0.3); }
-    .header h1 { font-size:28px; font-weight:800; margin-bottom:10px; letter-spacing:-0.5px; }
-    .header p { font-size:14px; font-weight:700; opacity:0.95; text-transform:uppercase; letter-spacing:1px; margin-bottom:6px; }
-    .kpi-grid { display:flex; gap:15px; margin-bottom:30px; }
-    .kpi-card { flex:1; background:#fff; border:1px solid #e2e8f0; padding:20px; border-radius:16px; border-left:4px solid #0ea5e9; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); }
-    .kpi-label { font-size:11px; font-weight:800; color:#64748b; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:10px; }
-    .kpi-val { font-size:24px; font-weight:800; color:#0f172a; line-height:1; }
-    .table-container { background:#fff; border-radius:16px; border:1px solid #e2e8f0; overflow:hidden; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.02); }
-    table { width:100%; border-collapse:collapse; text-align:left; table-layout: fixed; }
-    th { background:#f8fafc; padding:16px 10px; font-size:12px; font-weight:800; color:#475569; text-transform:uppercase; letter-spacing:0.5px; border-bottom:2px solid #e2e8f0; }
-    td { padding:16px 10px; border-bottom:1px solid #f1f5f9; font-size:13px; font-weight:700; color:#1e293b; word-wrap: break-word; overflow-wrap: break-word; word-break: break-word; }
-    tr:hover td { background:#f8fafc; }
-    tr:last-child td { border-bottom:none; }
-    .badge { background:#f1f5f9; padding:6px 10px; border-radius:8px; font-size:11px; font-weight:800; color:#64748b; text-transform:uppercase; letter-spacing:0.5px; }
-    .badge.purple { background:#f3e8ff; color:#7e22ce; }
-    .amount { color:#10b981; font-weight:800; font-family:monospace; font-size:15px; text-align:right; }
-    
-    .col-date { width: 10%; }
-    .col-branch { width: 11%; }
-    .col-name { width: 16%; }
-    .col-contact { width: 12%; }
-    .col-cat { width: 12%; }
-    .col-prod { width: 29%; }
-    .col-amt { width: 10%; text-align:right;}
+    var html=`<!DOCTYPE html><html lang="tr"><head><meta charset="UTF-8"><title>HEDEF AVM CRM - Gelişmiş Rapor</title><style>
+    * { box-sizing:border-box; margin:0; padding:0; font-family: sans-serif; } body { background:#f8fafc; color:#1e293b; font-size:12px; }
+    .container { max-width:1100px; margin:0 auto; padding:40px; } .header { background: #0ea5e9; color:#fff; padding:30px; border-radius:15px; margin-bottom:30px; }
+    table { width:100%; border-collapse:collapse; text-align:left; } th { background:#f8fafc; padding:12px; font-size:12px; border-bottom:2px solid #e2e8f0; }
+    td { padding:12px; border-bottom:1px solid #f1f5f9; } @media print { body { background:#fff; } .header { background:none; color:#000; border-bottom:2px solid #000;} }
+    </style></head><body><div class="container"><div class="header"><h1>Özel Satış Analizi</h1><p>Dönem: ${sM} - ${eM} | Filtre: ${cat}</p></div>
+    <table><thead><tr><th>Tarih</th><th>Şube</th><th>Müşteri</th><th>İletişim</th><th>Kategori</th><th>Ürün</th><th>Tutar</th></tr></thead><tbody>${tableRows}</tbody></table>
+    </div><script>window.print();<\/script></body></html>`;
 
-    .print-bar { background:#0f172a; color:#fff; padding:16px 32px; display:flex; justify-content:space-between; align-items:center; position:fixed; top:0; left:0; right:0; z-index:100; box-shadow:0 4px 12px rgba(0,0,0,0.1); }
-    .print-btn { background:#0ea5e9; border:none; color:#fff; padding:10px 20px; border-radius:10px; font-weight:700; cursor:pointer; font-size:14px; transition:0.2s; font-family:var(--font); }
-    .print-btn:hover { background:#0284c7; }
-    
-    @media print {
-        @page { margin: 10mm; size: A4 landscape; }
-        body { background:#fff !important; color:#000 !important; font-size:12px !important; padding-top: 0 !important;}
-        .container { padding:0 !important; width:100% !important; max-width:100% !important; margin:0 !important; }
-        .header { background:none !important; color:#000 !important; padding:0 0 15px 0 !important; margin-bottom:20px !important; border-bottom:3px solid #000 !important; border-radius:0 !important; box-shadow:none !important;}
-        .header h1 { color:#000 !important; font-size:24px !important; margin-bottom:8px !important;}
-        .header p { color:#000 !important; font-size:14px !important; font-weight:800 !important;}
-        .no-print { display:none !important; }
-        .kpi-grid { margin-bottom:20px !important; gap:10px !important;}
-        .kpi-card { border: 1px solid #999 !important; padding:12px !important; border-radius:8px !important; box-shadow:none !important;}
-        .kpi-label { color:#555 !important; font-size:10px !important;}
-        .kpi-val { color:#000 !important; font-size:18px !important;}
-        .table-container { border:none !important; box-shadow:none !important; border-radius:0 !important; overflow:visible !important;}
-        table { width:100% !important; table-layout:fixed !important; }
-        th { padding:10px 6px !important; font-size:12px !important; border-bottom:2px solid #000 !important; background:#f1f1f1 !important; color:#000 !important; white-space:normal !important;}
-        td { padding:10px 6px !important; border-bottom:1px solid #ccc !important; color:#000 !important; font-size:11px !important; font-weight:600 !important; word-wrap: break-word !important; word-break: break-word !important;}
-        .badge { background:transparent !important; color:#000 !important; border:1px solid #999 !important; padding:4px 6px !important; font-size:10px !important; font-weight:800 !important;}
-        .amount { color:#000 !important; font-size:12px !important; }
-        tr { page-break-inside: avoid !important; }
-        .print-bar { display:none !important; }
-    }
-    </style>
-    </head>
-    <body style="padding-top:80px;">
-    <div class="print-bar no-print">
-        <span style="font-weight:800; font-size:15px;">HEDEF AVM CRM &bull; Filtreli Satış Raporu Önizlemesi</span>
-        <div style="display:flex; gap:12px;">
-            <button class="print-btn" onclick="window.print()">Yazdır / PDF Kaydet</button>
-            <button class="print-btn" style="background:#334155;" onclick="window.close()">Kapat</button>
-        </div>
-    </div>
-    <div class="container">
-        <div class="header">
-            <h1>Özel Satış Analizi</h1>
-            <p>Dönem: ${sM} - ${eM}</p>
-            <p style="color:#000;">Filtre: ${cat}</p>
-        </div>
-        <div class="kpi-grid">
-            <div class="kpi-card" style="border-left-color: #64748b;">
-                <div class="kpi-label">Yönlendirme Adedi</div>
-                <div class="kpi-val">${tLeads}</div>
-            </div>
-            <div class="kpi-card" style="border-left-color: #10b981;">
-                <div class="kpi-label">Filtreli Satış (Net)</div>
-                <div class="kpi-val" style="color:#10b981">${tSales}</div>
-            </div>
-            <div class="kpi-card" style="border-left-color: #f59e0b;">
-                <div class="kpi-label">Dönüşüm Oranı</div>
-                <div class="kpi-val" style="color:#f59e0b">${tConv}</div>
-            </div>
-            <div class="kpi-card" style="border-left-color: #0ea5e9;">
-                <div class="kpi-label">Filtreli Ciro</div>
-                <div class="kpi-val" style="color:#0ea5e9; font-family:monospace;">${tRev}</div>
-            </div>
-        </div>
-        <div class="table-container">
-            <table>
-                <thead>
-                    <tr>
-                        <th class="col-date">Tarih</th>
-                        <th class="col-branch">Şube</th>
-                        <th class="col-name">Müşteri</th>
-                        <th class="col-contact">İletişim</th>
-                        <th class="col-cat">Kategori</th>
-                        <th class="col-prod">Ürün</th>
-                        <th class="col-amt">Tutar</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    ${tableRows}
-                </tbody>
-            </table>
-        </div>
-        <div style="text-align:center; margin-top:40px; padding-top:20px; border-top:1px solid #e2e8f0; font-size:12px; color:#94a3b8; font-weight:700;">
-            Oluşturulma Tarihi: ${printDate} &nbsp;&bull;&nbsp; HEDEF AVM CRM
-        </div>
-    </div>
-    </body>
-    </html>`;
-
-    var win = window.open('', '_blank', 'width=1200,height=900');
-    if(!win) { showWarning('Hata', 'Lütfen popup engelleyiciyi kapatın.'); return; }
-    win.document.open();
-    win.document.write(html);
-    win.document.close();
+    var win = window.open('', '_blank'); if(!win) return;
+    win.document.write(html); win.document.close();
 }
 
 function checkDuplicatePhone(inputEl) {
-    var contact = inputEl.value;
-    var compContact = getCompareNum(contact);
-
+    var contact = inputEl.value; var compContact = getCompareNum(contact);
     if (compContact.length >= 7) {
-        var exists = allRecordsData.find(function(r){
-            return getCompareNum(r.contact) === compContact;
-        });
-        
+        var exists = allRecordsData.find(function(r){ return getCompareNum(r.contact) === compContact; });
         if(exists) {
             showWarning('Mükerrer Kayıt', 'Bu numara sistemde kayıtlı!\n\nMüşteri: ' + (exists.name || 'Bilinmiyor') + '\nŞube: ' + exists.branch);
-            inputEl.value = ''; 
-            inputEl.closest('.entry-card').classList.add('error');
-            setTimeout(() => inputEl.closest('.entry-card').classList.remove('error'), 600);
-            return;
+            inputEl.value = ''; inputEl.closest('.entry-card').classList.add('error');
+            setTimeout(() => inputEl.closest('.entry-card').classList.remove('error'), 600); return;
         }
-
-        var allContacts = document.querySelectorAll('.inp-contact');
-        var matchCount = 0;
-        allContacts.forEach(function(el) {
-            if (getCompareNum(el.value) === compContact) matchCount++;
-        });
+        var allContacts = document.querySelectorAll('.inp-contact'); var matchCount = 0;
+        allContacts.forEach(function(el) { if (getCompareNum(el.value) === compContact) matchCount++; });
         if (matchCount > 1) {
             showWarning('Spam Engeli', 'Bu numarayı aynı formda birden fazla kez girdiniz!');
-            inputEl.value = ''; 
-            inputEl.closest('.entry-card').classList.add('error');
+            inputEl.value = ''; inputEl.closest('.entry-card').classList.add('error');
             setTimeout(() => inputEl.closest('.entry-card').classList.remove('error'), 600);
         }
     }
 }
 
 function addInputRow(){
-  var c=document.getElementById('inputContainer');
-  if(!c) return;
+  var c=document.getElementById('inputContainer'); if(!c) return;
   var d=document.createElement('div');d.className='entry-card';
   var bOpts='<option value="" disabled selected>Seçiniz...</option>'+BRANCHES.map(function(b){return '<option value="'+b+'">'+b+'</option>';}).join('');
   d.innerHTML='<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:1rem;margin-bottom:1rem">'
@@ -1725,10 +1607,7 @@ function addInputRow(){
 
 async function submitAllRows(){
   var rows=document.querySelectorAll('#inputContainer > .entry-card');
-  var data=[];
-  var hasEmptyError=false;
-  var hasSpamError=false;
-  var currentSubmissions=[];
+  var data=[]; var hasEmptyError=false; var hasSpamError=false; var currentSubmissions=[];
 
   for(var i=0; i<rows.length; i++){
     var row = rows[i];
@@ -1741,30 +1620,14 @@ async function submitAllRows(){
     if(!branch||!name){hasEmptyError=true; continue;}
     
     var compContact = getCompareNum(contact);
-
     if (compContact.length >= 7) {
-       if (currentSubmissions.indexOf(compContact) > -1) {
-          showWarning('Spam Engeli', contact + ' numarasını aynı formda birden fazla kez girdiniz.');
-          hasSpamError = true;
-          row.classList.add('error');
-          break;
-       }
+       if (currentSubmissions.indexOf(compContact) > -1) { showWarning('Spam Engeli', contact + ' numarasını birden fazla kez girdiniz.'); hasSpamError = true; row.classList.add('error'); break; }
        currentSubmissions.push(compContact);
-       
-       var exists = allRecordsData.find(function(r){
-          return getCompareNum(r.contact) === compContact;
-       });
-       
-       if(exists) {
-          showWarning('Mükerrer Kayıt', name + ' (' + contact + ') numaralı müşteri kayıtlı!\n\nŞube: ' + exists.branch);
-          hasSpamError = true;
-          row.classList.add('error');
-          break;
-       }
+       var exists = allRecordsData.find(function(r){ return getCompareNum(r.contact) === compContact; });
+       if(exists) { showWarning('Mükerrer Kayıt', name + ' (' + contact + ') numaralı müşteri kayıtlı!\n\nŞube: ' + exists.branch); hasSpamError = true; row.classList.add('error'); break; }
     }
 
-    var parts=dv.split('T'),dp=parts[0],tp=parts[1];
-    var dp2=dp.split('-');
+    var parts=dv.split('T'),dp=parts[0],tp=parts[1]; var dp2=dp.split('-');
     data.push({date:dp2[2]+'.'+dp2[1]+'.'+dp2[0]+' '+tp,branch:branch,name:name,
       contact:contact,media:row.querySelector('.inp-media').value,
       category:row.querySelector('.inp-category').value,product:row.querySelector('.inp-product').value,
@@ -1772,56 +1635,31 @@ async function submitAllRows(){
   }
   
   if(hasSpamError) return; 
-  if(hasEmptyError) {
-      showWarning('Eksik Bilgi', 'Lütfen işaretli alanları doldurun.');
-      return;
-  }
+  if(hasEmptyError) { showWarning('Eksik Bilgi', 'Lütfen işaretli alanları doldurun.'); return; }
   if(!data.length) return;
-  
-  if(!navigator.onLine) {
-    showWarning('Bağlantı Hatası', 'İnternet bağlantınız yok!');
-    return;
-  }
+  if(!navigator.onLine) { showWarning('Bağlantı Hatası', 'İnternet bağlantınız yok!'); return; }
 
   var btn=document.getElementById('submitBtn'),orig=btn.innerHTML;
   btn.innerHTML='<span class="loader" style="width:18px;height:18px;margin-right:8px;border-top-color:transparent;"></span> Kaydediliyor...';
   btn.disabled=true;
   
   try{
-    let res = await fetch(GAS_URL, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'text/plain;charset=utf-8' 
-        },
-        body: JSON.stringify({action:'addCustomersBulk', data:data})
-    });
-    
-    let text = await res.text();
-    let result = {};
-    try {
-        result = JSON.parse(text);
-    } catch (err) {
-        result = { status: 'error', message: 'Sunucudan geçersiz yanıt döndü. Apps Script sürümünüz güncel olmayabilir.' };
-    }
+    let res = await fetch(GAS_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({action:'addCustomersBulk', data:data}) });
+    let text = await res.text(); let result = {};
+    try { result = JSON.parse(text); } catch (err) { result = { status: 'error', message: 'Sunucudan geçersiz yanıt döndü.' }; }
 
     if (result.status === 'success') {
         setTimeout(function() {
             document.getElementById('inputContainer').innerHTML='';
-            addInputRow();
-            refreshData();
-            btn.innerHTML=orig;
-            btn.disabled=false;
+            addInputRow(); refreshData();
+            btn.innerHTML=orig; btn.disabled=false;
             showToast('Müşteri kayıtları başarıyla sisteme aktarıldı.');
+            fireConfetti(); // YENİ: Başarı animasyonu
         }, 500); 
-    } else {
-        throw new Error(result.message || 'Bilinmeyen sunucu hatası.');
-    }
-    
+    } else { throw new Error(result.message || 'Bilinmeyen sunucu hatası.'); }
   }catch(e){
-    console.error(e);
-    btn.innerHTML=orig;
-    btn.disabled=false;
-    showWarning('Kayıt Başarısız', 'Sebep: ' + e.message + '\n\nNOT: Google Apps Script üzerinde "Yeni Sürüm (New Version)" dağıtımı yapmayı unutmuş olabilirsiniz.');
+    console.error(e); btn.innerHTML=orig; btn.disabled=false;
+    showWarning('Kayıt Başarısız', 'Sebep: ' + e.message + '\n\nNOT: Google Apps Script üzerinde "Yeni Sürüm" dağıtımı yapmayı unutmuş olabilirsiniz.');
   }
 }
 </script>
