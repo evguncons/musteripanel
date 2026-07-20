@@ -472,22 +472,22 @@ body.dark .theme-toggle .knob{transform:translateX(20px)}
           <label class="inp-label">Kategori Filtresi</label>
           <select id="reportCategory" class="inp">
              <option value="all">Tüm Kategoriler</option>
-             <option>Mobilya</option>
-             <option>Baza+Yatak+Başlık</option>
-             <option>Bebek ve Çocuk</option>
-             <option>Beyaz Eşya</option>
-             <option>Elektrikli Ev Aletleri</option>
-             <option>Elektrikli-Benzinli Araç</option>
-             <option>Elektronik</option>
-             <option>Ev Dekorasyonu</option>
-             <option>Halı</option>
-             <option>Kişisel Aksesuar</option>
-             <option>Mobilya Aksesuarı</option>
-             <option>Tekstil</option>
-             <option>Züccaciye</option>
-             <option>Ayakkabı</option>
-             <option>LİMİT ÖĞREN</option>
-             <option>GENEL ÜRÜN BİLGİSİ</option>
+             <option value="Mobilya">Mobilya</option>
+             <option value="Baza+Yatak+Başlık">Baza+Yatak+Başlık</option>
+             <option value="Bebek ve Çocuk">Bebek ve Çocuk</option>
+             <option value="Beyaz Eşya">Beyaz Eşya</option>
+             <option value="Elektrikli Ev Aletleri">Elektrikli Ev Aletleri</option>
+             <option value="Elektrikli-Benzinli Araç">Elektrikli-Benzinli Araç</option>
+             <option value="Elektronik">Elektronik</option>
+             <option value="Ev Dekorasyonu">Ev Dekorasyonu</option>
+             <option value="Halı">Halı</option>
+             <option value="Kişisel Aksesuar">Kişisel Aksesuar</option>
+             <option value="Mobilya Aksesuarı">Mobilya Aksesuarı</option>
+             <option value="Tekstil">Tekstil</option>
+             <option value="Züccaciye">Züccaciye</option>
+             <option value="Ayakkabı">Ayakkabı</option>
+             <option value="LİMİT ÖĞREN">LİMİT ÖĞREN</option>
+             <option value="GENEL ÜRÜN BİLGİSİ">GENEL ÜRÜN BİLGİSİ</option>
           </select>
         </div>
         <div>
@@ -708,7 +708,6 @@ function parseAnyDate(dStr) {
     
     var str = String(dStr).trim();
     
-    // 1. Öncelikli olarak Türkçe DD.MM.YYYY formatını yakala (Amerikan formatına kaymasını engeller)
     var trRegex = /^(\d{1,2})\.(\d{1,2})\.(\d{4})(?:\s+(\d{1,2}:\d{1,2}))?/;
     var match = str.match(trRegex);
     if (match) {
@@ -721,7 +720,6 @@ function parseAnyDate(dStr) {
         if (!isNaN(d2.getTime())) return d2.getTime();
     }
 
-    // 2. Yukarıdaki şarta uymazsa standart (ISO) formatı olarak okumayı dene
     var d = new Date(str);
     if (!isNaN(d.getTime())) return d.getTime();
 
@@ -887,14 +885,12 @@ function renderDashCharts(){
 
   var resCounts={};
   allRecordsData.forEach(function(r){
-    // Eğer kayıt başarılı bir satışsa (tutar girilmişse vs.), doğrudan "Satışa Döndü" olarak say
     if (isRecordSale(r)) {
         resCounts['Satışa Döndü'] = (resCounts['Satışa Döndü'] || 0) + 1;
     } else {
         var resultClean = (r.result || '').trim();
         var lowerRes = resultClean.toLowerCase();
         
-        // Satış olmayan diğer durumları standartlaştırarak topla
         if (lowerRes === 'müşteri mağazaya gelecek' || lowerRes === 'mağazaya gelecek') {
             resCounts['Mağazaya Gelecek'] = (resCounts['Mağazaya Gelecek'] || 0) + 1;
         } else if (lowerRes === 'tekrar aranacak') {
@@ -1232,6 +1228,7 @@ async function fetchAdvancedReport() {
     try {
         let res = await fetch(GAS_URL, {
             method: 'POST',
+            redirect: 'follow', // ── HER İHTİMALE KARŞI CORS PROTOKOLÜ ──
             body: JSON.stringify({
                 action: 'getAdvancedReport',
                 data: { startPeriod: sP, endPeriod: eP, category: cat }
@@ -1463,7 +1460,7 @@ function exportReportPDF() {
             </table>
         </div>
         <div style="text-align:center; margin-top:40px; padding-top:20px; border-top:1px solid #e2e8f0; font-size:12px; color:#94a3b8; font-weight:700;">
-            Oluşturulma Tarihi: ${printDate} &nbsp;&bull;&nbsp; HEDEF AVM CRM
+            Oluşturulma Tarihi: ${dateStr} &nbsp;&bull;&nbsp; HEDEF AVM CRM
         </div>
     </div>
     </body>
@@ -1517,12 +1514,12 @@ function addInputRow(){
     +'<div><label class="inp-label" style="color:var(--sys-blue)">Şube <span style="color:var(--sys-red)">*</span></label><select class="inp inp-branch">'+bOpts+'</select></div>'
     +'<div><label class="inp-label" style="color:var(--sys-blue)">Müşteri Adı Soyadı <span style="color:var(--sys-red)">*</span></label><input type="text" class="inp inp-name" placeholder="Örn: Ahmet Yılmaz"></div>'
     +'<div><label class="inp-label">İletişim Numarası</label><input type="text" class="inp inp-contact" placeholder="05XX..." onchange="checkDuplicatePhone(this)"></div>'
-    +'<div><label class="inp-label">Geliş Medyası</label><select class="inp inp-media"><option>Instagram</option><option>Whatsapp</option><option>Facebook</option><option>Çağrı</option><option>Web Sitesi Form</option><option>SMS LİNK</option></select></div>'
+    +'<div><label class="inp-label">Geliş Medyası</label><select class="inp inp-media"><option value="Instagram">Instagram</option><option value="Whatsapp">Whatsapp</option><option value="Facebook">Facebook</option><option value="Çağrı">Çağrı</option><option value="Web Sitesi Form">Web Sitesi Form</option><option value="SMS LİNK">SMS LİNK</option></select></div>'
     +'</div>'
     +'<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:1rem;align-items:end; background:var(--surface2); padding:1rem; border-radius:12px;">'
-    +'<div><label class="inp-label">İlgilendiği Kategori</label><select class="inp inp-category"><option>Mobilya</option><option>Baza+Yatak+Başlık</option><option>Bebek ve Çocuk</option><option>Beyaz Eşya</option><option>Elektrikli Ev Aletleri</option><option>Elektrikli-Benzinli Araç</option><option>Elektronik</option><option>Ev Dekorasyonu</option><option>Halı</option><option>Kişisel Aksesuar</option><option>Mobilya Aksesuarı</option><option>Tekstil</option><option>Züccaciye</option><option>Ayakkabı</option><option>LİMİT ÖĞREN</option><option>GENEL ÜRÜN BİLGİSİ</option></select></div>'
+    +'<div><label class="inp-label">İlgilendiği Kategori</label><select class="inp inp-category"><option value="Mobilya">Mobilya</option><option value="Baza+Yatak+Başlık">Baza+Yatak+Başlık</option><option value="Bebek ve Çocuk">Bebek ve Çocuk</option><option value="Beyaz Eşya">Beyaz Eşya</option><option value="Elektrikli Ev Aletleri">Elektrikli Ev Aletleri</option><option value="Elektrikli-Benzinli Araç">Elektrikli-Benzinli Araç</option><option value="Elektronik">Elektronik</option><option value="Ev Dekorasyonu">Ev Dekorasyonu</option><option value="Halı">Halı</option><option value="Kişisel Aksesuar">Kişisel Aksesuar</option><option value="Mobilya Aksesuarı">Mobilya Aksesuarı</option><option value="Tekstil">Tekstil</option><option value="Züccaciye">Züccaciye</option><option value="Ayakkabı">Ayakkabı</option><option value="LİMİT ÖĞREN">LİMİT ÖĞREN</option><option value="GENEL ÜRÜN BİLGİSİ">GENEL ÜRÜN BİLGİSİ</option></select></div>'
     +'<div><label class="inp-label">Ürün Adı / Modeli</label><input type="text" class="inp inp-product" placeholder="Örn: L Koltuk"></div>'
-    +'<div style="display:flex;gap:.75rem;align-items:flex-end"><div style="flex:1"><label class="inp-label">Arama Durumu</label><select class="inp inp-status"><option>aranmadı</option><option>arandı</option></select></div>'
+    +'<div style="display:flex;gap:.75rem;align-items:flex-end"><div style="flex:1"><label class="inp-label">Arama Durumu</label><select class="inp inp-status"><option value="aranmadı">aranmadı</option><option value="arandı">arandı</option></select></div>'
     +'<button onclick="this.closest(\'.entry-card\').remove()" class="btn btn-icon" style="flex-shrink:0;color:var(--sys-red);" title="Sil"><i class="fas fa-trash-alt"></i></button></div>'
     +'</div>';
   c.appendChild(d);
@@ -1595,6 +1592,7 @@ async function submitAllRows(){
   try{
     let res = await fetch(GAS_URL, {
         method: 'POST',
+        redirect: 'follow', // ── HER İHTİMALE KARŞI CORS PROTOKOLÜ ──
         headers: {
             'Content-Type': 'text/plain;charset=utf-8' 
         },
@@ -1606,7 +1604,7 @@ async function submitAllRows(){
     try {
         result = JSON.parse(text);
     } catch (err) {
-        result = { status: 'error', message: 'Sunucudan geçersiz yanıt döndü. Apps Script sürümünüz güncel olmayabilir.' };
+        result = { status: 'error', message: 'Sunucudan geçersiz yanıt döndü. ' + text };
     }
 
     if (result.status === 'success') {
