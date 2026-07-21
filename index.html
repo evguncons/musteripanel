@@ -8,6 +8,7 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
 <style>
 *{box-sizing:border-box;}
 
@@ -348,6 +349,21 @@ body.dark .theme-toggle .knob{transform:translateX(20px)}
         </div>
       </div>
       <div style="padding:1.5rem">
+        <!-- META ÇÖZÜMLEYİCİ BAŞLANGIÇ -->
+        <div style="background:var(--surface2); border:1px dashed var(--sys-purple); border-radius:1rem; padding:1.25rem; margin-bottom:1.5rem;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.75rem;">
+                <div>
+                    <div style="font-weight:800; color:var(--text); font-size:1rem;"><i class="fas fa-robot mr-2" style="color:var(--sys-purple)"></i>Akıllı Metin Çözümleyici (Meta / WhatsApp)</div>
+                    <div style="font-size:0.75rem; color:var(--text3); font-weight:600; margin-top:0.2rem;">Müşteri mesajını buraya yapıştırın, sistem otomatik ayrıştırıp yeni satır eklesin.</div>
+                </div>
+            </div>
+            <div style="display:flex; gap:1rem; align-items:flex-start; flex-wrap:wrap;">
+                <textarea id="smartParserInput" class="inp" style="height:70px; resize:vertical; flex:1; min-width:250px; font-family:monospace; font-size:0.85rem;" placeholder="Kopyalanan metni buraya yapıştırın..."></textarea>
+                <button onclick="applySmartParsing()" class="btn" style="background:var(--sys-purple); color:#fff; height:70px; flex-shrink:0; padding:0 1.5rem; width:100%; max-width:180px;"><i class="fas fa-magic mr-2"></i> Çözümle</button>
+            </div>
+        </div>
+        <!-- META ÇÖZÜMLEYİCİ BİTİŞ -->
+
         <div id="inputContainer" style="display:flex;flex-direction:column;gap:1rem"></div>
         <div style="display:flex;justify-content:space-between;align-items:center;margin-top:1.5rem;padding-top:1.5rem;border-top:1px solid var(--border);flex-wrap:wrap;gap:1rem">
           <button onclick="addInputRow()" class="btn btn-ghost"><i class="fas fa-plus" style="color:var(--sys-blue)"></i> <span>Yeni Kayıt Satırı Ekle</span></button>
@@ -472,22 +488,22 @@ body.dark .theme-toggle .knob{transform:translateX(20px)}
           <label class="inp-label">Kategori Filtresi</label>
           <select id="reportCategory" class="inp">
              <option value="all">Tüm Kategoriler</option>
-             <option value="Mobilya">Mobilya</option>
-             <option value="Baza+Yatak+Başlık">Baza+Yatak+Başlık</option>
-             <option value="Bebek ve Çocuk">Bebek ve Çocuk</option>
-             <option value="Beyaz Eşya">Beyaz Eşya</option>
-             <option value="Elektrikli Ev Aletleri">Elektrikli Ev Aletleri</option>
-             <option value="Elektrikli-Benzinli Araç">Elektrikli-Benzinli Araç</option>
-             <option value="Elektronik">Elektronik</option>
-             <option value="Ev Dekorasyonu">Ev Dekorasyonu</option>
-             <option value="Halı">Halı</option>
-             <option value="Kişisel Aksesuar">Kişisel Aksesuar</option>
-             <option value="Mobilya Aksesuarı">Mobilya Aksesuarı</option>
-             <option value="Tekstil">Tekstil</option>
-             <option value="Züccaciye">Züccaciye</option>
-             <option value="Ayakkabı">Ayakkabı</option>
-             <option value="LİMİT ÖĞREN">LİMİT ÖĞREN</option>
-             <option value="GENEL ÜRÜN BİLGİSİ">GENEL ÜRÜN BİLGİSİ</option>
+             <option>Mobilya</option>
+             <option>Baza+Yatak+Başlık</option>
+             <option>Bebek ve Çocuk</option>
+             <option>Beyaz Eşya</option>
+             <option>Elektrikli Ev Aletleri</option>
+             <option>Elektrikli-Benzinli Araç</option>
+             <option>Elektronik</option>
+             <option>Ev Dekorasyonu</option>
+             <option>Halı</option>
+             <option>Kişisel Aksesuar</option>
+             <option>Mobilya Aksesuarı</option>
+             <option>Tekstil</option>
+             <option>Züccaciye</option>
+             <option>Ayakkabı</option>
+             <option>LİMİT ÖĞREN</option>
+             <option>GENEL ÜRÜN BİLGİSİ</option>
           </select>
         </div>
         <div>
@@ -1228,7 +1244,6 @@ async function fetchAdvancedReport() {
     try {
         let res = await fetch(GAS_URL, {
             method: 'POST',
-            redirect: 'follow', // ── HER İHTİMALE KARŞI CORS PROTOKOLÜ ──
             body: JSON.stringify({
                 action: 'getAdvancedReport',
                 data: { startPeriod: sP, endPeriod: eP, category: cat }
@@ -1473,6 +1488,152 @@ function exportReportPDF() {
     win.document.close();
 }
 
+function applySmartParsing() {
+    var rawText = document.getElementById('smartParserInput').value;
+    if(!rawText.trim()) return;
+
+    // Anti-Spam / Bot Temizliği
+    var cleanText = rawText
+        .replace(/Bu konuşmayı ata/gi, '')
+        .replace(/Yapay zeka temsilcin yanıt verecek/gi, '')
+        .replace(/Yapay zeka yanıtını iyileştir/gi, '')
+        .replace(/En Son Uygulamayı Kullan/gi, '')
+        .replace(/Bu türdeki mesajları görmek için Instagram uygulamasının en son sürümünü kullan/gi, '')
+        .replace(/Hedef Alışveriş\s*gönderdi/gi, '')
+        .replace(/Müşteri detayları algılandı.*?Kaydet/gi, '')
+        .replace(/satışımız yoktur/gi, '')
+        .replace(/satısımız yoktur/gi, '')
+        .replace(/mağazalarımız mevcuttur/gi, '')
+        .replace(/İsim Soyisim Telefon iletirseniz/gi, '')
+        .replace(/İrtibat numaranızı iletirseniz/gi, '')
+        .replace(/Yapay zeka aracın bu sohbeti sana aktardı/gi, '')
+        .replace(/Önerilen yanıt.*?Eklemek için tıkla/gi, '');
+
+    var lines = cleanText.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+    if(lines.length === 0) return;
+
+    var name = "";
+    var phone = "";
+    var branch = "";
+    var media = "Whatsapp"; 
+    var category = "GENEL ÜRÜN BİLGİSİ";
+    var product = "";
+
+    // Gelişmiş Telefon Çıkarıcı
+    var phoneMatch = cleanText.match(/(?:0|90|\+90)?\s*[5]\d{2}\s*\d{3}\s*\d{2}\s*\d{2}/);
+    if(phoneMatch) {
+        phone = phoneMatch[0].replace(/\D/g, '');
+        if(phone.length === 10) phone = '0' + phone;
+        else if(phone.length === 12 && phone.startsWith('90')) phone = '0' + phone.substring(2);
+    }
+
+    // Mükerrer Kontrolü (Satır eklemeden ÖNCE)
+    if (phone) {
+        var compContact = getCompareNum(phone);
+        if (compContact.length >= 7) {
+            var exists = allRecordsData.find(function(r){
+                return getCompareNum(r.contact) === compContact;
+            });
+            
+            if(exists) {
+                showWarning('Mükerrer Kayıt', 'Bu numara sistemde kayıtlı!\n\nMüşteri: ' + (exists.name || 'Bilinmiyor') + '\nŞube: ' + exists.branch);
+                return; 
+            }
+
+            var allContacts = document.querySelectorAll('.inp-contact');
+            var matchCount = 0;
+            allContacts.forEach(function(el) {
+                if (getCompareNum(el.value) === compContact) matchCount++;
+            });
+            if (matchCount > 0) {
+                showWarning('Spam Engeli', 'Bu numarayı ekrandaki listeye zaten eklediniz!');
+                return; 
+            }
+        }
+    }
+
+    // İsim Bulucu (Genelde Meta formatında en üstteki satır isimdir)
+    for(let i=0; i<lines.length; i++) {
+        let lLower = lines[i].toLowerCase();
+        if(!lLower.includes('fb.com') && !lLower.includes('reklama yanıt verdi') && !/^\d{2}:\d{2}$/.test(lines[i])) {
+            name = lines[i].replace(/replied to an ad.*/gi, '').trim();
+            break;
+        }
+    }
+
+    // Medya Tespiti
+    let lowerRaw = rawText.toLowerCase();
+    if(lowerRaw.includes('fb.com') || lowerRaw.includes('reklama yanıt verdi') || lowerRaw.includes('bu konuşmayı ata')) {
+        media = "Facebook";
+    } else if (lowerRaw.includes('instagram')) {
+        media = "Instagram";
+    }
+
+    // Şube Tespiti (Son Karar Algoritması)
+    const branchMap = {
+        "inegöl": "İnegöl Şubesi", "bursa": "İnegöl Şubesi", "hamitler": "İnegöl Şubesi",
+        "paşabahçe": "Paşabahçe Şubesi", "beykoz": "Paşabahçe Şubesi",
+        "çekmeköy": "Çekmeköy Şubesi", "şile": "Çekmeköy Şubesi", "kumbaba": "Çekmeköy Şubesi",
+        "izmit": "İzmit Şubesi", "kocaeli": "İzmit Şubesi",
+        "gölcük": "Gölcük Şubesi",
+        "körfez": "Körfez Şubesi",
+        "derince": "Derince Şubesi",
+        "sultanbeyli": "Sultanbeyli Şubesi",
+        "yenidoğan": "Yenidoğan Şubesi",
+        "kavacık": "Kavacık Şubesi",
+        "çayırova": "Çayırova Şubesi",
+        "gebze": "Gebze Şubesi",
+        "düzce": "Düzce Şubesi"
+    };
+    let lastBranchIndex = -1;
+    let lowerClean = cleanText.toLowerCase();
+    
+    for(let key in branchMap) {
+        let idx = lowerClean.lastIndexOf(key);
+        if(idx > lastBranchIndex) {
+            lastBranchIndex = idx;
+            branch = branchMap[key];
+        }
+    }
+
+    // Kategori ve Ürün Tespiti
+    if(lowerClean.includes('volta') || lowerClean.includes('vsm')) {
+        product = "VOLTA ELEKTRİKLİ ARAÇ";
+        category = "Elektrikli-Benzinli Araç";
+    } else {
+        const prodMap = {
+            "buzdolabı": "Beyaz Eşya", "çamaşır": "Beyaz Eşya", "bulaşık": "Beyaz Eşya", "fırın": "Beyaz Eşya",
+            "koltuk": "Mobilya", "kanepe": "Mobilya", "yatak odası": "Mobilya", "yemek odası": "Mobilya",
+            "yatak": "Baza+Yatak+Başlık", "baza": "Baza+Yatak+Başlık", "başlık": "Baza+Yatak+Başlık",
+            "telefon": "Elektronik", "tv": "Elektronik", "televizyon": "Elektronik", "süpürge": "Elektrikli Ev Aletleri"
+        };
+        for(let key in prodMap) {
+            if(lowerClean.includes(key)) {
+                category = prodMap[key];
+                product = key.toUpperCase();
+                break;
+            }
+        }
+    }
+
+    if(!product) product = "Genel Ürün Bilgisi";
+
+    // Satırı Ekle ve Doldur
+    addInputRow();
+    var rows = document.querySelectorAll('#inputContainer > .entry-card');
+    var targetRow = rows[rows.length - 1];
+
+    if(name) targetRow.querySelector('.inp-name').value = name;
+    if(phone) targetRow.querySelector('.inp-contact').value = phone;
+    if(branch) targetRow.querySelector('.inp-branch').value = branch;
+    if(media) targetRow.querySelector('.inp-media').value = media;
+    if(category) targetRow.querySelector('.inp-category').value = category;
+    if(product) targetRow.querySelector('.inp-product').value = product;
+
+    document.getElementById('smartParserInput').value = '';
+    showToast('Akıllı Çözümleyici metni başarıyla aktardı.');
+}
+
 function checkDuplicatePhone(inputEl) {
     var contact = inputEl.value;
     var compContact = getCompareNum(contact);
@@ -1514,12 +1675,12 @@ function addInputRow(){
     +'<div><label class="inp-label" style="color:var(--sys-blue)">Şube <span style="color:var(--sys-red)">*</span></label><select class="inp inp-branch">'+bOpts+'</select></div>'
     +'<div><label class="inp-label" style="color:var(--sys-blue)">Müşteri Adı Soyadı <span style="color:var(--sys-red)">*</span></label><input type="text" class="inp inp-name" placeholder="Örn: Ahmet Yılmaz"></div>'
     +'<div><label class="inp-label">İletişim Numarası</label><input type="text" class="inp inp-contact" placeholder="05XX..." onchange="checkDuplicatePhone(this)"></div>'
-    +'<div><label class="inp-label">Geliş Medyası</label><select class="inp inp-media"><option value="Instagram">Instagram</option><option value="Whatsapp">Whatsapp</option><option value="Facebook">Facebook</option><option value="Çağrı">Çağrı</option><option value="Web Sitesi Form">Web Sitesi Form</option><option value="SMS LİNK">SMS LİNK</option></select></div>'
+    +'<div><label class="inp-label">Geliş Medyası</label><select class="inp inp-media"><option>Instagram</option><option>Whatsapp</option><option>Facebook</option><option>Çağrı</option><option>Web Sitesi Form</option><option>SMS LİNK</option></select></div>'
     +'</div>'
     +'<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:1rem;align-items:end; background:var(--surface2); padding:1rem; border-radius:12px;">'
-    +'<div><label class="inp-label">İlgilendiği Kategori</label><select class="inp inp-category"><option value="Mobilya">Mobilya</option><option value="Baza+Yatak+Başlık">Baza+Yatak+Başlık</option><option value="Bebek ve Çocuk">Bebek ve Çocuk</option><option value="Beyaz Eşya">Beyaz Eşya</option><option value="Elektrikli Ev Aletleri">Elektrikli Ev Aletleri</option><option value="Elektrikli-Benzinli Araç">Elektrikli-Benzinli Araç</option><option value="Elektronik">Elektronik</option><option value="Ev Dekorasyonu">Ev Dekorasyonu</option><option value="Halı">Halı</option><option value="Kişisel Aksesuar">Kişisel Aksesuar</option><option value="Mobilya Aksesuarı">Mobilya Aksesuarı</option><option value="Tekstil">Tekstil</option><option value="Züccaciye">Züccaciye</option><option value="Ayakkabı">Ayakkabı</option><option value="LİMİT ÖĞREN">LİMİT ÖĞREN</option><option value="GENEL ÜRÜN BİLGİSİ">GENEL ÜRÜN BİLGİSİ</option></select></div>'
+    +'<div><label class="inp-label">İlgilendiği Kategori</label><select class="inp inp-category"><option>Mobilya</option><option>Baza+Yatak+Başlık</option><option>Bebek ve Çocuk</option><option>Beyaz Eşya</option><option>Elektrikli Ev Aletleri</option><option>Elektrikli-Benzinli Araç</option><option>Elektronik</option><option>Ev Dekorasyonu</option><option>Halı</option><option>Kişisel Aksesuar</option><option>Mobilya Aksesuarı</option><option>Tekstil</option><option>Züccaciye</option><option>Ayakkabı</option><option>LİMİT ÖĞREN</option><option>GENEL ÜRÜN BİLGİSİ</option></select></div>'
     +'<div><label class="inp-label">Ürün Adı / Modeli</label><input type="text" class="inp inp-product" placeholder="Örn: L Koltuk"></div>'
-    +'<div style="display:flex;gap:.75rem;align-items:flex-end"><div style="flex:1"><label class="inp-label">Arama Durumu</label><select class="inp inp-status"><option value="aranmadı">aranmadı</option><option value="arandı">arandı</option></select></div>'
+    +'<div style="display:flex;gap:.75rem;align-items:flex-end"><div style="flex:1"><label class="inp-label">Arama Durumu</label><select class="inp inp-status"><option>aranmadı</option><option>arandı</option></select></div>'
     +'<button onclick="this.closest(\'.entry-card\').remove()" class="btn btn-icon" style="flex-shrink:0;color:var(--sys-red);" title="Sil"><i class="fas fa-trash-alt"></i></button></div>'
     +'</div>';
   c.appendChild(d);
@@ -1592,11 +1753,11 @@ async function submitAllRows(){
   try{
     let res = await fetch(GAS_URL, {
         method: 'POST',
-        redirect: 'follow', // ── HER İHTİMALE KARŞI CORS PROTOKOLÜ ──
         headers: {
             'Content-Type': 'text/plain;charset=utf-8' 
         },
-        body: JSON.stringify({action:'addCustomersBulk', data:data})
+        body: JSON.stringify({action:'addCustomersBulk', data:data}),
+        redirect: 'follow'
     });
     
     let text = await res.text();
@@ -1604,7 +1765,7 @@ async function submitAllRows(){
     try {
         result = JSON.parse(text);
     } catch (err) {
-        result = { status: 'error', message: 'Sunucudan geçersiz yanıt döndü. ' + text };
+        result = { status: 'error', message: 'Sunucudan geçersiz yanıt döndü. Apps Script sürümünüz güncel olmayabilir.' };
     }
 
     if (result.status === 'success') {
