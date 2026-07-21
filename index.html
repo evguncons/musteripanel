@@ -123,11 +123,9 @@ select.inp{appearance:none;line-height:1.5;background-image:url("data:image/svg+
 .prog-bg{background:var(--prog-bg);border-radius:6px;height:8px;overflow:hidden}
 .prog-fill{height:100%;border-radius:6px;transition:width 0.8s cubic-bezier(0.4, 0, 0.2, 1)}
 
-/* Toast Notification */
 .toast { position:fixed; bottom:-100px; left:50%; transform:translateX(-50%); background:var(--sys-green); color:#fff; padding:12px 24px; border-radius:50px; font-weight:700; font-size:1rem; box-shadow:0 10px 25px rgba(16,185,129,0.4); transition:bottom 0.4s cubic-bezier(0.4, 0, 0.2, 1); z-index:9999; display:flex; align-items:center; gap:8px; pointer-events:none;}
 .toast.show { bottom: 30px; }
 
-/* Modals */
 .modal-bg{position:fixed;inset:0;z-index:999;background:rgba(15,23,42,.6);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;padding:1rem; opacity:0; visibility:hidden; transition:all 0.3s ease;}
 .modal-bg.show { opacity:1; visibility:visible; }
 .modal-content { transform:scale(0.95); transition:all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
@@ -142,7 +140,6 @@ select.inp{appearance:none;line-height:1.5;background-image:url("data:image/svg+
 .sec-header{display:flex;align-items:center;gap:1rem;padding:1.25rem 1.5rem;border-bottom:1px solid var(--border);flex-wrap:wrap; background:var(--surface2)}
 .sec-icon{width:42px;height:42px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0; box-shadow:0 2px 8px rgba(0,0,0,0.05)}
 
-/* ── HEADER STICKY GLASSMORPHISM ── */
 .app-header {
   background: var(--surface-glass);
   backdrop-filter: blur(16px);
@@ -193,7 +190,6 @@ select.inp{appearance:none;line-height:1.5;background-image:url("data:image/svg+
   .podium-wrap{flex-direction:column!important;align-items:center!important;min-height:unset!important;padding-top:1.5rem!important}
 }
 
-/* Dark mode toggle */
 .theme-toggle{width:46px;height:26px;border-radius:13px;border:none;cursor:pointer;position:relative;transition:background .3s;flex-shrink:0;padding:0; box-shadow: inset 0 2px 4px rgba(0,0,0,0.1)}
 .theme-toggle .knob{position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:transform .3s cubic-bezier(0.4, 0, 0.2, 1);box-shadow:0 2px 5px rgba(0,0,0,.2)}
 body:not(.dark) .theme-toggle{background:#cbd5e1}
@@ -349,6 +345,7 @@ body.dark .theme-toggle .knob{transform:translateX(20px)}
         </div>
       </div>
       <div style="padding:1.5rem">
+
         <!-- META ÇÖZÜMLEYİCİ BAŞLANGIÇ -->
         <div style="background:var(--surface2); border:1px dashed var(--sys-purple); border-radius:1rem; padding:1.25rem; margin-bottom:1.5rem;">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.75rem;">
@@ -488,22 +485,22 @@ body.dark .theme-toggle .knob{transform:translateX(20px)}
           <label class="inp-label">Kategori Filtresi</label>
           <select id="reportCategory" class="inp">
              <option value="all">Tüm Kategoriler</option>
-             <option>Mobilya</option>
-             <option>Baza+Yatak+Başlık</option>
-             <option>Bebek ve Çocuk</option>
-             <option>Beyaz Eşya</option>
-             <option>Elektrikli Ev Aletleri</option>
-             <option>Elektrikli-Benzinli Araç</option>
-             <option>Elektronik</option>
-             <option>Ev Dekorasyonu</option>
-             <option>Halı</option>
-             <option>Kişisel Aksesuar</option>
-             <option>Mobilya Aksesuarı</option>
-             <option>Tekstil</option>
-             <option>Züccaciye</option>
-             <option>Ayakkabı</option>
-             <option>LİMİT ÖĞREN</option>
-             <option>GENEL ÜRÜN BİLGİSİ</option>
+             <option value="Mobilya">Mobilya</option>
+             <option value="Baza+Yatak+Başlık">Baza+Yatak+Başlık</option>
+             <option value="Bebek ve Çocuk">Bebek ve Çocuk</option>
+             <option value="Beyaz Eşya">Beyaz Eşya</option>
+             <option value="Elektrikli Ev Aletleri">Elektrikli Ev Aletleri</option>
+             <option value="Elektrikli-Benzinli Araç">Elektrikli-Benzinli Araç</option>
+             <option value="Elektronik">Elektronik</option>
+             <option value="Ev Dekorasyonu">Ev Dekorasyonu</option>
+             <option value="Halı">Halı</option>
+             <option value="Kişisel Aksesuar">Kişisel Aksesuar</option>
+             <option value="Mobilya Aksesuarı">Mobilya Aksesuarı</option>
+             <option value="Tekstil">Tekstil</option>
+             <option value="Züccaciye">Züccaciye</option>
+             <option value="Ayakkabı">Ayakkabı</option>
+             <option value="LİMİT ÖĞREN">LİMİT ÖĞREN</option>
+             <option value="GENEL ÜRÜN BİLGİSİ">GENEL ÜRÜN BİLGİSİ</option>
           </select>
         </div>
         <div>
@@ -1669,18 +1666,47 @@ function addInputRow(){
   var c=document.getElementById('inputContainer');
   if(!c) return;
   var d=document.createElement('div');d.className='entry-card';
+  
+  // Şube dropdown optionlarına explicit (açık) value tanımlaması
   var bOpts='<option value="" disabled selected>Seçiniz...</option>'+BRANCHES.map(function(b){return '<option value="'+b+'">'+b+'</option>';}).join('');
+  
+  // Medya dropdown (TÜM SEÇENEKLER İÇİN EXPLICIT VALUE EKLENDİ - FACEBOOK BUG FİXİ)
+  var mediaOpts = '<option value="Instagram">Instagram</option>'
+                 +'<option value="Whatsapp">Whatsapp</option>'
+                 +'<option value="Facebook">Facebook</option>'
+                 +'<option value="Çağrı">Çağrı</option>'
+                 +'<option value="Web Sitesi Form">Web Sitesi Form</option>'
+                 +'<option value="SMS LİNK">SMS LİNK</option>';
+
+  // Kategori dropdown (TÜM SEÇENEKLER İÇİN EXPLICIT VALUE EKLENDİ)
+  var catOpts = '<option value="Mobilya">Mobilya</option>'
+               +'<option value="Baza+Yatak+Başlık">Baza+Yatak+Başlık</option>'
+               +'<option value="Bebek ve Çocuk">Bebek ve Çocuk</option>'
+               +'<option value="Beyaz Eşya">Beyaz Eşya</option>'
+               +'<option value="Elektrikli Ev Aletleri">Elektrikli Ev Aletleri</option>'
+               +'<option value="Elektrikli-Benzinli Araç">Elektrikli-Benzinli Araç</option>'
+               +'<option value="Elektronik">Elektronik</option>'
+               +'<option value="Ev Dekorasyonu">Ev Dekorasyonu</option>'
+               +'<option value="Halı">Halı</option>'
+               +'<option value="Kişisel Aksesuar">Kişisel Aksesuar</option>'
+               +'<option value="Mobilya Aksesuarı">Mobilya Aksesuarı</option>'
+               +'<option value="Tekstil">Tekstil</option>'
+               +'<option value="Züccaciye">Züccaciye</option>'
+               +'<option value="Ayakkabı">Ayakkabı</option>'
+               +'<option value="LİMİT ÖĞREN">LİMİT ÖĞREN</option>'
+               +'<option value="GENEL ÜRÜN BİLGİSİ">GENEL ÜRÜN BİLGİSİ</option>';
+
   d.innerHTML='<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:1rem;margin-bottom:1rem">'
     +'<div><label class="inp-label">Tarih & Saat</label><input type="datetime-local" class="inp" value="'+getTodayDT()+'"></div>'
     +'<div><label class="inp-label" style="color:var(--sys-blue)">Şube <span style="color:var(--sys-red)">*</span></label><select class="inp inp-branch">'+bOpts+'</select></div>'
     +'<div><label class="inp-label" style="color:var(--sys-blue)">Müşteri Adı Soyadı <span style="color:var(--sys-red)">*</span></label><input type="text" class="inp inp-name" placeholder="Örn: Ahmet Yılmaz"></div>'
     +'<div><label class="inp-label">İletişim Numarası</label><input type="text" class="inp inp-contact" placeholder="05XX..." onchange="checkDuplicatePhone(this)"></div>'
-    +'<div><label class="inp-label">Geliş Medyası</label><select class="inp inp-media"><option>Instagram</option><option>Whatsapp</option><option>Facebook</option><option>Çağrı</option><option>Web Sitesi Form</option><option>SMS LİNK</option></select></div>'
+    +'<div><label class="inp-label">Geliş Medyası</label><select class="inp inp-media">'+mediaOpts+'</select></div>'
     +'</div>'
     +'<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:1rem;align-items:end; background:var(--surface2); padding:1rem; border-radius:12px;">'
-    +'<div><label class="inp-label">İlgilendiği Kategori</label><select class="inp inp-category"><option>Mobilya</option><option>Baza+Yatak+Başlık</option><option>Bebek ve Çocuk</option><option>Beyaz Eşya</option><option>Elektrikli Ev Aletleri</option><option>Elektrikli-Benzinli Araç</option><option>Elektronik</option><option>Ev Dekorasyonu</option><option>Halı</option><option>Kişisel Aksesuar</option><option>Mobilya Aksesuarı</option><option>Tekstil</option><option>Züccaciye</option><option>Ayakkabı</option><option>LİMİT ÖĞREN</option><option>GENEL ÜRÜN BİLGİSİ</option></select></div>'
+    +'<div><label class="inp-label">İlgilendiği Kategori</label><select class="inp inp-category">'+catOpts+'</select></div>'
     +'<div><label class="inp-label">Ürün Adı / Modeli</label><input type="text" class="inp inp-product" placeholder="Örn: L Koltuk"></div>'
-    +'<div style="display:flex;gap:.75rem;align-items:flex-end"><div style="flex:1"><label class="inp-label">Arama Durumu</label><select class="inp inp-status"><option>aranmadı</option><option>arandı</option></select></div>'
+    +'<div style="display:flex;gap:.75rem;align-items:flex-end"><div style="flex:1"><label class="inp-label">Arama Durumu</label><select class="inp inp-status"><option value="aranmadı">aranmadı</option><option value="arandı">arandı</option></select></div>'
     +'<button onclick="this.closest(\'.entry-card\').remove()" class="btn btn-icon" style="flex-shrink:0;color:var(--sys-red);" title="Sil"><i class="fas fa-trash-alt"></i></button></div>'
     +'</div>';
   c.appendChild(d);
@@ -1728,10 +1754,16 @@ async function submitAllRows(){
 
     var parts=dv.split('T'),dp=parts[0],tp=parts[1];
     var dp2=dp.split('-');
-    data.push({date:dp2[2]+'.'+dp2[1]+'.'+dp2[0]+' '+tp,branch:branch,name:name,
-      contact:contact,media:row.querySelector('.inp-media').value,
-      category:row.querySelector('.inp-category').value,product:row.querySelector('.inp-product').value,
-      status:row.querySelector('.inp-status').value.toLocaleLowerCase('tr-TR')});
+    data.push({
+      date:dp2[2]+'.'+dp2[1]+'.'+dp2[0]+' '+tp,
+      branch:branch,
+      name:name,
+      contact:contact,
+      media:row.querySelector('.inp-media').value,
+      category:row.querySelector('.inp-category').value,
+      product:row.querySelector('.inp-product').value,
+      status:row.querySelector('.inp-status').value.toLocaleLowerCase('tr-TR')
+    });
   }
   
   if(hasSpamError) return; 
