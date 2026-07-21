@@ -1519,16 +1519,80 @@ function applySmartParsing() {
     var category = "GENEL ÜRÜN BİLGİSİ";
     var product = "";
 
-    // Web Sitesi Form Tespiti
-    var isWebForm = cleanText.includes("Talep #") || cleanText.includes("TC Kimlik");
+    var isWebForm = rawText.includes("Talep #") || rawText.includes("TC Kimlik") || rawText.includes("Ad Soyad");
 
-    // İsim Bulma
+    // 1. ÜRÜN VE KATEGORİ TESPİTİ (GELİŞMİŞ)
     if (isWebForm) {
-        var nameMatch = cleanText.match(/Ad Soyad(.*?)(Telefon|E-posta|TC Kimlik)/i);
+        // Web formundan nokta atışı ürün çıkarma (Barkod numarasını ayıklar)
+        let rawLines = rawText.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+        let headerIdx = rawLines.findIndex(l => l.includes("SKU") && l.includes("Tutar"));
+        if (headerIdx > -1 && rawLines.length > headerIdx + 1) {
+            product = rawLines[headerIdx + 1].replace(/\s+\d{8,15}.*/, '').trim();
+        }
+        if (!product) {
+            let flatText = rawText.replace(/\n/g, ' ');
+            let webProdMatch = flatText.match(/(?:Tutar|SKU)\s+(.*?)\s+(?:\d{8,15})/i);
+            if (webProdMatch && webProdMatch[1]) product = webProdMatch[1].trim();
+        }
+    } 
+
+    // Kategori Eşleştirme Sözlüğü (Genişletilmiş Sözlük)
+    const keywordToCat = {
+        "ankastre": "Beyaz Eşya", "buzdolabı": "Beyaz Eşya", "çamaşır": "Beyaz Eşya", "bulaşık": "Beyaz Eşya", "fırın": "Beyaz Eşya", "dondurucu": "Beyaz Eşya", "ocak": "Beyaz Eşya", "davlumbaz": "Beyaz Eşya",
+        "telefon": "Elektronik", "tv": "Elektronik", "televizyon": "Elektronik", "laptop": "Elektronik", "bilgisayar": "Elektronik", "tablet": "Elektronik", "kulaklık": "Elektronik", "playstation": "Elektronik",
+        "volta": "Elektrikli-Benzinli Araç", "scooter": "Elektrikli-Benzinli Araç", "scoter": "Elektrikli-Benzinli Araç", "motor": "Elektrikli-Benzinli Araç", "vsm": "Elektrikli-Benzinli Araç", "bisiklet": "Elektrikli-Benzinli Araç", "moped": "Elektrikli-Benzinli Araç",
+        "koltuk": "Mobilya", "kanepe": "Mobilya", "gardırop": "Mobilya", "dolap": "Mobilya", "masa": "Mobilya", "sandalye": "Mobilya", "oturma": "Mobilya", "berjer": "Mobilya", "şifonyer": "Mobilya", "komodin": "Mobilya",
+        "baza": "Baza+Yatak+Başlık", "yatak": "Baza+Yatak+Başlık", "başlık": "Baza+Yatak+Başlık",
+        "süpürge": "Elektrikli Ev Aletleri", "ütü": "Elektrikli Ev Aletleri", "airfryer": "Elektrikli Ev Aletleri", "blender": "Elektrikli Ev Aletleri", "kahve": "Elektrikli Ev Aletleri", "çay": "Elektrikli Ev Aletleri", "tost": "Elektrikli Ev Aletleri", "dyson": "Elektrikli Ev Aletleri", "philips": "Elektrikli Ev Aletleri",
+        "halı": "Halı", "yolluk": "Halı",
+        "tencere": "Züccaciye", "tava": "Züccaciye", "yemek takımı": "Züccaciye", "çeyiz": "Züccaciye", "kahvaltı takımı": "Züccaciye", "bardak": "Züccaciye", "çatal": "Züccaciye", "kaşık": "Züccaciye"
+    };
+    // Markalar (Sadece kelime bazlı sözlükte bulunamazsa kontrol edilir)
+    const brandToCat = {
+        "iphone": "Elektronik", "apple": "Elektronik", "samsung": "Elektronik", "redmi": "Elektronik", "xiaomi": "Elektronik", "huawei": "Elektronik", "oppo": "Elektronik", "vivo": "Elektronik", "poco": "Elektronik", "tecno": "Elektronik", "tcl": "Elektronik", "omix": "Elektronik", "casper": "Elektronik", "reeder": "Elektronik", "infinix": "Elektronik", "honor": "Elektronik", "general mobile": "Elektronik", "hiking": "Elektronik"
+    };
+
+    // Kategori Analizi İşlemi
+    let lowerClean = cleanText.toLocaleLowerCase('tr-TR');
+    let pLow = (product + " " + lowerClean).toLocaleLowerCase('tr-TR');
+    let foundCat = "";
+
+    // 1. Aşama: Net Anahtar Kelime Taraması
+    for(let key in keywordToCat) {
+        if(pLow.includes(key)) {
+            foundCat = keywordToCat[key];
+            if (!isWebForm && !product) product = key.toUpperCase();
+            break;
+        }
+    }
+    
+    // 2. Aşama: Sadece Marka Taraması (Eğer kelime bulunamadıysa)
+    if (!foundCat) {
+        for(let key in brandToCat) {
+            if(pLow.includes(key)) {
+                foundCat = brandToCat[key];
+                if (!isWebForm && !product) product = key.toUpperCase();
+                break;
+            }
+        }
+    }
+
+    if (foundCat) category = foundCat;
+    if (!product) product = "GENEL ÜRÜN BİLGİSİ";
+    
+    // Araçlar için özel isimlendirme kuralları
+    if (!isWebForm && category === "Elektrikli-Benzinli Araç") {
+         if(lowerClean.includes('volta') || lowerClean.includes('vsm')) product = "VOLTA ELEKTRİKLİ ARAÇ";
+         else product = "ELEKTRİKLİ ARAÇ";
+    }
+
+    // 2. İSİM BULMA
+    if (isWebForm) {
+        var nameMatch = rawText.match(/Ad Soyad\s+(.*?)\s+(?:Telefon|E-posta|TC Kimlik)/i);
         if (nameMatch && nameMatch[1]) {
             name = nameMatch[1].trim();
         } else {
-            var talepMatch = cleanText.match(/Talep #\d+\s*[—\-]\s*(.*)/i);
+            var talepMatch = rawText.match(/Talep #\d+\s*[—\-]\s*(.*)/i);
             if (talepMatch && talepMatch[1]) name = talepMatch[1].trim();
         }
     } else {
@@ -1540,12 +1604,12 @@ function applySmartParsing() {
         }
     }
 
-    // Telefon (0 sız olarak saklanacak)
+    // 3. TELEFON ÇIKARMA (0'sız ve Boşluksuz)
     var phoneMatch = cleanText.match(/(?:0|90|\+90)?\s*[5]\d{2}\s*\d{3}\s*\d{2}\s*\d{2}/);
     if (phoneMatch) {
         phone = phoneMatch[0].replace(/\D/g, '');
-        if(phone.startsWith('90') && phone.length > 10) phone = phone.substring(2);
-        if(phone.startsWith('0')) phone = phone.substring(1);
+        if(phone.length === 12 && phone.startsWith('90')) phone = phone.substring(2);
+        else if(phone.length === 11 && phone.startsWith('0')) phone = phone.substring(1);
     }
 
     // Mükerrer Kontrolü (Satır eklemeden ÖNCE)
@@ -1567,27 +1631,27 @@ function applySmartParsing() {
         }
     }
 
-    // Şube Bulucu
-    var lowerClean = cleanText.toLocaleLowerCase('tr-TR');
+    // 4. ŞUBE BULUCU
+    const branchMap = {
+        "inegöl": "İnegöl Şubesi", "paşabahçe": "Paşabahçe Şubesi", "çekmeköy": "Çekmeköy Şubesi",
+        "şile": "Çekmeköy Şubesi", "kumbaba": "Çekmeköy Şubesi", "izmit": "İzmit Şubesi", "i̇zmit": "İzmit Şubesi",
+        "gölcük": "Gölcük Şubesi", "körfez": "Körfez Şubesi", "derince": "Derince Şubesi", 
+        "sultanbeyli": "Sultanbeyli Şubesi", "yenidoğan": "Yenidoğan Şubesi", "kavacık": "Kavacık Şubesi", 
+        "çayırova": "Çayırova Şubesi", "gebze": "Gebze Şubesi", "düzce": "Düzce Şubesi", 
+        "bursa": "İnegöl Şubesi", "kocaeli": "İzmit Şubesi"
+    };
+    
+    let lastBranchIndex = -1;
     if (isWebForm) {
-        var branchMatch = lowerClean.match(/mağaza(.*?)(tarih|\()/);
-        if (branchMatch && branchMatch[1]) {
-            let bName = branchMatch[1].trim();
-            if(bName.includes("i̇zmit") || bName.includes("izmit")) branch = "İzmit Şubesi";
-            else if(bName.includes("düzce")) branch = "Düzce Şubesi";
+        // Web formunda mağaza kelimesinden sonrasını hedefle (Bitişik yazımlara karşı dayanıklı)
+        let bm = lowerClean.match(/mağaza\s*(.*?)(?:\s+tarih|\(|\d)/i);
+        if (bm && bm[1]) {
+            let bn = bm[1].trim();
+            for (let key in branchMap) { if (bn.includes(key)) branch = branchMap[key]; }
         }
     }
     
     if(!branch) {
-        const branchMap = {
-            "inegöl": "İnegöl Şubesi", "paşabahçe": "Paşabahçe Şubesi", "çekmeköy": "Çekmeköy Şubesi",
-            "şile": "Çekmeköy Şubesi", "kumbaba": "Çekmeköy Şubesi", "izmit": "İzmit Şubesi",
-            "i̇zmit": "İzmit Şubesi", "gölcük": "Gölcük Şubesi", "körfez": "Körfez Şubesi",
-            "derince": "Derince Şubesi", "sultanbeyli": "Sultanbeyli Şubesi", "yenidoğan": "Yenidoğan Şubesi",
-            "kavacık": "Kavacık Şubesi", "çayırova": "Çayırova Şubesi", "gebze": "Gebze Şubesi",
-            "düzce": "Düzce Şubesi", "bursa": "İnegöl Şubesi", "kocaeli": "İzmit Şubesi"
-        };
-        let lastBranchIndex = -1;
         for (let key in branchMap) {
             let idx = lowerClean.lastIndexOf(key);
             if (idx > lastBranchIndex) {
@@ -1596,54 +1660,6 @@ function applySmartParsing() {
             }
         }
     }
-
-    // Kategori ve Ürün Tespiti
-    if (isWebForm) {
-        var prodMatch = rawText.match(/Tutar(.*?)(?=\d{8,}|12 ay|\d+,\d+ TL|$)/i); 
-        if (prodMatch && prodMatch[1]) {
-            product = prodMatch[1].trim();
-            let pLow = product.toLocaleLowerCase('tr-TR');
-            if(pLow.includes("telefon") || pLow.includes("iphone") || pLow.includes("samsung") || pLow.includes("redmi")) {
-                category = "Elektronik";
-                if(pLow.includes("telefon") || pLow.includes("cep")) product = "TELEFON";
-                else if(pLow.includes("iphone")) product = "IPHONE";
-            }
-            else if(pLow.includes("tv") || pLow.includes("televizyon")) category = "Elektronik";
-            else if(pLow.includes("buzdolabı") || pLow.includes("çamaşır")) category = "Beyaz Eşya";
-            else if(pLow.includes("volta") || pLow.includes("motor") || pLow.includes("scooter") || pLow.includes("scoter")) category = "Elektrikli-Benzinli Araç";
-        }
-    } else {
-        if(lowerClean.includes('volta') || lowerClean.includes('vsm')) {
-            product = "VOLTA ELEKTRİKLİ ARAÇ";
-            category = "Elektrikli-Benzinli Araç";
-        } else if(lowerClean.includes('scooter') || lowerClean.includes('scoter')) {
-            product = "ELEKTRİKLİ SCOOTER";
-            category = "Elektrikli-Benzinli Araç";
-        } else if(lowerClean.includes('motor')) {
-            product = "ELEKTRİKLİ MOTOR";
-            category = "Elektrikli-Benzinli Araç";
-        } else if(lowerClean.includes('elektrikli bisiklet')) {
-            product = "ELEKTRİKLİ BİSİKLET";
-            category = "Elektrikli-Benzinli Araç";
-        } else {
-            const prodMap = {
-                "buzdolabı": "Beyaz Eşya", "çamaşır": "Beyaz Eşya", "bulaşık": "Beyaz Eşya", "fırın": "Beyaz Eşya",
-                "koltuk": "Mobilya", "kanepe": "Mobilya", "yatak odası": "Mobilya", "yemek odası": "Mobilya",
-                "yatak": "Baza+Yatak+Başlık", "baza": "Baza+Yatak+Başlık", "başlık": "Baza+Yatak+Başlık",
-                "telefon": "Elektronik", "televizyon": "Elektronik", "süpürge": "Elektrikli Ev Aletleri",
-                "iphone": "Elektronik", "apple": "Elektronik"
-            };
-            for(let key in prodMap) {
-                if(lowerClean.includes(key)) {
-                    category = prodMap[key];
-                    product = key.toUpperCase();
-                    break;
-                }
-            }
-        }
-    }
-
-    if(!product) product = "GENEL ÜRÜN BİLGİSİ";
 
     // DOM'a Ekleme
     addInputRow();
@@ -1663,10 +1679,7 @@ function applySmartParsing() {
         }
     }
     
-    // Geliş Medyası manuel seçim için kesinlikle boş ("") bırakılıyor
-    targetRow.querySelector('.inp-media').value = "";
-    
-    if(category) {
+    if (category) {
         let selCat = targetRow.querySelector('.inp-category');
         for(let i=0; i<selCat.options.length; i++) {
             if(selCat.options[i].value === category) {
@@ -1676,12 +1689,11 @@ function applySmartParsing() {
         }
     }
     
-    if(product) targetRow.querySelector('.inp-product').value = product;
+    if(product) targetRow.querySelector('.inp-product').value = product.toUpperCase();
 
     document.getElementById('smartParserInput').value = "";
     showToast('Metin başarıyla çözümlendi, lütfen "Geliş Medyası"nı seçmeyi unutmayın.');
 }
-
 function checkDuplicatePhone(inputEl) {
     var contact = inputEl.value;
     var compContact = getCompareNum(contact);
