@@ -1603,14 +1603,27 @@ function applySmartParsing() {
         if (prodMatch && prodMatch[1]) {
             product = prodMatch[1].trim();
             let pLow = product.toLocaleLowerCase('tr-TR');
-            if(pLow.includes("telefon") || pLow.includes("iphone") || pLow.includes("samsung")) category = "Elektronik";
+            if(pLow.includes("telefon") || pLow.includes("iphone") || pLow.includes("samsung") || pLow.includes("redmi")) {
+                category = "Elektronik";
+                if(pLow.includes("telefon") || pLow.includes("cep")) product = "TELEFON";
+                else if(pLow.includes("iphone")) product = "IPHONE";
+            }
             else if(pLow.includes("tv") || pLow.includes("televizyon")) category = "Elektronik";
             else if(pLow.includes("buzdolabı") || pLow.includes("çamaşır")) category = "Beyaz Eşya";
-            else if(pLow.includes("volta") || pLow.includes("motor")) category = "Elektrikli-Benzinli Araç";
+            else if(pLow.includes("volta") || pLow.includes("motor") || pLow.includes("scooter") || pLow.includes("scoter")) category = "Elektrikli-Benzinli Araç";
         }
     } else {
         if(lowerClean.includes('volta') || lowerClean.includes('vsm')) {
             product = "VOLTA ELEKTRİKLİ ARAÇ";
+            category = "Elektrikli-Benzinli Araç";
+        } else if(lowerClean.includes('scooter') || lowerClean.includes('scoter')) {
+            product = "ELEKTRİKLİ SCOOTER";
+            category = "Elektrikli-Benzinli Araç";
+        } else if(lowerClean.includes('motor')) {
+            product = "ELEKTRİKLİ MOTOR";
+            category = "Elektrikli-Benzinli Araç";
+        } else if(lowerClean.includes('elektrikli bisiklet')) {
+            product = "ELEKTRİKLİ BİSİKLET";
             category = "Elektrikli-Benzinli Araç";
         } else {
             const prodMap = {
