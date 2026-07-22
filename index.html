@@ -1855,11 +1855,10 @@ async function submitAllRows(){
         result = JSON.parse(text);
     } catch (err) {
         console.error("JSON Parse Hatası. Gelen metin:", text);
-        // Yanıt HTML ise kesinlikle yetki veya dağıtım sürümü hatasıdır
         if(text.toLowerCase().includes("<html") || text.toLowerCase().includes("<body")) {
-             throw new Error("YETKİ VEYA SÜRÜM HATASI!\n\n1. Google Apps Script'te kodları değiştirdikten sonra 'Yeni Sürüm' olarak dağıtmadınız.\n2. Veya Web Uygulamasını dağıtırken Erişim iznini 'Herkes (Anyone)' yapmadınız.\n\nLütfen Dağıt > Dağıtımları Yönet > Düzenle > Yeni Sürüm > Herkes adımlarını izleyin.");
+             throw new Error("YETKİ VEYA SÜRÜM HATASI!\n\n1. Google Apps Script'te kodları değiştirdikten sonra 'Yeni Sürüm' olarak dağıtmadınız.\n2. Veya Web Uygulamasını dağıtırken Erişim iznini 'Herkes (Anyone)' yapmadınız.");
         }
-        throw new Error('Sunucudan bozuk veri döndü. (Yanıt JSON değil)');
+        throw new Error('Sunucudan bozuk veri döndü. (Yanıt JSON değil)\n\n' + text);
     }
 
     if (result.status === 'success') {
@@ -1871,6 +1870,15 @@ async function submitAllRows(){
             btn.disabled=false;
             showToast('Müşteri kayıtları başarıyla sisteme aktarıldı.');
         }, 500); 
+    } else if (result.status === 'warning') {
+         setTimeout(function() {
+            document.getElementById('inputContainer').innerHTML='';
+            addInputRow();
+            refreshData();
+            btn.innerHTML=orig;
+            btn.disabled=false;
+            showWarning('Uyarı: Mükerrer Kayıtlar Atlandı', result.message + '\n\nDiğer kayıtlar başarıyla eklendi.');
+        }, 500);
     } else {
         throw new Error(result.message || ('Bilinmeyen sunucu hatası. Ham Yanıt: ' + JSON.stringify(result)));
     }
