@@ -1522,7 +1522,7 @@ function applySmartParsing() {
     var phone = "";
     var branch = "";
     var media = ""; 
-    var category = "GENEL ÜRÜN BİLGİSİ";
+    var category = "";
     var product = "";
     
     if(isWebForm) media = "Web Sitesi Form";
@@ -1603,15 +1603,35 @@ function applySmartParsing() {
         }
     }
 
-    // 4. ÜRÜN BULUCU
+    // 4. ÜRÜN BULUCU (Geliştirilmiş Web Form Yakalama - Barkodsuz Destek)
     if (isWebForm) {
-        let webProdMatch = flatText.match(/Tutar(.*?)(?=\d{8,})/i);
-        if (webProdMatch && webProdMatch[1]) {
-            product = webProdMatch[1].trim();
-        } else {
-            let match2 = flatText.match(/(?:SKU|Ürün)(.*?)(?=\d{8,})/i);
-            if(match2 && match2[1]) product = match2[1].trim();
+        let tutarIdx = flatText.lastIndexOf("Tutar");
+        if (tutarIdx > -1) {
+             let afterTutar = flatText.substring(tutarIdx + 5).trim();
+             // Barkod (8+ rakam) varsa oradan kes, yoksa cümlenin geri kalanının TAMAMINI al
+             let barcodeMatch = afterTutar.match(/\d{8,}/);
+             if (barcodeMatch) {
+                 product = afterTutar.substring(0, barcodeMatch.index).trim();
+             } else {
+                 product = afterTutar;
+             }
         }
+        
+        if (!product) {
+             let skuIdx = flatText.lastIndexOf("SKU");
+             if (skuIdx === -1) skuIdx = flatText.lastIndexOf("Ürün");
+             if (skuIdx > -1) {
+                  let afterSku = flatText.substring(skuIdx + (flatText.substring(skuIdx, skuIdx+3)==="SKU" ? 3 : 4)).trim();
+                  let barcodeMatch = afterSku.match(/\d{8,}/);
+                  if (barcodeMatch) {
+                      product = afterSku.substring(0, barcodeMatch.index).trim();
+                  } else {
+                      product = afterSku;
+                  }
+             }
+        }
+        
+        // Tablo başlıklarından kalan kırıntıları temizle
         if (product) {
             product = product.replace(/^(?:Adet|Taksit|Tutar|SKU|Ürün|Sepet|\s)+/gi, '').trim();
         }
@@ -1620,63 +1640,78 @@ function applySmartParsing() {
     // 5. GELİŞMİŞ KATEGORİ TESPİTİ (DEV SÖZLÜK)
     const keywordToCat = {
         // Beyaz Eşya
-        "ankastre": "Beyaz Eşya", "buzdolabı": "Beyaz Eşya", "çamaşır makinesi": "Beyaz Eşya", "çamaşır": "Beyaz Eşya", "bulaşık": "Beyaz Eşya", "fırın": "Beyaz Eşya", "dondurucu": "Beyaz Eşya", "derin dondurucu": "Beyaz Eşya", "ocak": "Beyaz Eşya", "davlumbaz": "Beyaz Eşya", "kurutma makinesi": "Beyaz Eşya", "aspiratör": "Beyaz Eşya", "set üstü": "Beyaz Eşya", "klima": "Beyaz Eşya", "kombi": "Beyaz Eşya", "su sebili": "Beyaz Eşya",
-        // Elektronik
-        "cep telefonu": "Elektronik", "tv": "Elektronik", "televizyon": "Elektronik", "laptop": "Elektronik", "bilgisayar": "Elektronik", "tablet": "Elektronik", "kulaklık": "Elektronik", "playstation": "Elektronik", "ps5": "Elektronik", "ps4": "Elektronik", "apple": "Elektronik", "iphone": "Elektronik", "samsung": "Elektronik", "xiaomi": "Elektronik", "redmi": "Elektronik", "huawei": "Elektronik", "smart tv": "Elektronik", "oled": "Elektronik", "qled": "Elektronik", "hoparlör": "Elektronik", "soundbar": "Elektronik", "akıllı saat": "Elektronik", "watch": "Elektronik", "monitör": "Elektronik", "kasa": "Elektronik",
+        "çamaşır makinesi": "Beyaz Eşya", "bulaşık makinesi": "Beyaz Eşya", "kurutma makinesi": "Beyaz Eşya", "derin dondurucu": "Beyaz Eşya", "ankastre set": "Beyaz Eşya", "ankastre": "Beyaz Eşya", "buzdolabı": "Beyaz Eşya", "çamaşır": "Beyaz Eşya", "bulaşık": "Beyaz Eşya", "fırın": "Beyaz Eşya", "dondurucu": "Beyaz Eşya", "ocak": "Beyaz Eşya", "davlumbaz": "Beyaz Eşya", "aspiratör": "Beyaz Eşya", "set üstü": "Beyaz Eşya", "klima": "Beyaz Eşya", "kombi": "Beyaz Eşya", "su sebili": "Beyaz Eşya", "uğur": "Beyaz Eşya", "arçelik": "Beyaz Eşya", "beko": "Beyaz Eşya", "vestel": "Beyaz Eşya", "profilo": "Beyaz Eşya", "altus": "Beyaz Eşya", "bosch": "Beyaz Eşya",
+        
         // Elektrikli-Benzinli Araç
-        "volta": "Elektrikli-Benzinli Araç", "scooter": "Elektrikli-Benzinli Araç", "scoter": "Elektrikli-Benzinli Araç", "motor": "Elektrikli-Benzinli Araç", "vsm": "Elektrikli-Benzinli Araç", "elektrikli bisiklet": "Elektrikli-Benzinli Araç", "bisiklet": "Elektrikli-Benzinli Araç", "moped": "Elektrikli-Benzinli Araç", "atv": "Elektrikli-Benzinli Araç", "e-bike": "Elektrikli-Benzinli Araç", "üç tekerlekli": "Elektrikli-Benzinli Araç",
+        "elektrikli bisiklet": "Elektrikli-Benzinli Araç", "elektrikli motor": "Elektrikli-Benzinli Araç", "motorlu bisiklet": "Elektrikli-Benzinli Araç", "üç tekerlekli": "Elektrikli-Benzinli Araç", "volta": "Elektrikli-Benzinli Araç", "scooter": "Elektrikli-Benzinli Araç", "scoter": "Elektrikli-Benzinli Araç", "motor": "Elektrikli-Benzinli Araç", "vsm": "Elektrikli-Benzinli Araç", "bisiklet": "Elektrikli-Benzinli Araç", "moped": "Elektrikli-Benzinli Araç", "atv": "Elektrikli-Benzinli Araç", "e-bike": "Elektrikli-Benzinli Araç", "kuba": "Elektrikli-Benzinli Araç", "rks": "Elektrikli-Benzinli Araç", "arora": "Elektrikli-Benzinli Araç", "yuki": "Elektrikli-Benzinli Araç",
+        
+        // Elektronik
+        "cep telefonu": "Elektronik", "akıllı saat": "Elektronik", "playstation": "Elektronik", "playstatıon": "Elektronik", "sony": "Elektronik", "tv": "Elektronik", "televizyon": "Elektronik", "laptop": "Elektronik", "bilgisayar": "Elektronik", "tablet": "Elektronik", "kulaklık": "Elektronik", "ps5": "Elektronik", "ps4": "Elektronik", "apple": "Elektronik", "iphone": "Elektronik", "samsung": "Elektronik", "xiaomi": "Elektronik", "redmi": "Elektronik", "huawei": "Elektronik", "smart tv": "Elektronik", "oled": "Elektronik", "qled": "Elektronik", "hoparlör": "Elektronik", "soundbar": "Elektronik", "watch": "Elektronik", "monitör": "Elektronik", "kasa": "Elektronik", "oyun konsolu": "Elektronik", "nintendo": "Elektronik",
+        
         // Mobilya
-        "yatak odası": "Mobilya", "yemek odası": "Mobilya", "düğün paketi": "Mobilya", "oturma grubu": "Mobilya", "tv ünitesi": "Mobilya", "koltuk": "Mobilya", "kanepe": "Mobilya", "gardırop": "Mobilya", "dolap": "Mobilya", "masa": "Mobilya", "sandalye": "Mobilya", "berjer": "Mobilya", "şifonyer": "Mobilya", "komodin": "Mobilya", "sehpa": "Mobilya", "zigon": "Mobilya", "puf": "Mobilya", "konsol": "Mobilya", "vitrin": "Mobilya", "portmanto": "Mobilya", "çekyat": "Mobilya",
+        "yatak odası": "Mobilya", "yemek odası": "Mobilya", "düğün paketi": "Mobilya", "oturma grubu": "Mobilya", "tv ünitesi": "Mobilya", "köşe takımı": "Mobilya", "koltuk takımı": "Mobilya", "koltuk": "Mobilya", "kanepe": "Mobilya", "gardırop": "Mobilya", "dolap": "Mobilya", "masa": "Mobilya", "sandalye": "Mobilya", "berjer": "Mobilya", "şifonyer": "Mobilya", "komodin": "Mobilya", "sehpa": "Mobilya", "zigon": "Mobilya", "puf": "Mobilya", "konsol": "Mobilya", "vitrin": "Mobilya", "portmanto": "Mobilya", "çekyat": "Mobilya", "vestiyer": "Mobilya",
+        
         // Baza+Yatak+Başlık
         "baza": "Baza+Yatak+Başlık", "yatak": "Baza+Yatak+Başlık", "başlık": "Baza+Yatak+Başlık", "ranza": "Baza+Yatak+Başlık",
+        
         // Bebek ve Çocuk
-        "bebek arabası": "Bebek ve Çocuk", "beşik": "Bebek ve Çocuk", "oto koltuğu": "Bebek ve Çocuk", "mama sandalyesi": "Bebek ve Çocuk", "çocuk odası": "Bebek ve Çocuk", "genç odası": "Bebek ve Çocuk", "akülü araba": "Bebek ve Çocuk", "park yatak": "Bebek ve Çocuk",
+        "bebek arabası": "Bebek ve Çocuk", "mama sandalyesi": "Bebek ve Çocuk", "çocuk odası": "Bebek ve Çocuk", "genç odası": "Bebek ve Çocuk", "akülü araba": "Bebek ve Çocuk", "park yatak": "Bebek ve Çocuk", "beşik": "Bebek ve Çocuk", "oto koltuğu": "Bebek ve Çocuk", "ana kucağı": "Bebek ve Çocuk",
+        
         // Elektrikli Ev Aletleri
-        "süpürge": "Elektrikli Ev Aletleri", "robot süpürge": "Elektrikli Ev Aletleri", "roborock": "Elektrikli Ev Aletleri", "ütü": "Elektrikli Ev Aletleri", "airfryer": "Elektrikli Ev Aletleri", "fritöz": "Elektrikli Ev Aletleri", "blender": "Elektrikli Ev Aletleri", "kahve": "Elektrikli Ev Aletleri", "espresso": "Elektrikli Ev Aletleri", "çay makinesi": "Elektrikli Ev Aletleri", "çaycı": "Elektrikli Ev Aletleri", "tost makinesi": "Elektrikli Ev Aletleri", "dyson": "Elektrikli Ev Aletleri", "philips": "Elektrikli Ev Aletleri", "phılıps": "Elektrikli Ev Aletleri", "mikser": "Elektrikli Ev Aletleri", "rondo": "Elektrikli Ev Aletleri", "saç kurutma": "Elektrikli Ev Aletleri", "epilatör": "Elektrikli Ev Aletleri", "tıraş": "Elektrikli Ev Aletleri", "vantilatör": "Elektrikli Ev Aletleri", "su ısıtıcı": "Elektrikli Ev Aletleri", "kettle": "Elektrikli Ev Aletleri",
+        "robot süpürge": "Elektrikli Ev Aletleri", "şarjlı süpürge": "Elektrikli Ev Aletleri", "dik süpürge": "Elektrikli Ev Aletleri", "çay makinesi": "Elektrikli Ev Aletleri", "tost makinesi": "Elektrikli Ev Aletleri", "saç kurutma": "Elektrikli Ev Aletleri", "su ısıtıcı": "Elektrikli Ev Aletleri", "süpürge": "Elektrikli Ev Aletleri", "roborock": "Elektrikli Ev Aletleri", "ütü": "Elektrikli Ev Aletleri", "airfryer": "Elektrikli Ev Aletleri", "fritöz": "Elektrikli Ev Aletleri", "blender": "Elektrikli Ev Aletleri", "kahve": "Elektrikli Ev Aletleri", "espresso": "Elektrikli Ev Aletleri", "çaycı": "Elektrikli Ev Aletleri", "dyson": "Elektrikli Ev Aletleri", "philips": "Elektrikli Ev Aletleri", "phılıps": "Elektrikli Ev Aletleri", "mikser": "Elektrikli Ev Aletleri", "rondo": "Elektrikli Ev Aletleri", "epilatör": "Elektrikli Ev Aletleri", "tıraş": "Elektrikli Ev Aletleri", "vantilatör": "Elektrikli Ev Aletleri", "kettle": "Elektrikli Ev Aletleri", "braun": "Elektrikli Ev Aletleri", "tefal": "Elektrikli Ev Aletleri", "arzum": "Elektrikli Ev Aletleri",
+        
         // Halı
-        "halı": "Halı", "yolluk": "Halı", "kilim": "Halı", "paspas": "Halı",
+        "halı": "Halı", "yolluk": "Halı", "kilim": "Halı", "paspas": "Halı", "merinos": "Halı", "padişah": "Halı", "dinarsu": "Halı",
+        
         // Züccaciye
-        "yemek takımı": "Züccaciye", "kahvaltı takımı": "Züccaciye", "çeyiz seti": "Züccaciye", "tencere": "Züccaciye", "tava": "Züccaciye", "bardak": "Züccaciye", "çatal": "Züccaciye", "kaşık": "Züccaciye", "bıçak": "Züccaciye", "tabak": "Züccaciye", "termos": "Züccaciye", "karaca": "Züccaciye", "emsan": "Züccaciye", "korkmaz": "Züccaciye", "schafer": "Züccaciye", "düdüklü": "Züccaciye",
+        "yemek takımı": "Züccaciye", "kahvaltı takımı": "Züccaciye", "çeyiz seti": "Züccaciye", "çatal bıçak": "Züccaciye", "tencere takımı": "Züccaciye", "tencere": "Züccaciye", "tava": "Züccaciye", "bardak": "Züccaciye", "çatal": "Züccaciye", "kaşık": "Züccaciye", "bıçak": "Züccaciye", "tabak": "Züccaciye", "termos": "Züccaciye", "karaca": "Züccaciye", "emsan": "Züccaciye", "korkmaz": "Züccaciye", "schafer": "Züccaciye", "düdüklü": "Züccaciye", "bernardo": "Züccaciye", "fincan": "Züccaciye", "kadeh": "Züccaciye",
+        
         // Ev Dekorasyonu
         "duvar saati": "Ev Dekorasyonu", "tablo": "Ev Dekorasyonu", "ayna": "Ev Dekorasyonu", "vazo": "Ev Dekorasyonu", "biblo": "Ev Dekorasyonu", "avize": "Ev Dekorasyonu", "aydınlatma": "Ev Dekorasyonu", "lambader": "Ev Dekorasyonu", "abajur": "Ev Dekorasyonu", "lamba": "Ev Dekorasyonu",
+        
         // Kişisel Aksesuar
-        "cüzdan": "Kişisel Aksesuar", "çanta": "Kişisel Aksesuar", "parfüm": "Kişisel Aksesuar", "saat": "Kişisel Aksesuar", "gözlük": "Kişisel Aksesuar", "takı": "Kişisel Aksesuar", "kolye": "Kişisel Aksesuar",
+        "cüzdan": "Kişisel Aksesuar", "çanta": "Kişisel Aksesuar", "parfüm": "Kişisel Aksesuar", "saat": "Kişisel Aksesuar", "gözlük": "Kişisel Aksesuar", "takı": "Kişisel Aksesuar", "kolye": "Kişisel Aksesuar", "valiz": "Kişisel Aksesuar", "bavul": "Kişisel Aksesuar",
+        
         // Tekstil
-        "uyku seti": "Tekstil", "nevresim": "Tekstil", "yorgan": "Tekstil", "yastık": "Tekstil", "battaniye": "Tekstil", "pike": "Tekstil", "havlu": "Tekstil", "bornoz": "Tekstil", "perde": "Tekstil", "tül": "Tekstil", "çarşaf": "Tekstil",
+        "uyku seti": "Tekstil", "nevresim": "Tekstil", "yorgan": "Tekstil", "yastık": "Tekstil", "battaniye": "Tekstil", "pike": "Tekstil", "havlu": "Tekstil", "bornoz": "Tekstil", "perde": "Tekstil", "tül": "Tekstil", "çarşaf": "Tekstil", "alez": "Tekstil", "yatak örtüsü": "Tekstil",
+        
         // Ayakkabı
-        "spor ayakkabı": "Ayakkabı", "ayakkabı": "Ayakkabı", "bot": "Ayakkabı", "çizme": "Ayakkabı", "terlik": "Ayakkabı", "sneaker": "Ayakkabı", "nike": "Ayakkabı", "adidas": "Ayakkabı", "puma": "Ayakkabı", "kinetix": "Ayakkabı", "lumberjack": "Ayakkabı",
+        "spor ayakkabı": "Ayakkabı", "ayakkabı": "Ayakkabı", "bot": "Ayakkabı", "çizme": "Ayakkabı", "terlik": "Ayakkabı", "sneaker": "Ayakkabı", "nike": "Ayakkabı", "adidas": "Ayakkabı", "puma": "Ayakkabı", "kinetix": "Ayakkabı", "lumberjack": "Ayakkabı", "skechers": "Ayakkabı",
+        
         // Limit Öğren
         "limit": "LİMİT ÖĞREN", "taksit limiti": "LİMİT ÖĞREN", "limit sorgulama": "LİMİT ÖĞREN"
     };
-    
-    // Telefon metnini tamamen sök (Yanlışlıkla Elektronik seçilmesini engeller)
+
+    // Güvenlik: Telefon numarası vs metinlerini arama alanından sil
     let safeWholeText = lowerClean
         .replace(/telefon\s*numara[^\s]*/gi, '')
         .replace(/telefon\s*belirt[^\s]*/gi, '')
         .replace(/telefon\s*ilet[^\s]*/gi, '')
         .replace(/telefon\s*:?\s*[\+0-9]+/gi, '');
     
+    // YENİ: Kategori aramasını SADECE ürün adı içinde yap (Eğer ürün adı varsa)
     let searchSpace = product ? product.toLocaleLowerCase('tr-TR') : safeWholeText;
-    let foundCat = "";
     
-    // HATA ÖNLEME: En uzun kelimeleri önce ara (Örn: "Yatak Odası" kelimesini "Yatak" kelimesinden önce kontrol et)
+    // Uzun kelime önceliği için anahtarları uzunluğa göre sırala
     let sortedKeys = Object.keys(keywordToCat).sort((a, b) => b.length - a.length);
     
     for(let i=0; i<sortedKeys.length; i++) {
         let key = sortedKeys[i];
         if(searchSpace.includes(key)) {
-            foundCat = keywordToCat[key];
+            category = keywordToCat[key];
             if (!isWebForm && !product) product = key.toUpperCase();
             break;
         }
     }
 
-    if (!foundCat && searchSpace.includes("telefon")) {
-         foundCat = "Elektronik";
+    if (!category && searchSpace.includes("telefon")) {
+         category = "Elektronik";
          if (!product) product = "TELEFON";
     }
 
-    if (foundCat) category = foundCat;
+    if (!category) {
+        category = "GENEL ÜRÜN BİLGİSİ";
+    }
     
     if (!product) {
         if (category === "LİMİT ÖĞREN") product = "LİMİT SORGULAMA";
