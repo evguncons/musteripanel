@@ -1000,7 +1000,15 @@ function renderCategoryAnalytics(){
 
   var topCat=sorted[0];
   var topRev=sorted.slice().sort(function(a,b){return b[1].revenue-a[1].revenue;})[0];
-  var topConv=sorted.filter(function(e){return e[1].sales>0;}).sort(function(a,b){return(b[1].sales/b[1].volume)-(a[1].sales/a[1].volume);})[0];
+  
+  // Dönüşüm hesaplamasında 1'de 1 (%100) gibi yanıltıcı verileri filtrelemek için
+  // en az 5 kayıt barajı (threshold) koyuyoruz. Oran eşitse hacmi yüksek olan kazanır.
+  var topConvC = sorted.filter(function(e){return e[1].sales>0 && e[1].volume>=5;});
+  if(!topConvC.length) topConvC = sorted.filter(function(e){return e[1].sales>0;}); // 5 barajını geçen yoksa olanları al
+  var topConv = topConvC.sort(function(a,b){
+      var cA=a[1].sales/a[1].volume, cB=b[1].sales/b[1].volume; 
+      return Math.abs(cA-cB)<0.001 ? b[1].volume-a[1].volume : cB-cA;
+  })[0];
 
   var ck=function(id,val){var el=document.getElementById(id);if(el) el.textContent=val;};
   ck('ck-topHacim',topCat?topCat[0]:'—');
