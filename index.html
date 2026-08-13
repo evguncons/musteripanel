@@ -1456,17 +1456,15 @@ function exportReportPDF() {
 }
 
 function applySmartParsing() {
-    // 1. ADIM: NFKC Normalizasyonu ile şekilli, kalın, eğik fontları standart metne çevirir
     var rawText = document.getElementById('smartParserInput').value.normalize("NFKC");
     if(!rawText.trim()) return;
 
-    // Gelişmiş Temizlik Filtresi (Çöp metinleri, reklamları, tarihleri ve bot mesajlarını siler)
     var cleanText = rawText
         .replace(/Bu konuşmayı ata/gi, "")
         .replace(/Bu,?\s*bir reklama yanıttı?r?\.?/gi, "")
         .replace(/Detayları gör/gi, "")
-        .replace(/\d{1,2}\s+[a-zA-ZçğıöşüÇĞIÖŞÜ]+\s+\d{4}\s+\d{2}:\d{2}/g, "") // Örn: "2 Tem 2026 12:20"
-        .replace(/^\d{2}:\d{2}$/gm, "") // Örn: "13:42"
+        .replace(/\d{1,2}\s+[a-zA-ZçğıöşüÇĞIÖŞÜ]+\s+\d{4}\s+\d{2}:\d{2}/g, "") 
+        .replace(/^\d{2}:\d{2}$/gm, "") 
         .replace(/Yapay zeka temsilcin yanıt verecek/gi, "")
         .replace(/Bu sohbeti yapay zeka temsilcinden devraldın/gi, "")
         .replace(/Yapay zeka yanıtını iyileştir/gi, "")
@@ -1493,20 +1491,29 @@ function applySmartParsing() {
         .replace(/Elden Taksit Başvurusu/gi, "")
         .replace(/Hedef AVM,\s*elden taksit alışveriş ve senetle alışveriş imkanı sunan.*/gi, "")
         .replace(/merhabalar,\s*öncelikle ürünler ve fiyatlar için mağazalarımız bilgi vermektedir/gi, "")
+        .replace(/merhabalar, sizlere nasıl yardımcı olabiliriz\?/gi, "")
         .replace(/hangi il ve ilçedeydiniz\? isim\/soyisminiz nedir\?/gi, "")
         .replace(/mağazamız sizlere istediğiniz ürünün hem modellerini hem de elden taksitli fiyatlarını iletsin/gi, "")
         .replace(/bizleri beklerken size özel alışveriş limitinizi öğrenmek için aşağıdaki bağlantıya tıklayarak formu doldurabilirsiniz/gi, "")
         .replace(/mesajlarınıza sırasıyla dönüş yapılmaktadır/gi, "")
-        .replace(/merhabalar, sizlere nasıl yardımcı olabiliriz\?/gi, "")
         .replace(/bu sohbet, bilgi almak için mesaj atın reklamına verilmiş bir yanıt içeriyor/gi, "")
         .replace(/reklamı gör/gi, "")
         .replace(/This app was built in Streamlit! Check it out and visit/gi, "")
         .replace(/HEDEF AVM LİMİT ÖĞREN/gi, "")
-        .replace(/fiyatları\s*nasıl\s*öğrenebilirim\??/gi, "")
-        .replace(/fiyatı\s*nedir\??/gi, "")
-        .replace(/deneme\s*imkanı\s*var\s*mı\??/gi, "")
-        .replace(/taksit limiti/gi, "")
-        .replace(/şimdi limitini öğren/gi, "")
+        .replace(/fb\.com/gi, "")
+        .replace(/Hangi il ve ilçedeydiniz\?/gi, "")
+        .replace(/İrtibat numaranızı iletirseniz en yakın mağazamız sizlere istediğiniz ürünün hem modellerini hem de elden taksitli fiyatlarını iletsin\.?/gi, "")
+        .replace(/Volta EV1 fiyatları ve elden taksit seçenekleri hakkında mağazalarımız bilgi vermektedir efendim\.?/gi, "")
+        .replace(/İstanbul, Kocaeli, Bursa ve Düzce bölgelerinde şubelerimiz bulunuyor\.?/gi, "")
+        .replace(/İl, ilçe ve telefon numarası belirtirseniz mağazamız sizleri arayıp bilgi versinler\.?/gi, "")
+        .replace(/Ürün modelleri ve elden taksitli fiyatlar hakkında mağazalarımız bilgi vermektedir efendim\.?/gi, "")
+        .replace(/Apple marka ürünler \(iPhone, iPad vb\.\) stoklarımızda bulunmamaktadır\.?/gi, "")
+        .replace(/İstanbul, Kocaeli ve Bursa illerinde hizmet vermekteyiz; il ilçe ve telefon numarası belirtirseniz mağazamız sizleri arayıp detaylı bilgi versinler\.?/gi, "")
+        .replace(/[a-zA-ZçğıöşüÇĞIÖŞÜ\s]+ Avrupa yakasında olduğu için bu bölgede elden taksit imkanımız bulunmuyor\.?/gi, "")
+        .replace(/Dilerseniz en yakın şubemiz olan Anadolu yakasındaki [a-zA-ZçğıöşüÇĞIÖŞÜ\s]+'nden veya www\.hedefavm\.com sitemizden online olarak alışveriş yapabilirsiniz\.?/gi, "")
+        .replace(/İlgilendiğiniz ürün için telefon numaranızı belirtirseniz ekibimiz sizi arayıp bilgi versinler\.?/gi, "")
+        .replace(/Merhaba [a-zA-ZçğıöşüÇĞIÖŞÜ\s]+! Lütfen size nasıl yardımcı olabileceğimizi bize bildirin\.?/gi, "")
+        .replace(/Yardımcı olalım efendim[,\s]*hangi il ve ilçedesiniz\?/gi, "")
         .trim();
 
     var flatText = cleanText.replace(/\n/g, ' ');
@@ -1519,14 +1526,12 @@ function applySmartParsing() {
     var name = "";
     var phone = "";
     var branch = "";
-    var media = ""; 
+    var media = isFacebook ? "Facebook" : ""; 
     var category = "";
     var product = "";
-    
-    if(isWebForm) media = "Web Sitesi Form";
-    else if(isFacebook) media = "Facebook";
 
-    // TELEFON TESPİTİ
+    if(isWebForm) media = "Web Sitesi Form";
+
     var phoneMatch = cleanText.match(/(?:0|90|\+90)?\s*5\d{2}\s*\d{3}\s*\d{2}\s*\d{2}/);
     if (!phoneMatch) {
         phoneMatch = flatText.match(/(?:0|90|\+90)?5\d{9}/);
@@ -1538,7 +1543,6 @@ function applySmartParsing() {
         else if(phone.length === 11 && phone.startsWith('0')) phone = phone.substring(1);
     }
 
-    // TELEFON SPAM KONTROLÜ
     if (phone) {
         var compContact = getCompareNum(phone);
         if (compContact.length >= 7) {
@@ -1557,9 +1561,11 @@ function applySmartParsing() {
                 return; 
             }
         }
+        
+        flatText = flatText.replace(phoneMatch[0], "");
+        rawText = rawText.replace(phoneMatch[0], "");
     }
 
-    // İSİM TESPİTİ
     if (isWebForm) {
         var nameMatch = flatText.match(/Ad Soyad\s*([^\d]+?)\s*Telefon/i);
         if (nameMatch && nameMatch[1]) {
@@ -1569,22 +1575,19 @@ function applySmartParsing() {
             if (talepMatch && talepMatch[1]) name = talepMatch[1].trim();
         }
     } else {
-        // İlk 5 satırı tarayıp gerçek isme benzeyeni yakala
-        for(let i=0; i<Math.min(lines.length, 5); i++) {
+        for(let i=0; i<Math.min(lines.length, 6); i++) {
             let line = lines[i];
-            // Harf içermeli, sadece rakam olmamalı, link olmamalı, çok uzun olmamalı
-            if(line.match(/[a-zA-ZçğıöşüÇĞIÖŞÜ]/) && !line.match(/^[\d\s]+$/) && line.length > 2 && line.length < 35 && !line.includes("http") && !line.includes(".com") && !line.toLowerCase().includes("mesaj") && !line.toLowerCase().includes("reklam") && !line.toLowerCase().includes("temsilci")) {
+            if(line.match(/[a-zA-ZçğıöşüÇĞIÖŞÜ]/) && !line.match(/^[\d\s]+$/) && line.length > 2 && line.length < 35 && !line.includes("http") && !line.includes(".com") && !line.toLowerCase().includes("mesaj") && !line.toLowerCase().includes("reklam") && !line.toLowerCase().includes("temsilci") && !line.toLowerCase().includes("reklama yanıt")) {
                 name = line;
                 break;
             }
         }
     }
 
-    // ŞUBE TESPİTİ (Genişletilmiş ASCII ve İlçe Sözlüğü)
     const branchMap = {
         "inegöl": "İnegöl Şubesi", "inegol": "İnegöl Şubesi", "bursa": "İnegöl Şubesi",
         "paşabahçe": "Paşabahçe Şubesi", "pasabahce": "Paşabahçe Şubesi",
-        "çekmeköy": "Çekmeköy Şubesi", "cekmekoy": "Çekmeköy Şubesi", "şile": "Çekmeköy Şubesi", "sile": "Çekmeköy Şubesi", "kumbaba": "Çekmeköy Şubesi", "taşdelen": "Çekmeköy Şubesi", "tasdelen": "Çekmeköy Şubesi",
+        "çekmeköy": "Çekmeköy Şubesi", "cekmekoy": "Çekmeköy Şubesi", "şile": "Çekmeköy Şubesi", "sile": "Çekmeköy Şubesi", "kumbaba": "Çekmeköy Şubesi", "taşdelen": "Çekmeköy Şubesi", "tasdelen": "Çekmeköy Şubesi", "madenler": "Çekmeköy Şubesi",
         "izmit": "İzmit Şubesi", "i̇zmit": "İzmit Şubesi", "kocaeli": "İzmit Şubesi",
         "gölcük": "Gölcük Şubesi", "golcuk": "Gölcük Şubesi",
         "körfez": "Körfez Şubesi", "korfez": "Körfez Şubesi",
@@ -1598,7 +1601,7 @@ function applySmartParsing() {
     };
     
     let lowerClean = flatText.toLocaleLowerCase('tr-TR');
-    let lowerNFKC = rawText.toLocaleLowerCase('tr-TR'); // Normalize edilmiş raw text
+    let lowerNFKC = rawText.toLocaleLowerCase('tr-TR'); 
     
     if (isWebForm) {
         let bm = lowerClean.match(/Mağaza\s*([a-zçğıöşü\s]+?)\s*\(\d+\)/i);
@@ -1610,15 +1613,13 @@ function applySmartParsing() {
     }
     if(!branch) {
         let lastBranchIndex = -1;
-        let searchSpace = lowerClean + " " + lowerNFKC; // İkisini de ara
+        let searchSpace = lowerClean + " " + lowerNFKC;
         for (let key in branchMap) {
             let idx = searchSpace.lastIndexOf(key);
-            // Bulunan en son ilçeyi şube kabul et
             if (idx > lastBranchIndex) { lastBranchIndex = idx; branch = branchMap[key]; }
         }
     }
 
-    // 1. ADIM: KAMPANYA VE REKLAM YAKALAYICI (En Yüksek Öncelik)
     let isCampaignMatch = false;
     if (lowerClean.includes('şehrin ritmine elektrikli') || lowerClean.includes('volta motor') || lowerClean.includes('volta ev1') || lowerClean.includes('elektrikli motorlu bisiklet')) {
         product = "VOLTA ELEKTRİKLİ BİSİKLET / ARAÇ";
@@ -1628,30 +1629,33 @@ function applySmartParsing() {
         product = "PLAYSTATION 5";
         category = "Elektronik";
         isCampaignMatch = true;
-    } else if (lowerClean.includes('taksit limit') || lowerClean.includes('limitini öğren') || lowerClean.includes('limit sorgula')) {
+    } else if (lowerClean.includes('taksit limit') || lowerClean.includes('limitini öğren') || lowerClean.includes('limit sorgula') || lowerClean.includes('limitogren')) {
         product = "LİMİT SORGULAMA";
         category = "LİMİT ÖĞREN";
         isCampaignMatch = true;
     }
 
-    // Eğer kampanya eşleşmesi yoksa, normal çözümlemeye geç:
     if (!isCampaignMatch) {
         
-        // 2. ADIM: EXPLICIT (AÇIK) ÜRÜN TESPİTİ (Web Formları)
         let explicitProduct = "";
-        let formProdMatch = flatText.match(/(?:Ürün(?:SKU)?AdetTaksitTutar|Ürün Adı|İlgilendiği Ürün|Sepet|Model)\s*[:\-]?\s*(.*?)(?=\s*(?:Tutar|Fiyat|$))/i);
-        if (!formProdMatch) {
-            formProdMatch = flatText.match(/(?:Ürün)\s*[:\-]\s*(.*?)(?=\s*(?:Tutar|Fiyat|$))/i);
+        
+        if (isWebForm) {
+            let formProdMatch = flatText.match(/(?:Tutar|Fiyat)\s*(.*?)(?=\s*(?:Tutar|Fiyat|$))/i);
+            if(formProdMatch && formProdMatch[1]) {
+                explicitProduct = formProdMatch[1].trim();
+            }
         }
-        if (!formProdMatch) {
-            // Barkod (SKU) şartını kaldırıp, "Tutar" kelimesinden sonrasını yakalayan filtre
-            let tutarMatch = flatText.match(/Tutar\s*([a-zA-ZçğıöşüÇĞIÖŞÜ0-9\s\/\-\(\)]+?)(?:\s\d+|$)/i);
-            if (tutarMatch && tutarMatch[1]) explicitProduct = tutarMatch[1].trim();
+        
+        if (!explicitProduct) {
+            let formProdMatch = flatText.match(/(?:Ürün(?:SKU)?AdetTaksitTutar|Ürün Adı|İlgilendiği Ürün|Sepet|Model)\s*[:\-]?\s*(.*?)(?=\s*(?:Tutar|Fiyat|$))/i);
+            if (!formProdMatch) {
+                formProdMatch = flatText.match(/(?:Ürün)\s*[:\-]\s*(.*?)(?=\s*(?:Tutar|Fiyat|$))/i);
+            }
+            if (formProdMatch && formProdMatch[1]) {
+                explicitProduct = formProdMatch[1].replace(/^[-\s:]+/g, '').trim();
+            }
         }
 
-        if (formProdMatch && formProdMatch[1] && !explicitProduct) {
-            explicitProduct = formProdMatch[1].replace(/^[-\s:]+/g, '').trim();
-        }
         if (!explicitProduct) {
             let lineProdMatch = rawText.match(/(?:Ürün Adı|İlgilendiği Ürün)\s*[:\-]?\s*([^\n]+)/i);
             if (!lineProdMatch) lineProdMatch = rawText.match(/(?:Ürün)\s*[:\-]\s*([^\n]+)/i);
@@ -1659,18 +1663,17 @@ function applySmartParsing() {
         }
         
         if (explicitProduct) {
-            // Araya giren tablo başlıklarını sil
             product = explicitProduct.replace(/^(?:Adet|Taksit|Tutar|SKU|Ürün|Sepet|\s)+/gi, '').trim();
-            // Sondaki uzun barkodu sil
+            product = product.replace(/^(?:AdetTaksitTutar)\s*/gi, '').trim(); 
+            
             let bcMatch = product.match(/(.*?)\s+\d{8,}$/);
             if (bcMatch) product = bcMatch[1].trim();
         }
 
-        // 3. ADIM: KATEGORİ VE KELİME SÖZLÜĞÜ (Gelişmiş)
         const keywordToCat = {
             "çamaşır makinesi": "Beyaz Eşya", "bulaşık makinesi": "Beyaz Eşya", "kurutma makinesi": "Beyaz Eşya", "derin dondurucu": "Beyaz Eşya", "ankastre set": "Beyaz Eşya", "ankastre": "Beyaz Eşya", "buzdolabı": "Beyaz Eşya", "fırın": "Beyaz Eşya", "ocak": "Beyaz Eşya", "davlumbaz": "Beyaz Eşya", "aspiratör": "Beyaz Eşya", "klima": "Beyaz Eşya", "kombi": "Beyaz Eşya", "su sebili": "Beyaz Eşya", "uğur": "Beyaz Eşya", "arçelik": "Beyaz Eşya", "beko": "Beyaz Eşya", "vestel": "Beyaz Eşya", "profilo": "Beyaz Eşya", "altus": "Beyaz Eşya", "bosch": "Beyaz Eşya", "siemens": "Beyaz Eşya",
-            "elektrikli bisiklet": "Elektrikli-Benzinli Araç", "elektrikli motor": "Elektrikli-Benzinli Araç", "motorlu bisiklet": "Elektrikli-Benzinli Araç", "üç tekerlekli": "Elektrikli-Benzinli Araç", "benzinli motor": "Elektrikli-Benzinli Araç", "volta": "Elektrikli-Benzinli Araç", "scooter": "Elektrikli-Benzinli Araç", "scoter": "Elektrikli-Benzinli Araç", "vsm": "Elektrikli-Benzinli Araç", "bisiklet": "Elektrikli-Benzinli Araç", "moped": "Elektrikli-Benzinli Araç", "atv": "Elektrikli-Benzinli Araç", "kuba": "Elektrikli-Benzinli Araç", "rks": "Elektrikli-Benzinli Araç", "arora": "Elektrikli-Benzinli Araç", "yuki": "Elektrikli-Benzinli Araç", "kanuni": "Elektrikli-Benzinli Araç",
-            "cep telefonu": "Elektronik", "akıllı saat": "Elektronik", "playstation": "Elektronik", "playstatıon": "Elektronik", "oyun konsolu": "Elektronik", "smart tv": "Elektronik", "sony": "Elektronik", "televizyon": "Elektronik", "laptop": "Elektronik", "bilgisayar": "Elektronik", "tablet": "Elektronik", "kulaklık": "Elektronik", "ps5": "Elektronik", "ps4": "Elektronik", "apple": "Elektronik", "iphone": "Elektronik", "samsung": "Elektronik", "xiaomi": "Elektronik", "redmi": "Elektronik", "huawei": "Elektronik", "oled": "Elektronik", "qled": "Elektronik", "hoparlör": "Elektronik", "soundbar": "Elektronik", "watch": "Elektronik", "monitör": "Elektronik", "kasa": "Elektronik", "nintendo": "Elektronik", "tv": "Elektronik", "telefon": "Elektronik",
+            "elektrikli bisiklet": "Elektrikli-Benzinli Araç", "elektrikli motor": "Elektrikli-Benzinli Araç", "motorlu bisiklet": "Elektrikli-Benzinli Araç", "üç tekerlekli": "Elektrikli-Benzinli Araç", "benzinli motor": "Elektrikli-Benzinli Araç", "volta": "Elektrikli-Benzinli Araç", "scooter": "Elektrikli-Benzinli Araç", "scoter": "Elektrikli-Benzinli Araç", "vsm": "Elektrikli-Benzinli Araç", "bisiklet": "Elektrikli-Benzinli Araç", "moped": "Elektrikli-Benzinli Araç", "atv": "Elektrikli-Benzinli Araç", "kuba": "Elektrikli-Benzinli Araç", "rks": "Elektrikli-Benzinli Araç", "arora": "Elektrikli-Benzinli Araç", "yuki": "Elektrikli-Benzinli Araç", "kanuni": "Elektrikli-Benzinli Araç", "elektrikli araba": "Elektrikli-Benzinli Araç", "ev1": "Elektrikli-Benzinli Araç",
+            "cep telefonu": "Elektronik", "telefon varmı": "Elektronik", "telefon fiyat": "Elektronik", "telefon almak": "Elektronik", "akıllı saat": "Elektronik", "playstation": "Elektronik", "playstatıon": "Elektronik", "oyun konsolu": "Elektronik", "smart tv": "Elektronik", "sony": "Elektronik", "televizyon": "Elektronik", "laptop": "Elektronik", "bilgisayar": "Elektronik", "tablet": "Elektronik", "kulaklık": "Elektronik", "ps5": "Elektronik", "ps4": "Elektronik", "apple": "Elektronik", "iphone": "Elektronik", "samsung": "Elektronik", "xiaomi": "Elektronik", "redmi": "Elektronik", "huawei": "Elektronik", "oled": "Elektronik", "qled": "Elektronik", "hoparlör": "Elektronik", "soundbar": "Elektronik", "watch": "Elektronik", "monitör": "Elektronik", "kasa": "Elektronik", "nintendo": "Elektronik", "tv": "Elektronik",
             "yatak odası": "Mobilya", "yemek odası": "Mobilya", "düğün paketi": "Mobilya", "oturma grubu": "Mobilya", "tv ünitesi": "Mobilya", "köşe takımı": "Mobilya", "koltuk takımı": "Mobilya", "çalışma masası": "Mobilya", "oyuncu koltuğu": "Mobilya", "orta sehpa": "Mobilya", "zigon sehpa": "Mobilya", "yemek masası": "Mobilya", "mutfak masası": "Mobilya", "kitaplık": "Mobilya", "telefonluk": "Mobilya", "koltuk": "Mobilya", "kanepe": "Mobilya", "gardırop": "Mobilya", "dolap": "Mobilya", "masa": "Mobilya", "sandalye": "Mobilya", "berjer": "Mobilya", "şifonyer": "Mobilya", "komodin": "Mobilya", "sehpa": "Mobilya", "zigon": "Mobilya", "puf": "Mobilya", "konsol": "Mobilya", "vitrin": "Mobilya", "portmanto": "Mobilya", "çekyat": "Mobilya", "vestiyer": "Mobilya", "ayakkabılık": "Mobilya", "makyaj masası": "Mobilya",
             "baza yatak başlık": "Baza+Yatak+Başlık", "baza": "Baza+Yatak+Başlık", "yatak": "Baza+Yatak+Başlık", "başlık": "Baza+Yatak+Başlık", "ranza": "Baza+Yatak+Başlık", "karyola": "Baza+Yatak+Başlık",
             "bebek arabası": "Bebek ve Çocuk", "mama sandalyesi": "Bebek ve Çocuk", "çocuk odası": "Bebek ve Çocuk", "genç odası": "Bebek ve Çocuk", "park yatak": "Bebek ve Çocuk", "oto koltuğu": "Bebek ve Çocuk", "akülü": "Bebek ve Çocuk", "beşik": "Bebek ve Çocuk",
@@ -1684,7 +1687,6 @@ function applySmartParsing() {
             "limit sorgulama": "LİMİT ÖĞREN", "taksit limiti": "LİMİT ÖĞREN", "limit öğrenme": "LİMİT ÖĞREN", "limit": "LİMİT ÖĞREN", "kredi": "LİMİT ÖĞREN"
         };
 
-        // Eğer explicitProduct (formdan çekilmiş net ürün) varsa, SADECE onun içinde kategori ara
         let searchSpace = explicitProduct ? explicitProduct.toLocaleLowerCase('tr-TR') : lowerClean;
         let sortedKeys = Object.keys(keywordToCat).sort((a, b) => b.length - a.length); 
         let matchedKeyword = "";
@@ -1698,24 +1700,25 @@ function applySmartParsing() {
             }
         }
 
-        // 4. ADIM: BAĞLAMSAL ÜRÜN ADI ÇIKARIMI
         if (!product && matchedKeyword) {
             let escapedKey = matchedKeyword.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
-            let regex = new RegExp(`(?:[a-zA-ZçğıöşüÇĞIÖŞÜ0-9]+\\s+){0,2}${escapedKey}(?:\\s+[a-zA-ZçğıöşüÇĞIÖŞÜ0-9]+){0,2}`, 'gi');
+            let regex = new RegExp(`(?:[a-zA-ZçğıöşüÇĞIÖŞÜ0-9]+\\s+){0,2}${escapedKey}(?:\\s+[a-zA-ZçğıöşüÇĞIÖŞÜ0-9]+){0,1}`, 'gi');
             let ctxMatch = searchSpace.match(regex);
             
             if (ctxMatch) {
                 let ctx = ctxMatch[0];
-                let stopWords = ['fiyat', 'fiyatı', 'fiyatları', 'nedir', 'ne', 'kadar', 'merhaba', 'slm', 'selam', 'iyi', 'günler', 'akşamlar', 'istiyorum', 'bilgi', 'almak', 'alabilir', 'miyim', 'yardımcı', 'olur', 'musunuz', 'var', 'mı', 'yok', 'mu', 'bana', 'sipariş', 'vermek', 'için', 'bunun', 'şunun', 'ilgileniyorum', 'bu', 'şu', 'o', 'satışınız', 'varmı', 'varmıydı', 'var mıydı'];
+                let nameParts = name ? name.toLocaleLowerCase('tr-TR').split(/\s+/) : [];
+                let stopWords = ['fiyat', 'fiyatı', 'fiyatları', 'fiyatlar', 'nedir', 'ne', 'kadar', 'merhaba', 'merhabalar', 'slm', 'selam', 'iyi', 'günler', 'akşamlar', 'istiyorum', 'bilgi', 'almak', 'alabilir', 'miyim', 'yardımcı', 'olur', 'musunuz', 'var', 'mı', 'yok', 'mu', 'bana', 'sipariş', 'vermek', 'için', 'bunun', 'şunun', 'ilgileniyorum', 'bu', 'şu', 'o', 'satışınız', 'varmı', 'varmıydı', 'var mıydı', 'sizde', 'bizde', 'lütfen', 'efendim', 'nasıl', 'olabiliriz', 'bize', 'bildirin', 'hangi'].concat(nameParts);
+                
                 let words = ctx.split(/\s+/);
                 let filtered = words.filter(w => !stopWords.includes(w.toLocaleLowerCase('tr-TR').replace(/[.,?!]/g, '')));
                 product = filtered.join(' ').toUpperCase();
             }
             
             if (!product || product.length < 3) product = matchedKeyword.toUpperCase();
+            if (product === "TELEFON" || product === "CEP TELEFONU VARMI" || product.includes("TELEFON SİZDE")) product = "CEP TELEFONU";
         }
 
-        // 5. ADIM: GÜVENLİK FİLTRESİ (Alakasız uzun metinleri çöpe atar)
         if (product) {
             let pTest = product.toLowerCase();
             if (pTest.includes("satın alabilir miyim") || pTest.includes("merhaba") || pTest.includes("öncelikle") || pTest.includes("hedefavm.com") || pTest.includes("https") || product.length > 50) {
@@ -1731,7 +1734,6 @@ function applySmartParsing() {
         else product = "GENEL ÜRÜN BİLGİSİ";
     }
 
-    // FORMA YAZDIRMA
     addInputRow();
     var rows = document.querySelectorAll('#inputContainer > .entry-card');
     var targetRow = rows[rows.length - 1];
