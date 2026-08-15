@@ -1442,31 +1442,100 @@ function renderCiroLogs() {
     var latestLog = validLogs[validLogs.length - 1];
     var latestDateStr = latestLog.t.split(' ')[0]; 
 
-    // 3. "Dünkü" (veya bir önceki referans) kaydı bul. (Sadece sistemin kendi gününden farklı olan ilk logu arıyoruz)
+    // Tarihi çözümle (Tahmin ve geçen ay hesabı için)
+    var dParts = latestDateStr.split('.');
+    var currentDay = parseInt(dParts[0], 10);
+    var currentMonth = parseInt(dParts[1], 10);
+    var currentYear = parseInt(dParts[2], 10);
+    var daysInMonth = new Date(currentYear, currentMonth, 0).getDate();
+
+    // 3. "Dünkü" kaydı bul.
     var yesterdayLog = null;
     for (var i = allSnapLogs.length - 1; i >= 0; i--) {
         var checkDateStr = allSnapLogs[i].t.split(' ')[0];
         var checkT = parseLogDate(allSnapLogs[i].t);
         var latestT = parseLogDate(latestLog.t);
         
-        // Günleri farklıysa VE en son logdan zaman olarak gerideyse, o bizim "önceki gün" logumuzdur
         if (checkDateStr !== latestDateStr && checkT < latestT) {
             yesterdayLog = allSnapLogs[i];
             break;
         }
     }
 
+    // 4. "Geçen Ayın Bugünü" (Aynı Gün) Logunu Bul
+    var lastMonthLog = null;
+    var lastMonth = currentMonth - 1;
+    var lmYear = currentYear;
+    if (lastMonth === 0) { lastMonth = 12; lmYear--; }
+    var lastMonthDateStr = (currentDay < 10 ? '0'+currentDay : currentDay) + '.' + (lastMonth < 10 ? '0'+lastMonth : lastMonth) + '.' + lmYear;
+    
+    var lmLogs = allSnapLogs.filter(l => l.t.startsWith(lastMonthDateStr));
+    if (lmLogs.length > 0) {
+        lastMonthLog = lmLogs[lmLogs.length - 1]; // O günün en son logunu al
+    }
+
     var fmt = function(n) { return '₺' + new Intl.NumberFormat('tr-TR',{maximumFractionDigits:0}).format(n||0); };
 
+    // --- GLOBAL HESAPLAMALAR ---
+    var currentG = latestLog.g;
+    var yestG = yesterdayLog ? yesterdayLog.g : 0;
+    var lmG = lastMonthLog ? lastMonthLog.g : 0;
+
+    // Düne Göre Değişim
+    var yestDiff = currentG - yestG;
+    var yestPct = yestG > 0 ? (yestDiff / yestG * 100) : 0;
+    
+    // Geçen Aya Göre Değişim
+    var lmDiff = currentG - lmG;
+    var lmPct = lmG > 0 ? (lmDiff / lmG * 100) : 0;
+
+    // Ay Sonu Projeksiyonu (Mevcut Güncel Hız - Linear Run Rate)
+    var projectedG = (currentG / Math.max(1, currentDay)) * daysInMonth;
+
+    // --- HTML OLUŞTURMA (GLOBAL) ---
+    var yestHtml = yesterdayLog ? `
+        <div style="display:flex; align-items:center; gap:8px; margin-top:10px;">
+            <div style="background:rgba(255,255,255,0.2); padding:6px 10px; border-radius:8px; font-size:0.9rem; font-weight:800; font-family:monospace;">
+                <i class="fas ${yestDiff>=0?'fa-arrow-up':'fa-arrow-down'}"></i> ${yestDiff>=0?'+':''}${fmt(yestDiff)}
+            </div>
+            <div style="background:rgba(255,255,255,0.2); padding:6px 10px; border-radius:8px; font-size:0.9rem; font-weight:800;">
+                %${Math.abs(yestPct).toFixed(1)} Günlük Artış
+            </div>
+        </div>
+    ` : '<div style="font-size:0.85rem; opacity:0.8; margin-top:10px;"><i class="fas fa-info-circle"></i> Dün gün sonu verisi sistemde yok.</div>';
+
+    var lmHtml = lastMonthLog ? `
+        <div style="margin-top:8px; font-size:0.85rem; font-weight:600; background:rgba(0,0,0,0.1); padding:8px; border-radius:8px;">
+            <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
+                <span>Geçen Ay (${currentDay} ${TR_MONTHS[lastMonth-1]}):</span>
+                <span style="font-family:monospace; font-weight:800;">${fmt(lmG)}</span>
+            </div>
+            <div style="color:${lmDiff>=0?'#a7f3d0':'#fecaca'}; font-weight:800; display:flex; align-items:center; gap:4px;">
+                <i class="fas ${lmDiff>=0?'fa-arrow-up':'fa-arrow-down'}"></i> Geçen aya göre %${Math.abs(lmPct).toFixed(1)} ${lmDiff>=0?'ileridesiniz':'geridesiniz'}
+            </div>
+        </div>
+    ` : `<div style="margin-top:8px; font-size:0.8rem; opacity:0.7; font-style:italic;"><i class="fas fa-history"></i> ${currentDay} ${TR_MONTHS[lastMonth-1]} tarihine ait geçmiş ciro logu bulunamadı.</div>`;
+
     var globalHtml = `
-    <div style="background:linear-gradient(135deg, var(--sys-blue), #0284c7); border-radius:1.5rem; padding:2rem; margin-bottom:1.5rem; color:#fff; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem; box-shadow:0 10px 25px -5px rgba(14,165,233,0.4);">
+    <div style="background:linear-gradient(135deg, var(--sys-blue), #0284c7); border-radius:1.5rem; padding:2rem; margin-bottom:1.5rem; color:#fff; display:grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap:1.5rem; box-shadow:0 10px 25px -5px rgba(14,165,233,0.4);">
         <div>
             <div style="font-size:0.85rem; font-weight:800; text-transform:uppercase; letter-spacing:0.1em; opacity:0.9; margin-bottom:0.5rem;">TÜM ŞUBELER TOPLAM (KÜMÜLATİF)</div>
-            <div style="font-size:2.8rem; font-weight:800; line-height:1; font-family:monospace; letter-spacing:-1px;">${fmt(latestLog.g)}</div>
+            <div style="font-size:3rem; font-weight:800; line-height:1; font-family:monospace; letter-spacing:-1px;">${fmt(currentG)}</div>
+            ${yestHtml}
         </div>
-        <div style="background:rgba(255,255,255,0.15); backdrop-filter:blur(10px); padding:1rem 1.5rem; border-radius:1rem; text-align:right;">
-            <div style="font-size:0.75rem; font-weight:800; text-transform:uppercase; opacity:0.9; margin-bottom:0.3rem;">Önceki Gün Sonu</div>
-            <div style="font-size:1.3rem; font-weight:800; font-family:monospace;">${yesterdayLog ? fmt(yesterdayLog.g) : 'Veri Yok'}</div>
+        
+        <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap:1rem;">
+            <div style="background:rgba(255,255,255,0.15); backdrop-filter:blur(10px); padding:1.25rem; border-radius:1rem; display:flex; flex-direction:column; justify-content:center;">
+                <div style="font-size:0.75rem; font-weight:800; text-transform:uppercase; opacity:0.9; margin-bottom:0.4rem;"><i class="fas fa-calendar-alt mr-1"></i> Dün Gün Sonu</div>
+                <div style="font-size:1.6rem; font-weight:800; font-family:monospace; line-height:1;">${yesterdayLog ? fmt(yestG) : 'Veri Yok'}</div>
+                ${lmHtml}
+            </div>
+            
+            <div style="background:rgba(255,255,255,0.15); backdrop-filter:blur(10px); padding:1.25rem; border-radius:1rem; display:flex; flex-direction:column; justify-content:center;">
+                <div style="font-size:0.75rem; font-weight:800; text-transform:uppercase; opacity:0.9; margin-bottom:0.4rem;"><i class="fas fa-rocket mr-1"></i> Tahmini Ay Sonu Cirosu</div>
+                <div style="font-size:1.8rem; font-weight:800; font-family:monospace; color:#a7f3d0; line-height:1;">${fmt(projectedG)}</div>
+                <div style="font-size:0.75rem; font-weight:600; margin-top:8px; opacity:0.85; line-height:1.4;">Şu anki hız korunursa ${daysInMonth} gün sonunda ulaşılması beklenen tutar.</div>
+            </div>
         </div>
     </div>`;
 
@@ -1488,14 +1557,19 @@ function renderCiroLogs() {
         let currentVal = latestLog.b[i] || 0;
         let yestVal = yesterdayLog ? yesterdayLog.b[i] : 0;
         let delta = currentVal - yestVal;
+        let deltaPct = yestVal > 0 ? (delta / yestVal * 100) : 0;
         
         let deltaHtml = '';
         if (yesterdayLog) {
-            if (delta > 0) deltaHtml = `<span style="color:var(--sys-green); font-weight:800; font-size:0.85rem; font-family:monospace;"><i class="fas fa-arrow-up mr-1"></i> +${fmt(delta)} Düne Göre</span>`;
-            else if (delta < 0) deltaHtml = `<span style="color:var(--sys-red); font-weight:800; font-size:0.85rem; font-family:monospace;"><i class="fas fa-arrow-down mr-1"></i> ${fmt(delta)} Düne Göre</span>`;
-            else deltaHtml = `<span style="color:var(--text3); font-weight:800; font-size:0.8rem;">Düne Göre Değişim Yok</span>`;
+            if (delta > 0) {
+                deltaHtml = `<div style="display:flex; align-items:center; gap:6px; margin-top:0.5rem;"><span style="background:rgba(16,185,129,0.1); color:var(--sys-green); padding:4px 8px; border-radius:6px; font-weight:800; font-size:0.8rem; font-family:monospace;"><i class="fas fa-arrow-up mr-1"></i> +${fmt(delta)}</span><span style="background:rgba(16,185,129,0.1); color:var(--sys-green); padding:4px 8px; border-radius:6px; font-weight:800; font-size:0.8rem;">%${deltaPct.toFixed(1)}</span></div>`;
+            } else if (delta < 0) {
+                deltaHtml = `<div style="display:flex; align-items:center; gap:6px; margin-top:0.5rem;"><span style="background:rgba(239,68,68,0.1); color:var(--sys-red); padding:4px 8px; border-radius:6px; font-weight:800; font-size:0.8rem; font-family:monospace;"><i class="fas fa-arrow-down mr-1"></i> ${fmt(delta)}</span><span style="background:rgba(239,68,68,0.1); color:var(--sys-red); padding:4px 8px; border-radius:6px; font-weight:800; font-size:0.8rem;">%${Math.abs(deltaPct).toFixed(1)}</span></div>`;
+            } else {
+                deltaHtml = `<div style="margin-top:0.5rem; color:var(--text3); font-weight:800; font-size:0.8rem; padding:4px 0;">Düne Göre Değişim Yok</div>`;
+            }
         } else {
-             deltaHtml = `<span style="color:var(--text3); font-weight:800; font-size:0.8rem;">Önceki gün verisi yok</span>`;
+             deltaHtml = `<div style="margin-top:0.5rem; color:var(--text3); font-weight:800; font-size:0.8rem; padding:4px 0;">Önceki gün verisi yok</div>`;
         }
 
         if (memPeaks[bName] && currentVal < memPeaks[bName]) {
@@ -1513,7 +1587,7 @@ function renderCiroLogs() {
                 <div style="font-weight:800; color:var(--text); font-size:1.1rem;">${bName}</div>
                 <div style="width:32px; height:32px; border-radius:8px; background:var(--surface2); display:flex; justify-content:center; align-items:center; color:var(--sys-blue);"><i class="fas fa-search"></i></div>
             </div>
-            <div style="font-size:1.6rem; font-weight:800; color:var(--sys-blue); font-family:monospace; line-height:1; margin-bottom:0.6rem; letter-spacing:-0.5px;">${fmt(currentVal)}</div>
+            <div style="font-size:1.6rem; font-weight:800; color:var(--sys-blue); font-family:monospace; line-height:1; letter-spacing:-0.5px;">${fmt(currentVal)}</div>
             ${deltaHtml}
         </div>`;
     }
