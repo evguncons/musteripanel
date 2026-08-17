@@ -1554,10 +1554,37 @@ function renderCiroLogs() {
             }
             topBranchesHtml += '</div>';
 
-            let firstLogG = validLogs[0].g;
-            let lastLogG = validLogs[validLogs.length - 1].g;
-            let diffG = lastLogG - firstLogG;
-            let diffHtml = diffG >= 0 ? `<i class="fas fa-arrow-up"></i> +${fmt(diffG)}` : `<i class="fas fa-arrow-down"></i> ${fmt(diffG)}`;
+            // Önceki döneme göre kıyaslama (Aynı uzunluktaki geçmiş periyot)
+            let duration = realEndT - realStartT;
+            if (duration <= 0) duration = 86400000; // En az 1 gün
+            let prevEndT = realStartT - 1000;
+            let prevStartT = prevEndT - duration;
+            
+            let prevRangeRecords = allRecordsData.filter(r => {
+                let rt = parseAnyDate(r.timestamp || r.date);
+                return rt >= prevStartT && rt <= prevEndT;
+            });
+            
+            let prevRevenue = 0;
+            prevRangeRecords.forEach(r => {
+                if (isRecordSale(r)) prevRevenue += parseTurkishFloat(r.amount);
+            });
+            
+            let pctChangeHtml = '';
+            if (prevRevenue > 0) {
+                let pct = ((rRevenue - prevRevenue) / prevRevenue) * 100;
+                if (pct > 0) {
+                    pctChangeHtml = `<span style="color:var(--sys-green);"><i class="fas fa-arrow-up"></i> %${pct.toFixed(1)} artış</span>`;
+                } else if (pct < 0) {
+                    pctChangeHtml = `<span style="color:var(--sys-red);"><i class="fas fa-arrow-down"></i> %${Math.abs(pct).toFixed(1)} düşüş</span>`;
+                } else {
+                    pctChangeHtml = `<span style="color:var(--text3);"><i class="fas fa-minus"></i> Değişim yok</span>`;
+                }
+            } else if (rRevenue > 0) {
+                pctChangeHtml = `<span style="color:var(--sys-green);"><i class="fas fa-arrow-up"></i> %100 artış</span>`;
+            } else {
+                pctChangeHtml = `<span style="color:var(--text3);">Önceki dönem: ₺0</span>`;
+            }
 
             miniReportHtml = warningBanner + `
             <div style="background:var(--surface-glass); border:1px solid var(--border); border-left:4px solid var(--sys-purple); border-radius:1.5rem; padding:1.5rem; margin-bottom:1.5rem; box-shadow:var(--shadow-md); animation: fadeIn 0.4s ease; backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);">
@@ -1567,19 +1594,19 @@ function renderCiroLogs() {
                 
                 <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:1.25rem;">
                     <div>
-                        <div style="font-size:0.75rem; font-weight:800; color:var(--text3); text-transform:uppercase; margin-bottom:6px;">Kümülatif Log Artışı</div>
-                        <div style="font-size:1.6rem; font-weight:800; color:${diffG >= 0 ? 'var(--sys-green)' : 'var(--sys-red)'}; font-family:monospace; line-height:1.2;">${diffHtml}</div>
-                        <div style="font-size:0.7rem; font-weight:600; color:var(--text3); margin-top:4px;">(Tablodaki Net Yükseliş)</div>
+                        <div style="font-size:0.75rem; font-weight:800; color:var(--text3); text-transform:uppercase; margin-bottom:6px;">Dönem Toplam Cirosu</div>
+                        <div style="font-size:1.8rem; font-weight:800; color:var(--text); font-family:monospace; line-height:1.2;">${fmt(rRevenue)}</div>
+                        <div style="font-size:0.75rem; font-weight:700; margin-top:4px;">${pctChangeHtml} <span style="color:var(--text3); font-weight:600;">(Önceki eşdeğer döneme göre)</span></div>
                     </div>
                     <div>
-                        <div style="font-size:0.75rem; font-weight:800; color:var(--text3); text-transform:uppercase; margin-bottom:6px;">Eklenen Satış Cirosu</div>
-                        <div style="font-size:1.6rem; font-weight:800; color:var(--text); font-family:monospace; line-height:1.2;">${fmt(rRevenue)}</div>
-                        <div style="font-size:0.7rem; font-weight:600; color:var(--text3); margin-top:4px;">(Aralıktaki Satışların Toplamı)</div>
+                        <div style="font-size:0.75rem; font-weight:800; color:var(--text3); text-transform:uppercase; margin-bottom:6px;">Satış Adedi</div>
+                        <div style="font-size:1.8rem; font-weight:800; color:var(--sys-green); font-family:monospace; line-height:1.2;">${rSales}</div>
+                        <div style="font-size:0.7rem; font-weight:600; color:var(--text3); margin-top:4px;">(Başarılı işlem sayısı)</div>
                     </div>
                     <div>
                         <div style="font-size:0.75rem; font-weight:800; color:var(--text3); text-transform:uppercase; margin-bottom:6px;">Ortalama Sepet Tutarı</div>
                         <div style="font-size:1.6rem; font-weight:800; color:var(--sys-blue); font-family:monospace; line-height:1.2;">${fmt(avgBasket)}</div>
-                        <div style="font-size:0.7rem; font-weight:600; color:var(--text3); margin-top:4px;">(Kayıtlı Satış Ortalaması)</div>
+                        <div style="font-size:0.7rem; font-weight:600; color:var(--text3); margin-top:4px;">(Kayıtlı satış ortalaması)</div>
                     </div>
                     <div>
                         <div style="font-size:0.75rem; font-weight:800; color:var(--text3); text-transform:uppercase; margin-bottom:6px;">En Çok Satan Kategori</div>
