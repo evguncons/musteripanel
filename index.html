@@ -505,18 +505,6 @@ body.dark .theme-toggle .knob{transform:translateX(20px)}
         </div>
         <button class="btn btn-ghost btn-sm" onclick="triggerManualLog()" id="btnManualLog"><i class="fas fa-camera mr-2" style="color:var(--sys-blue)"></i> Şimdi Manuel Kayıt Al</button>
       </div>
-      
-      <!-- KAYIP DEDEKTÖRÜ (GİZLİ, GEREKTİĞİNDE AÇILIR) -->
-      <div id="lossDetectorAlert" style="display:none; padding:1.25rem 1.5rem; background:rgba(239, 68, 68, 0.1); border-bottom:1px solid rgba(239, 68, 68, 0.2); align-items:center; justify-content:space-between; gap:1rem; flex-wrap:wrap;">
-         <div style="display:flex; align-items:center; gap:1rem;">
-            <div style="width:40px; height:40px; border-radius:50%; background:var(--sys-red); color:#fff; display:flex; align-items:center; justify-content:center; font-size:1.2rem; flex-shrink:0; box-shadow:0 4px 10px rgba(239, 68, 68, 0.4);"><i class="fas fa-exclamation-triangle"></i></div>
-            <div>
-                <div style="font-size:1rem; font-weight:800; color:var(--sys-red); margin-bottom:0.2rem;">DİKKAT: Ciro Düşüşü (Silinen Kayıt) Tespit Edildi!</div>
-                <div style="font-size:0.85rem; font-weight:600; color:var(--text);" id="lossDetectorText">...</div>
-            </div>
-         </div>
-         <button class="btn btn-sm" style="background:var(--sys-red); color:#fff;" onclick="acknowledgeLoss()">Bilgim Dahilinde (Sıfırla)</button>
-      </div>
 
       <div style="padding:1.5rem; display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:1.25rem; align-items:end; border-bottom:1px solid var(--border);">
         <div>
@@ -627,7 +615,7 @@ var allSalesFiltered = [];
 
 var allSnapLogs = []; 
 var branchNamesData = []; 
-var memPeaks = JSON.parse(localStorage.getItem('crm_mem_peaks') || '{}');
+var previousLogHtml = ''; // For preventing flicker
 
 function showWarning(title, message) {
     document.getElementById('warningTitle').textContent = title;
@@ -1393,7 +1381,6 @@ async function fetchAdvancedReport() {
     }
 }
 
-// YENİ: Excel'den gelen "14.08.2026 17:33" veya uzun native formatları güvenle TimeStamp'e çeviren yardımcı fonksiyon
 function parseLogDate(timeStr) {
     if (!timeStr) return 0;
     var str = String(timeStr).trim();
@@ -1416,7 +1403,10 @@ function renderCiroLogs() {
     var container = document.getElementById('logContainer');
     if (!allSnapLogs || allSnapLogs.length === 0) {
         var emptyHtml = '<div class="card" style="padding:3rem;text-align:center;color:var(--text3);font-weight:600;">Henüz snapshot (ciro logu) kaydı bulunmuyor.</div>';
-        if (container.innerHTML !== emptyHtml) container.innerHTML = emptyHtml;
+        if (container.innerHTML !== emptyHtml) {
+             container.innerHTML = emptyHtml;
+             previousLogHtml = emptyHtml;
+        }
         return;
     }
 
@@ -1425,9 +1415,11 @@ function renderCiroLogs() {
     var endVal = document.getElementById('logEndDate') ? document.getElementById('logEndDate').value : '';
     var endTimeVal = document.getElementById('logEndTime') ? document.getElementById('logEndTime').value : '';
     
+    // Tarih ve saat sınırlarını güvenli bir şekilde hesapla. Kullanıcı saat girmediyse 00:00 ve 23:59 kabul edilir.
     var requestedStartTime = startVal ? new Date(startVal + 'T' + (startTimeVal || '00:00') + ':00').getTime() : 0;
     var requestedEndTime = endVal ? new Date(endVal + 'T' + (endTimeVal || '23:59') + ':59').getTime() : Infinity;
 
+    // A. Filtreye uygun olan logları (Bitiş noktası olarak kullanılacak) bulalım:
     var validLogs = [];
     for (var j = 0; j < allSnapLogs.length; j++) {
         var lt = parseLogDate(allSnapLogs[j].t);
@@ -1443,36 +1435,38 @@ function renderCiroLogs() {
             <div style="font-size:1.2rem; font-weight:800; color:var(--text); margin-bottom:0.5rem;">Seçili Tarihlerde Log Yok</div>
             <div style="font-size:0.9rem; color:var(--text2); font-weight:600;">Bu tarih aralığına ait geçerli ciro logu (snapshot) bulunamadı. Lütfen daha yeni bir tarih seçiniz.</div>
         </div>`;
-        if (container.innerHTML !== noLogHtml) container.innerHTML = noLogHtml;
+        if (container.innerHTML !== noLogHtml) {
+             container.innerHTML = noLogHtml;
+             previousLogHtml = noLogHtml;
+        }
         return;
     }
 
     var fmt = function(n) { return '₺' + new Intl.NumberFormat('tr-TR',{maximumFractionDigits:0}).format(n||0); };
-
-    // ----------------- YENİ: SEÇİLİ DÖNEM ÖZET RAPORU -----------------
     var miniReportHtml = '';
     var isFilterActive = (startVal !== '' || endVal !== '');
 
     if (isFilterActive) {
         let firstSystemLogTime = parseLogDate(allSnapLogs[0].t);
         let warningBanner = '';
-        if (startVal && requestedStartTime > 0 && requestedStartTime < firstSystemLogTime - 86400000) {
+        if (startVal && requestedStartTime > 0 && requestedStartTime <= firstSystemLogTime) {
              warningBanner = `<div style="background:rgba(245, 158, 11, 0.1); border-left:4px solid var(--sys-orange); padding:12px 15px; border-radius:8px; font-size:0.8rem; font-weight:600; color:var(--text); margin-bottom:1rem; display:flex; align-items:center; gap:8px;"><i class="fas fa-exclamation-circle text-orange-500 text-lg"></i> <div><b>Bilgi:</b> Sistemin hafızasına çekilen en eski log <b>${allSnapLogs[0].t}</b> tarihlidir. Rapor zorunlu olarak bu tarihten itibaren hesaplanmıştır.</div></div>`;
         }
 
-        // TARIHTEN HEMEN ONCEKI LOGU REFERANS OLARAK ALMA (Kesinlik Saglar)
+        // B. Baseline (Referans) Logunu Bulalım:
+        // Saat 00:00 seçildiğinde o anı kapsamak için "istenen saatten HEMEN ÖNCEKİ" logu bulmalıyız.
         let startLog = allSnapLogs[0];
         let closestBeforeDiff = Infinity;
         for (let i = 0; i < allSnapLogs.length; i++) {
             let t = parseLogDate(allSnapLogs[i].t);
             let diff = requestedStartTime - t;
-            if (diff > 0 && diff < closestBeforeDiff) {
+            // Sıfırdan büyükse istenen tarihten öncedir. 0 ise tam o andır (ikisi de kabul).
+            if (diff >= 0 && diff < closestBeforeDiff) {
                 closestBeforeDiff = diff;
                 startLog = allSnapLogs[i];
             }
         }
-        
-        // Eger oncesinde log yoksa (secilen tarih ilk logdan da eskiyse), ilk logu kullan
+        // Eğer istenen tarih ilk logdan bile eskiyse, en baştaki log geçerlidir.
         if (requestedStartTime <= firstSystemLogTime) {
             startLog = validLogs[0];
         }
@@ -1481,13 +1475,12 @@ function renderCiroLogs() {
         
         let startStrDisplay = startVal.split('-').reverse().join('.') + ' ' + (startTimeVal || '00:00');
         let endStrDisplay = endVal ? endVal.split('-').reverse().join('.') + ' ' + (endTimeVal || '23:59') : endLog.t;
-
         let dateTitleStr = `Seçilen Tarih Aralığı Özeti (${startStrDisplay} - ${endStrDisplay} Arası)`;
 
-        // 1. NET CİRO ARTIŞI (Loglardan Gelen Kesin Gerçek Veri)
+        // 1. DÖNEM TOPLAM CİROSU (Kümülatif Log Artışından hesaplanır, kuruşu kuruşuna kesin sonuçtur)
         let netRevenue = endLog.g - startLog.g;
 
-        // 2. ÖNCEKİ DÖNEM KIYASLAMASI (Aynı Uzunluktaki Geçmiş Periyot)
+        // 2. ÖNCEKİ DÖNEM KIYASLAMASI
         let startLogTime = parseLogDate(startLog.t);
         let endLogTime = parseLogDate(endLog.t);
         let duration = endLogTime - startLogTime;
@@ -1508,7 +1501,6 @@ function renderCiroLogs() {
                 prevStartLog = allSnapLogs[i];
             }
         }
-        
         let prevNetRevenue = prevEndLog.g - prevStartLog.g;
         
         let pctChangeHtml = '';
@@ -1523,7 +1515,7 @@ function renderCiroLogs() {
             pctChangeHtml = `<span style="color:var(--text3);">Önceki dönem artışı: ₺0</span>`;
         }
 
-        // 3. ŞUBE SIRALAMASI (Loglardan Gelen Kesin Gerçek Veri)
+        // 3. ŞUBE SIRALAMASI (Loglardan gelen net ciro artışına göre)
         let branchDeltas = [];
         for (let i = 0; i < branchNamesData.length; i++) {
             let bName = branchNamesData[i].replace(/ Şubesi/gi, '');
@@ -1558,21 +1550,23 @@ function renderCiroLogs() {
         }
         topBranchesHtml += '</div>';
 
-        // 4. TREND KATEGORİ (Sadece o tarihlerde girilen yeni kayıtlardan trend tahmini)
+        // 4. İŞLEM ADEDİ VE TREND KATEGORİ (Tüm başarılı işlemlere bakar, eski müşteriye bugün satış girildiyse onu da sayar)
         let rCats = {};
-        let newSalesCount = 0;
+        let totalSalesCount = 0;
         
         let rangeRecords = allRecordsData.filter(r => {
+            // Sadece başarılı satışları filtrele
+            if (!isRecordSale(r)) return false;
+            // Satışın eklenme veya güncellenme timestampine bak (eğer varsa)
             let rt = parseAnyDate(r.timestamp || r.date);
-            return rt > startLogTime && rt <= endLogTime; // Sıkı sınırlar (Baslangictan hemen sonrasi dahil)
+            // Sıkı sınırlar (Baseline logundan sonrası kabul edilir)
+            return rt >= startLogTime && rt <= endLogTime;
         });
 
         rangeRecords.forEach(r => {
-            if (isRecordSale(r)) {
-                newSalesCount++;
-                let c = r.category || 'Diğer';
-                rCats[c] = (rCats[c] || 0) + 1;
-            }
+            totalSalesCount++;
+            let c = r.category || 'Diğer';
+            rCats[c] = (rCats[c] || 0) + 1;
         });
 
         let topCat = '-';
@@ -1594,9 +1588,9 @@ function renderCiroLogs() {
                     <div style="font-size:0.75rem; font-weight:700; margin-top:4px;">${pctChangeHtml} <span style="color:var(--text3); font-weight:600;">(Önceki eşdeğer döneme göre)</span></div>
                 </div>
                 <div>
-                    <div style="font-size:0.75rem; font-weight:800; color:var(--text3); text-transform:uppercase; margin-bottom:6px;">YENİ İŞLEM ADEDİ</div>
-                    <div style="font-size:1.8rem; font-weight:800; color:var(--sys-green); font-family:monospace; line-height:1.2;">${newSalesCount}</div>
-                    <div style="font-size:0.7rem; font-weight:600; color:var(--text3); margin-top:4px;">(Sadece bu tarihte girilen yeni satışlar)</div>
+                    <div style="font-size:0.75rem; font-weight:800; color:var(--text3); text-transform:uppercase; margin-bottom:6px;">İŞLEM ADEDİ</div>
+                    <div style="font-size:1.8rem; font-weight:800; color:var(--sys-green); font-family:monospace; line-height:1.2;">${totalSalesCount}</div>
+                    <div style="font-size:0.7rem; font-weight:600; color:var(--text3); margin-top:4px;">(Dönemdeki tüm başarılı işlemler)</div>
                 </div>
                 <div>
                     <div style="font-size:0.75rem; font-weight:800; color:var(--text3); text-transform:uppercase; margin-bottom:6px;">TREND KATEGORİ</div>
@@ -1608,7 +1602,6 @@ function renderCiroLogs() {
             ${topBranchesHtml}
         </div>`;
     }
-    // ------------------------------------------------------------------
 
     var latestLog = validLogs[validLogs.length - 1];
     var latestDateStr = latestLog.t.split(' ')[0]; 
@@ -1618,7 +1611,6 @@ function renderCiroLogs() {
         var checkDateStr = allSnapLogs[i].t.split(' ')[0];
         var checkT = parseLogDate(allSnapLogs[i].t);
         var latestT = parseLogDate(latestLog.t);
-        
         if (checkDateStr !== latestDateStr && checkT < latestT) {
             yesterdayLog = allSnapLogs[i];
             break;
@@ -1636,7 +1628,6 @@ function renderCiroLogs() {
     var lmYear = currentYear;
     if (lastMonth === 0) { lastMonth = 12; lmYear--; }
     var lastMonthDateStr = (currentDay < 10 ? '0'+currentDay : currentDay) + '.' + (lastMonth < 10 ? '0'+lastMonth : lastMonth) + '.' + lmYear;
-    
     var lmLogs = allSnapLogs.filter(l => l.t.startsWith(lastMonthDateStr));
     if (lmLogs.length > 0) {
         lastMonthLog = lmLogs[lmLogs.length - 1]; 
@@ -1648,10 +1639,8 @@ function renderCiroLogs() {
 
     var yestDiff = currentG - yestG;
     var yestPct = yestG > 0 ? (yestDiff / yestG * 100) : 0;
-    
     var lmDiff = currentG - lmG;
     var lmPct = lmG > 0 ? (lmDiff / lmG * 100) : 0;
-
     var projectedG = (currentG / Math.max(1, currentDay)) * daysInMonth;
 
     var yestHtml = yesterdayLog ? `
@@ -1736,8 +1725,9 @@ function renderCiroLogs() {
     branchGrid += '</div>';
 
     var finalHtml = globalHtml + branchGrid;
-    if (container.innerHTML !== finalHtml) {
+    if (previousLogHtml !== finalHtml) {
         container.innerHTML = finalHtml;
+        previousLogHtml = finalHtml;
     }
 }
 
@@ -1773,8 +1763,6 @@ function openLogModal(branchIndex, branchName) {
         if (currTime < startT || currTime > endT) continue;
 
         var delta = curr.b[branchIndex] - prev.b[branchIndex];
-        
-        // CİRODA DEĞİŞİM YOKSA BU ZAMAN DİLİMİNİ EKRANA ÇİZME (Gereksiz kalabalık olmasın)
         if (delta === 0) continue;
 
         var isDrop = delta < 0;
@@ -1803,7 +1791,6 @@ function openLogModal(branchIndex, branchName) {
     }
 
     if (timelineHtml === '') {
-        // HİÇ DEĞİŞİM YOKSA KULLANICIYA BUNUN BİR HATA OLMADIĞINI, DEĞİŞİM OLMADIĞINI SÖYLE
         timelineHtml = `
         <div style="padding:3rem 1rem; text-align:center; color:var(--text3); font-weight:600;">
             <i class="fas fa-check-circle mb-3" style="font-size:3rem; color:var(--sys-green); opacity:0.5;"></i><br>
@@ -1828,71 +1815,6 @@ function acknowledgeLoss() {
     localStorage.setItem('crm_mem_peaks', JSON.stringify(memPeaks));
     document.getElementById('lossDetectorAlert').style.display = 'none';
     showToast('Hafıza yeni kümülatif verilere güncellendi.');
-}
-
-function openLogModal(branchIndex, branchName) {
-    var modal = document.getElementById('logBranchModal');
-    var title = document.getElementById('modalLogTitle');
-    var timeline = document.getElementById('modalLogTimeline');
-    
-    title.textContent = branchName + ' Şubesi';
-    
-    var startVal = document.getElementById('logStartDate') ? document.getElementById('logStartDate').value : '';
-    var endVal = document.getElementById('logEndDate') ? document.getElementById('logEndDate').value : '';
-    var startT = startVal ? new Date(startVal + 'T00:00:00').getTime() : 0;
-    var endT = endVal ? new Date(endVal + 'T23:59:59').getTime() : Infinity;
-
-    var timelineHtml = '';
-    var fmt = function(n) { return '₺' + new Intl.NumberFormat('tr-TR',{maximumFractionDigits:0}).format(n||0); };
-
-    if (allSnapLogs.length < 2) {
-        timeline.innerHTML = '<div style="padding:3rem 1rem; text-align:center; color:var(--text3); font-weight:600;"><i class="fas fa-info-circle text-2xl mb-3" style="color:var(--sys-blue)"></i><br>İlk referans noktası alındı. Bir sonraki satış girildiğinde (veya 5 dk sonra) hareketler listelenmeye başlayacaktır.</div>';
-        modal.classList.add('show');
-        return;
-    }
-    
-    for(var i = allSnapLogs.length - 1; i > 0; i--) {
-        var curr = allSnapLogs[i];
-        var prev = allSnapLogs[i-1];
-
-        var tParts = curr.t.split(' ')[0].split('.');
-        var currTime = new Date(tParts[2] + '-' + tParts[1] + '-' + tParts[0] + 'T' + curr.t.split(' ')[1] + ':00').getTime();
-        if (currTime < startT || currTime > endT) continue;
-
-        var delta = curr.b[branchIndex] - prev.b[branchIndex];
-        if (delta === 0) continue;
-
-        var isDrop = delta < 0;
-        var iconHtml = isDrop ? '<i class="fas fa-arrow-down"></i>' : '<i class="fas fa-arrow-up"></i>';
-        var iconColor = isDrop ? 'var(--sys-red)' : 'var(--sys-green)';
-        var iconBg = isDrop ? 'rgba(239,68,68,0.15)' : 'rgba(16,185,129,0.15)';
-        var sign = isDrop ? '' : '+';
-        var alertText = isDrop ? '<div style="font-size:0.75rem; color:var(--sys-red); font-weight:700; margin-top:4px;">Düşüş! Bir satış silindi veya tutarı azaldı.</div>' : '';
-
-        timelineHtml += `
-        <div style="background:var(--surface2); border:1px solid var(--border); border-left:4px solid ${iconColor}; padding:1.25rem; border-radius:1rem; display:flex; justify-content:space-between; align-items:center;">
-            <div style="display:flex; align-items:center; gap:1rem;">
-                <div style="width:40px; height:40px; border-radius:10px; background:${iconBg}; color:${iconColor}; display:flex; justify-content:center; align-items:center; font-size:1.2rem; flex-shrink:0;">
-                    ${iconHtml}
-                </div>
-                <div>
-                    <div style="font-size:0.85rem; font-weight:800; color:var(--text); margin-bottom:2px;">${curr.t}</div>
-                    <div style="font-size:0.75rem; font-weight:600; color:var(--text3);">Güncel Kümülatif: ${fmt(curr.b[branchIndex])}</div>
-                    ${alertText}
-                </div>
-            </div>
-            <div style="text-align:right;">
-                <div style="font-size:1.3rem; font-weight:800; color:${iconColor}; font-family:monospace;">${sign}${fmt(delta)}</div>
-            </div>
-        </div>`;
-    }
-
-    if (timelineHtml === '') {
-        timelineHtml = '<div style="padding:3rem 1rem; text-align:center; color:var(--text3); font-weight:600;">Seçili tarih aralığında bu şube için bir ciro değişimi tespit edilmedi.</div>';
-    }
-
-    timeline.innerHTML = timelineHtml;
-    modal.classList.add('show');
 }
 
 async function triggerManualLog() {
