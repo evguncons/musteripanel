@@ -191,6 +191,17 @@ select.inp{appearance:none;line-height:1.5;background-image:url("data:image/svg+
   .podium-wrap{flex-direction:column!important;align-items:center!important;min-height:unset!important;padding-top:1.5rem!important}
 }
 
+/* Print Styles */
+@media print {
+  body, body.dark { background: #fff !important; color: #000 !important; }
+  body * { visibility: hidden; }
+  #exportPrintableArea, #exportPrintableArea * { visibility: visible; }
+  #exportPrintableArea { position: absolute; left: 0; top: 0; width: 100%; padding: 0 !important; margin: 0 !important; }
+  .no-print { display: none !important; }
+  .app-header, .tabs-row { display: none !important; }
+  #mainApp { padding: 0 !important; margin: 0 !important; }
+}
+
 /* Dark mode toggle */
 .theme-toggle{width:46px;height:26px;border-radius:13px;border:none;cursor:pointer;position:relative;transition:background .3s;flex-shrink:0;padding:0; box-shadow: inset 0 2px 4px rgba(0,0,0,0.1)}
 .theme-toggle .knob{position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:transform .3s cubic-bezier(0.4, 0, 0.2, 1);box-shadow:0 2px 5px rgba(0,0,0,.2)}
@@ -201,6 +212,7 @@ body.dark .theme-toggle .knob{transform:translateX(20px)}
 </style>
 </head>
 <body>
+
 <!-- ════════════════════ LOGIN ════════════════════ -->
 <div id="loginScreen" style="position:fixed;inset:0;z-index:1000;background:var(--bg);display:flex;align-items:center;justify-content:center;padding:1rem; transition: opacity 0.4s ease;">
   <div style="background:var(--card-bg);border:1px solid var(--border);border-radius:1.75rem;padding:3rem 2.5rem;width:100%;max-width:400px;text-align:center;box-shadow:var(--shadow-md)">
@@ -257,6 +269,7 @@ body.dark .theme-toggle .knob{transform:translateX(20px)}
       <div class="nav-tab" onclick="switchTab('sales')" id="tab-sales"><i class="fas fa-shopping-bag"></i> Satışa Dönenler</div>
       <div class="nav-tab" onclick="switchTab('report')" id="tab-report"><i class="fas fa-brain"></i> Yapay Zeka (AI) Raporu</div>
       <div class="nav-tab" onclick="switchTab('log')" id="tab-log"><i class="fas fa-history"></i> Ciro Logları</div>
+      <div class="nav-tab" onclick="switchTab('export')" id="tab-export"><i class="fas fa-file-export"></i> Dışa Aktar (Rapor)</div>
     </div>
   </header>
 
@@ -530,6 +543,45 @@ body.dark .theme-toggle .knob{transform:translateX(20px)}
     </div>
   </div>
 
+  <!-- ══ DIŞA AKTAR / RAPOR ══ -->
+  <div id="view-export" class="tab-content">
+    <div class="card no-print" style="margin-bottom:1.5rem; border-top:4px solid #10b981;">
+      <div class="sec-header" style="background:var(--surface2);">
+        <div class="sec-icon" style="background:rgba(16,185,129,0.1);color:#10b981"><i class="fas fa-file-export text-xl"></i></div>
+        <div>
+          <div style="font-size:1.1rem;font-weight:800;color:var(--text)">Yönetim Raporu & Dışa Aktar</div>
+          <div style="font-size:.75rem;font-weight:600;color:var(--text3)">Belirlediğiniz tarihler arasındaki tüm performansı kurumsal rapor formatında Excel veya PDF olarak indirin.</div>
+        </div>
+      </div>
+      <div style="padding:1.5rem; display:flex; gap:1.25rem; align-items:end; flex-wrap:wrap; border-bottom:1px solid var(--border);">
+        <div><label class="inp-label">Başlangıç Tarihi</label><input type="date" id="expStartDate" class="inp"></div>
+        <div><label class="inp-label">Bitiş Tarihi</label><input type="date" id="expEndDate" class="inp"></div>
+        <button class="btn btn-primary" onclick="renderExportReport()" style="min-width:180px;"><i class="fas fa-magic mr-2"></i> Raporu Hazırla</button>
+      </div>
+      <div style="padding:1rem 1.5rem; font-size:0.8rem; color:var(--text3); font-weight:600;">
+         <i class="fas fa-lightbulb text-yellow-500 mr-1"></i> <b>İpucu:</b> Seçtiğiniz tarih aralığı 1 aydan uzunsa, raporun içinde otomatik olarak "Aylar Arası Büyüme Trendi" grafiği oluşturulacaktır.
+      </div>
+    </div>
+    
+    <div id="exportContentArea" style="display:none; background:#fff; color:#000; padding:2.5rem; border-radius:1rem;" class="card">
+       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:2rem;" class="no-print">
+          <div>
+            <h2 style="font-size:1.3rem; font-weight:800; color:var(--text); margin-bottom:4px;">Rapor Önizlemesi</h2>
+            <div style="font-size:0.8rem; font-weight:600; color:var(--text3);">Çıktı almadan önce raporu aşağıdan kontrol edebilirsiniz.</div>
+          </div>
+          <div style="display:flex; gap:0.75rem;">
+              <button class="btn" style="background:#10b981; color:white;" onclick="exportToCSV('Hedef_AVM_Performans_Raporu.csv')"><i class="fas fa-file-excel mr-1"></i> Excel İndir</button>
+              <button class="btn" style="background:#0f172a; color:white;" onclick="window.print()"><i class="fas fa-file-pdf mr-1"></i> PDF Kaydet / Yazdır</button>
+          </div>
+       </div>
+       
+       <!-- YAZDIRILACAK ALAN -->
+       <div id="exportPrintableArea">
+          <!-- Rapor İçeriği JS ile dolacak -->
+       </div>
+    </div>
+  </div>
+
 </div><!-- /mainApp -->
 
 <!-- CİRO LOG TIMELINE MODAL -->
@@ -593,7 +645,7 @@ const CATEGORIES=["Mobilya","Baza+Yatak+Başlık","Bebek ve Çocuk","Beyaz Eşya
 const TR_MONTHS=['OCAK','ŞUBAT','MART','NİSAN','MAYIS','HAZİRAN','TEMMUZ','AĞUSTOS','EYLÜL','EKİM','KASIM','ARALIK'];
 const COLORS=['#0ea5e9','#10b981','#f59e0b','#ef4444','#8b5cf6','#06b6d4','#f97316','#ec4899','#84cc16','#14b8a6','#6366f1','#e11d48','#0ea5e9','#d97706'];
 
-const TABS = ['entry', 'dashboard', 'category', 'performance', 'sales', 'report', 'log'];
+const TABS = ['entry', 'dashboard', 'category', 'performance', 'sales', 'report', 'log', 'export'];
 
 function toggleTheme(){
   var isDark=document.body.classList.toggle('dark');
@@ -1387,7 +1439,6 @@ async function fetchAdvancedReport() {
     }
 }
 
-// YENİ: Excel'den gelen "14.08.2026 17:33" veya uzun native formatları güvenle TimeStamp'e çeviren yardımcı fonksiyon
 function parseLogDate(timeStr) {
     if (!timeStr) return 0;
     var str = String(timeStr).trim();
@@ -1419,30 +1470,31 @@ function renderCiroLogs() {
     var endVal = document.getElementById('logEndDate') ? document.getElementById('logEndDate').value : '';
     var endTimeVal = document.getElementById('logEndTime') ? document.getElementById('logEndTime').value : '';
     
-    var requestedStartTime = 0;
+    // --- 1. ÇÖZÜM: SAAT GİRİLMEDİYSE BAŞLANGIÇ REFERANSINI "BİR ÖNCEKİ GÜN 23:59:59" OLARAK AYARLA ---
+    var startT = 0;
     if (startVal) {
         if (!startTimeVal) {
             let d = new Date(startVal + 'T00:00:00');
-            d.setMinutes(d.getMinutes() - 1);
-            requestedStartTime = d.getTime();
+            d.setMinutes(d.getMinutes() - 1); // Yani "Bir önceki gün 23:59:00" => O günün kasası 0 ikenki hali
+            startT = d.getTime();
         } else {
-            requestedStartTime = new Date(startVal + 'T' + startTimeVal + ':00').getTime();
+            startT = new Date(startVal + 'T' + startTimeVal + ':00').getTime();
         }
     }
     
-    var requestedEndTime = Infinity;
+    var endT = Infinity;
     if (endVal) {
         if (!endTimeVal) {
-            requestedEndTime = new Date(endVal + 'T23:59:59').getTime();
+            endT = new Date(endVal + 'T23:59:59').getTime();
         } else {
-            requestedEndTime = new Date(endVal + 'T' + endTimeVal + ':59').getTime();
+            endT = new Date(endVal + 'T' + endTimeVal + ':59').getTime();
         }
     }
 
     var validLogs = [];
     for (var j = 0; j < allSnapLogs.length; j++) {
         var lt = parseLogDate(allSnapLogs[j].t);
-        if (lt >= requestedStartTime && lt <= requestedEndTime) {
+        if (lt >= startT && lt <= endT) {
             validLogs.push(allSnapLogs[j]);
         }
     }
@@ -1466,7 +1518,7 @@ function renderCiroLogs() {
     if (isFilterActive) {
         let firstSystemLogTime = parseLogDate(allSnapLogs[0].t);
         let warningBanner = '';
-        if (startVal && requestedStartTime > 0 && requestedStartTime < firstSystemLogTime - 86400000) {
+        if (startVal && startT > 0 && startT < firstSystemLogTime - 86400000) {
              warningBanner = `<div style="background:rgba(245, 158, 11, 0.1); border-left:4px solid var(--sys-orange); padding:12px 15px; border-radius:8px; font-size:0.8rem; font-weight:600; color:var(--text); margin-bottom:1rem; display:flex; align-items:center; gap:8px;"><i class="fas fa-exclamation-circle text-orange-500 text-lg"></i> <div><b>Bilgi:</b> Sistemin hafızasına çekilen en eski log <b>${allSnapLogs[0].t}</b> tarihlidir. Rapor zorunlu olarak bu tarihten itibaren hesaplanmıştır.</div></div>`;
         }
 
@@ -1474,7 +1526,7 @@ function renderCiroLogs() {
         let closestDiff = Infinity;
         for (let i = 0; i < allSnapLogs.length; i++) {
             let t = parseLogDate(allSnapLogs[i].t);
-            let diff = requestedStartTime - t;
+            let diff = startT - t;
             if (diff >= 0 && diff < closestDiff) {
                 closestDiff = diff;
                 startLog = allSnapLogs[i];
@@ -1570,23 +1622,40 @@ function renderCiroLogs() {
             }
         });
 
-        let topCat = 'Veri Yok';
-        let topCatCount = 0;
-        Object.keys(rCats).forEach(k => {
-            if (k !== 'Diğer' && rCats[k] > topCatCount) { topCatCount = rCats[k]; topCat = k; }
-        });
-        if (topCat === 'Veri Yok' && rCats['Diğer'] > 0) {
-            topCat = 'Çeşitli'; topCatCount = rCats['Diğer'];
-        }
-
+        // SADECE SATIŞ RAKAMI "SIFIRDAN BÜYÜK" OLANLARI ORTALAMA SEPETE DAHİL ET
         let totalRevForAvg = 0;
         let totalSalesForAvg = 0;
         allRecordsData.forEach(function(r) {
            let amt = parseTurkishFloat(r.amount);
-           if(amt > 0) { totalRevForAvg += amt; totalSalesForAvg++; }
+           if(amt > 0) { 
+               totalRevForAvg += amt; 
+               totalSalesForAvg++; 
+           }
         });
+        
         var avgBasket = totalSalesForAvg > 0 ? Math.round(totalRevForAvg / totalSalesForAvg) : 0;
+        
+        // --- YENİ TAHMİNİ İŞLEM ADEDİ HESAPLAMASI ---
         var estimatedSales = avgBasket > 0 ? Math.ceil(netRevenue / avgBasket) : 0;
+        
+        // DİĞER KATEGORİSİNİ BASKILA (Mobilya vb. varsa öne çıkar)
+        let topCat = '-';
+        let topCatCount = 0;
+        Object.keys(rCats).forEach(k => {
+            if (k !== 'Diğer' && rCats[k] > topCatCount) { topCatCount = rCats[k]; topCat = k; }
+        });
+        if (topCat === '-' && rCats['Diğer'] > 0) {
+            topCat = 'Çeşitli'; topCatCount = rCats['Diğer'];
+        }
+
+        let categoryHtml = '';
+        if (newSalesCount > 0) {
+            categoryHtml = `<div style="font-size:1.4rem; font-weight:800; color:var(--sys-orange); line-height:1.2; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="${topCat}">${topCat}</div>
+            <div style="font-size:0.8rem; font-weight:800; color:var(--text3); margin-top:4px;">${topCatCount} <span style="font-size:0.7rem; font-weight:600;">SATIŞ (Sadece yeni müşterilerden)</span></div>`;
+        } else {
+            categoryHtml = `<div style="font-size:1.1rem; font-weight:800; color:var(--text2); line-height:1.2; margin-top:8px;">Veri Yok</div>
+            <div style="font-size:0.7rem; font-weight:600; color:var(--text3); margin-top:4px; line-height:1.3;">Bu aralıkta sisteme *yeni kayıt edilen* satış bulunamadı.<br>(Satışlar dünkü veya eski kayıtlardan gelmiş olabilir)</div>`;
+        }
 
         miniReportHtml = warningBanner + `
         <div style="background:var(--surface-glass); border:1px solid var(--border); border-left:4px solid var(--sys-purple); border-radius:1.5rem; padding:1.5rem; margin-bottom:1.5rem; box-shadow:var(--shadow-md); animation: fadeIn 0.4s ease; backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);">
@@ -1606,9 +1675,8 @@ function renderCiroLogs() {
                     <div style="font-size:0.7rem; font-weight:600; color:var(--text3); margin-top:4px;">(Net Ciro / Ort. Sepet Tutarı)</div>
                 </div>
                 <div>
-                    <div style="font-size:0.75rem; font-weight:800; color:var(--text3); text-transform:uppercase; margin-bottom:6px;">TREND KATEGORİ</div>
-                    <div style="font-size:1.4rem; font-weight:800; color:var(--sys-orange); line-height:1.2; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${topCat}</div>
-                    <div style="font-size:0.8rem; font-weight:800; color:var(--text3); margin-top:4px;">${topCatCount > 0 ? topCatCount + ' <span style="font-size:0.7rem; font-weight:600;">YENİ KAYIT SATIŞI</span>' : 'Veri Yok'}</div>
+                    <div style="font-size:0.75rem; font-weight:800; color:var(--text3); text-transform:uppercase; margin-bottom:6px;" title="Satış tarihi sistemde ayrı tutulmadığı için sadece filtrelenen tarihlerde sisteme yeni eklenen müşteriler baz alınır.">YENİ MÜŞTERİ TRENDİ <i class="fas fa-info-circle"></i></div>
+                    ${categoryHtml}
                 </div>
             </div>
             
@@ -1747,110 +1815,216 @@ function renderCiroLogs() {
         previousLogHtml = finalHtml;
     }
 }
-function openLogModal(branchIndex, branchName) {
-    var modal = document.getElementById('logBranchModal');
-    var title = document.getElementById('modalLogTitle');
-    var timeline = document.getElementById('modalLogTimeline');
-    
-    title.textContent = branchName + ' Şubesi';
-    
-    var startVal = document.getElementById('logStartDate') ? document.getElementById('logStartDate').value : '';
-    var startTimeVal = document.getElementById('logStartTime') ? document.getElementById('logStartTime').value : '';
-    var endVal = document.getElementById('logEndDate') ? document.getElementById('logEndDate').value : '';
-    var endTimeVal = document.getElementById('logEndTime') ? document.getElementById('logEndTime').value : '';
-    
-    var startT = startVal ? new Date(startVal + 'T' + (startTimeVal || '00:00') + ':00').getTime() : 0;
-    var endT = endVal ? new Date(endVal + 'T' + (endTimeVal || '23:59') + ':59').getTime() : Infinity;
 
-    var timelineHtml = '';
-    var fmt = function(n) { return '₺' + new Intl.NumberFormat('tr-TR',{maximumFractionDigits:0}).format(n||0); };
-
-    if (allSnapLogs.length < 2) {
-        timeline.innerHTML = '<div style="padding:3rem 1rem; text-align:center; color:var(--text3); font-weight:600;"><i class="fas fa-info-circle text-2xl mb-3" style="color:var(--sys-blue)"></i><br>Sistemde henüz sadece 1 referans kaydı var. Karşılaştırma yapılamıyor.</div>';
-        modal.classList.add('show');
+function renderExportReport() {
+    var startVal = document.getElementById('expStartDate').value;
+    var endVal = document.getElementById('expEndDate').value;
+    if(!startVal || !endVal) {
+        showWarning('Eksik Tarih', 'Lütfen başlangıç ve bitiş tarihlerini seçin.');
         return;
     }
-    
-    for(var i = allSnapLogs.length - 1; i > 0; i--) {
-        var curr = allSnapLogs[i];
-        var prev = allSnapLogs[i-1];
 
-        var currTime = parseLogDate(curr.t);
-        if (currTime < startT || currTime > endT) continue;
+    var startT = new Date(startVal + 'T00:00:00').getTime();
+    var endT = new Date(endVal + 'T23:59:59').getTime();
 
-        var delta = curr.b[branchIndex] - prev.b[branchIndex];
-        
-        // CİRODA DEĞİŞİM YOKSA BU ZAMAN DİLİMİNİ EKRANA ÇİZME (Gereksiz kalabalık olmasın)
-        if (delta === 0) continue;
+    var fRecords = allRecordsData.filter(function(r) {
+        var rt = parseAnyDate(r.timestamp || r.date);
+        return rt >= startT && rt <= endT;
+    });
 
-        var isDrop = delta < 0;
-        var iconHtml = isDrop ? '<i class="fas fa-arrow-down"></i>' : '<i class="fas fa-arrow-up"></i>';
-        var iconColor = isDrop ? 'var(--sys-red)' : 'var(--sys-green)';
-        var iconBg = isDrop ? 'rgba(239,68,68,0.15)' : 'rgba(16,185,129,0.15)';
-        var sign = isDrop ? '' : '+';
-        var alertText = isDrop ? '<div style="font-size:0.75rem; color:var(--sys-red); font-weight:700; margin-top:4px;">Düşüş! Bir satış silindi veya tutarı azaldı.</div>' : '';
-
-        timelineHtml += `
-        <div style="background:var(--surface2); border:1px solid var(--border); border-left:4px solid ${iconColor}; padding:1.25rem; border-radius:1rem; display:flex; justify-content:space-between; align-items:center;">
-            <div style="display:flex; align-items:center; gap:1rem;">
-                <div style="width:40px; height:40px; border-radius:10px; background:${iconBg}; color:${iconColor}; display:flex; justify-content:center; align-items:center; font-size:1.2rem; flex-shrink:0;">
-                    ${iconHtml}
-                </div>
-                <div>
-                    <div style="font-size:0.85rem; font-weight:800; color:var(--text); margin-bottom:2px;">${curr.t}</div>
-                    <div style="font-size:0.75rem; font-weight:600; color:var(--text3);">Güncel Kümülatif: ${fmt(curr.b[branchIndex])}</div>
-                    ${alertText}
-                </div>
-            </div>
-            <div style="text-align:right;">
-                <div style="font-size:1.3rem; font-weight:800; color:${iconColor}; font-family:monospace;">${sign}${fmt(delta)}</div>
-            </div>
-        </div>`;
+    if(fRecords.length === 0) {
+        showWarning('Sonuç Yok', 'Seçilen tarih aralığında hiçbir müşteri veya satış kaydı bulunamadı.');
+        return;
     }
 
-    if (timelineHtml === '') {
-        // HİÇ DEĞİŞİM YOKSA KULLANICIYA BUNUN BİR HATA OLMADIĞINI, DEĞİŞİM OLMADIĞINI SÖYLE
-        timelineHtml = `
-        <div style="padding:3rem 1rem; text-align:center; color:var(--text3); font-weight:600;">
-            <i class="fas fa-check-circle mb-3" style="font-size:3rem; color:var(--sys-green); opacity:0.5;"></i><br>
-            Seçili tarih aralığında bu şubede satış artışı veya iptali olmamıştır.<br>
-            <span style="font-size:0.8rem; font-weight:normal; margin-top:8px; display:inline-block;">Kümülatif ciro sabittir.</span>
-        </div>`;
-    }
+    var gLeads = fRecords.length;
+    var gCalls = 0;
+    var gSales = 0;
+    var gRev = 0;
 
-    timeline.innerHTML = timelineHtml;
-    modal.classList.add('show');
-}
+    var bStats = {};
+    BRANCHES.forEach(function(b) {
+        var clean = b.replace(/ Şubesi/gi, '');
+        bStats[clean] = { leads:0, calls:0, sales:0, rev:0, cats:{} };
+    });
 
-function acknowledgeLoss() {
-    memPeaks = {};
-    if (allSnapLogs.length > 0) {
-        let latestLog = allSnapLogs[allSnapLogs.length - 1];
-        memPeaks['global'] = latestLog.g;
-        for (let i = 0; i < branchNamesData.length; i++) {
-            memPeaks[branchNamesData[i].replace(/ Şubesi/gi, '')] = latestLog.b[i];
+    var trendMap = {};
+
+    fRecords.forEach(function(r) {
+        var isSale = isRecordSale(r);
+        var status = String(r.status).toLowerCase();
+        var bName = (r.branch || '').replace(/ Şubesi/gi, '');
+        var cat = r.category || 'Diğer';
+        var amt = parseTurkishFloat(r.amount);
+
+        if(status.includes('arand')) gCalls++;
+        if(isSale) { gSales++; gRev += amt; }
+
+        if(bStats[bName]) {
+            bStats[bName].leads++;
+            if(status.includes('arand')) bStats[bName].calls++;
+            if(isSale) {
+                bStats[bName].sales++;
+                bStats[bName].rev += amt;
+                bStats[bName].cats[cat] = (bStats[bName].cats[cat] || 0) + 1;
+            }
         }
+
+        var t = parseAnyDate(r.timestamp || r.date);
+        if(t > 0) {
+            var d = new Date(t);
+            var mKey = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0');
+            if(!trendMap[mKey]) trendMap[mKey] = { rev:0, label: TR_MONTHS[d.getMonth()] + ' ' + d.getFullYear() };
+            if(isSale) { trendMap[mKey].rev += amt; }
+        }
+    });
+
+    var fmt = function(n){ return '₺'+new Intl.NumberFormat('tr-TR',{maximumFractionDigits:0}).format(n||0); };
+
+    var bHtml = '';
+    var bArr = Object.keys(bStats).map(function(k) { return {name: k, data: bStats[k]}; });
+    bArr.sort(function(a,b) { return b.data.rev - a.data.rev; }); 
+
+    bArr.forEach(function(item) {
+        var d = item.data;
+        if(d.leads === 0 && d.sales === 0) return; 
+        var conv = d.calls > 0 ? ((d.sales / d.calls) * 100).toFixed(1) : 0;
+        
+        var topCat = '-';
+        var maxC = 0;
+        Object.keys(d.cats).forEach(function(c) {
+            if(d.cats[c] > maxC) { maxC = d.cats[c]; topCat = c; }
+        });
+
+        bHtml += '<tr style="border-bottom:1px solid #e2e8f0;">' +
+            '<td style="padding:12px 10px; font-weight:700; color:#1e293b;">' + item.name + '</td>' +
+            '<td style="padding:12px 10px; text-align:center; color:#475569;">' + d.leads + '</td>' +
+            '<td style="padding:12px 10px; text-align:center; color:#475569;">' + d.calls + '</td>' +
+            '<td style="padding:12px 10px; text-align:center; color:#10b981; font-weight:800; font-family:monospace; font-size:1.1rem;">' + d.sales + '</td>' +
+            '<td style="padding:12px 10px; text-align:center; color:#475569;">%' + conv + '</td>' +
+            '<td style="padding:12px 10px; text-align:right; font-weight:800; color:#0ea5e9; font-family:monospace; font-size:1.1rem;">' + fmt(d.rev) + '</td>' +
+            '<td style="padding:12px 10px; text-align:right; font-size:0.85rem; color:#64748b; font-weight:600;">' + topCat + '</td>' +
+        '</tr>';
+    });
+
+    var tKeys = Object.keys(trendMap).sort();
+    var tHtml = '';
+    if(tKeys.length > 1) {
+        tHtml += '<h3 style="margin-top:2.5rem; margin-bottom:1rem; font-size:1.1rem; font-weight:800; color:#1e293b; border-bottom:2px solid #e2e8f0; padding-bottom:8px;">Aylık Gidişat (Büyüme Trendi)</h3>';
+        tHtml += '<div style="display:flex; gap:1.25rem; flex-wrap:wrap;">';
+        var prevRev = 0;
+        tKeys.forEach(function(k) {
+            var d = trendMap[k];
+            var growthStr = '';
+            if(prevRev > 0) {
+                var pct = ((d.rev - prevRev) / prevRev) * 100;
+                if(pct > 0) growthStr = '<span style="color:#10b981; font-size:0.8rem; font-weight:800;"><i class="fas fa-arrow-up"></i> %' + pct.toFixed(1) + '</span>';
+                else if(pct < 0) growthStr = '<span style="color:#ef4444; font-size:0.8rem; font-weight:800;"><i class="fas fa-arrow-down"></i> %' + Math.abs(pct).toFixed(1) + '</span>';
+                else growthStr = '<span style="color:#94a3b8; font-size:0.8rem; font-weight:800;">%0 (Değişim Yok)</span>';
+            } else if (prevRev === 0 && k !== tKeys[0]) {
+                 growthStr = '<span style="color:#10b981; font-size:0.8rem; font-weight:800;"><i class="fas fa-arrow-up"></i> %100</span>';
+            } else {
+                 growthStr = '<span style="color:#94a3b8; font-size:0.8rem; font-weight:700;">- (Başlangıç Ayı)</span>';
+            }
+            
+            tHtml += '<div style="background:#f8fafc; border:1px solid #e2e8f0; padding:15px 20px; border-radius:12px; min-width:180px;">' +
+                '<div style="font-size:0.85rem; font-weight:800; text-transform:uppercase; letter-spacing:0.05em; color:#64748b; margin-bottom:8px;">' + d.label + '</div>' +
+                '<div style="font-size:1.5rem; font-weight:800; color:#0f172a; font-family:monospace; line-height:1; letter-spacing:-0.5px;">' + fmt(d.rev) + '</div>' +
+                '<div style="margin-top:6px;">' + growthStr + '</div>' +
+            '</div>';
+            prevRev = d.rev;
+        });
+        tHtml += '</div>';
     }
-    localStorage.setItem('crm_mem_peaks', JSON.stringify(memPeaks));
-    document.getElementById('lossDetectorAlert').style.display = 'none';
-    showToast('Hafıza yeni kümülatif verilere güncellendi.');
+
+    var gConv = gCalls > 0 ? ((gSales / gCalls) * 100).toFixed(1) : 0;
+    var sDate = startVal.split('-').reverse().join('.');
+    var eDate = endVal.split('-').reverse().join('.');
+
+    var reportHtml = `
+        <div style="text-align:center; margin-bottom:2.5rem;">
+            <h1 style="font-size:1.6rem; font-weight:800; color:#0f172a; margin-bottom:0.5rem; letter-spacing:0.5px;">HEDEF AVM SATIŞ & PERFORMANS RAPORU</h1>
+            <p style="font-size:0.95rem; font-weight:600; color:#64748b; margin:0;">Tarih Aralığı: ${sDate} - ${eDate}</p>
+        </div>
+        
+        <div style="display:flex; gap:1.5rem; margin-bottom:2rem; flex-wrap:wrap; justify-content:space-between;">
+            <div style="flex:1; min-width:160px; background:#f0f9ff; padding:20px; border-radius:12px; border-left:5px solid #0ea5e9;">
+                <div style="font-size:0.75rem; font-weight:800; color:#0284c7; text-transform:uppercase; letter-spacing:0.05em; margin-bottom:6px;">Toplam Ciro</div>
+                <div style="font-size:2.2rem; font-weight:800; color:#0369a1; font-family:monospace; line-height:1; letter-spacing:-1px;">${fmt(gRev)}</div>
+            </div>
+            <div style="flex:1; min-width:160px; background:#ecfdf5; padding:20px; border-radius:12px; border-left:5px solid #10b981;">
+                <div style="font-size:0.75rem; font-weight:800; color:#047857; text-transform:uppercase; letter-spacing:0.05em; margin-bottom:6px;">Başarılı Satış</div>
+                <div style="font-size:2.2rem; font-weight:800; color:#047857; font-family:monospace; line-height:1;">${gSales} <span style="font-size:0.9rem; font-weight:700; color:#059669;">adet</span></div>
+            </div>
+            <div style="flex:1; min-width:160px; background:#f5f3ff; padding:20px; border-radius:12px; border-left:5px solid #8b5cf6;">
+                <div style="font-size:0.75rem; font-weight:800; color:#6d28d9; text-transform:uppercase; letter-spacing:0.05em; margin-bottom:6px;">Yönlendirme / Aranan</div>
+                <div style="font-size:2.2rem; font-weight:800; color:#6d28d9; font-family:monospace; line-height:1;">${gLeads} <span style="font-size:1rem;color:#7c3aed;">/ ${gCalls}</span></div>
+            </div>
+            <div style="flex:1; min-width:160px; background:#fffbeb; padding:20px; border-radius:12px; border-left:5px solid #f59e0b;">
+                <div style="font-size:0.75rem; font-weight:800; color:#b45309; text-transform:uppercase; letter-spacing:0.05em; margin-bottom:6px;">Ortalama Dönüşüm</div>
+                <div style="font-size:2.2rem; font-weight:800; color:#b45309; font-family:monospace; line-height:1;">%${gConv}</div>
+            </div>
+        </div>
+
+        ${tHtml}
+
+        <h3 style="margin-top:2.5rem; margin-bottom:1rem; font-size:1.1rem; font-weight:800; color:#1e293b; border-bottom:2px solid #e2e8f0; padding-bottom:8px;">Şube Bazlı Detaylı Performans Tablosu</h3>
+        <table id="exportTable" style="width:100%; border-collapse:collapse; font-size:0.9rem; text-align:left; font-family:'Plus Jakarta Sans', sans-serif;">
+            <thead style="background:#f1f5f9;">
+                <tr>
+                    <th style="padding:12px 10px; font-weight:800; color:#334155; text-transform:uppercase; font-size:0.75rem; border-bottom:2px solid #cbd5e1;">Şube Adı</th>
+                    <th style="padding:12px 10px; font-weight:800; color:#334155; text-transform:uppercase; font-size:0.75rem; border-bottom:2px solid #cbd5e1; text-align:center;">Yönlendirme</th>
+                    <th style="padding:12px 10px; font-weight:800; color:#334155; text-transform:uppercase; font-size:0.75rem; border-bottom:2px solid #cbd5e1; text-align:center;">Aranan</th>
+                    <th style="padding:12px 10px; font-weight:800; color:#334155; text-transform:uppercase; font-size:0.75rem; border-bottom:2px solid #cbd5e1; text-align:center;">Satış</th>
+                    <th style="padding:12px 10px; font-weight:800; color:#334155; text-transform:uppercase; font-size:0.75rem; border-bottom:2px solid #cbd5e1; text-align:center;">Dönüşüm</th>
+                    <th style="padding:12px 10px; font-weight:800; color:#334155; text-transform:uppercase; font-size:0.75rem; border-bottom:2px solid #cbd5e1; text-align:right;">Toplam Ciro</th>
+                    <th style="padding:12px 10px; font-weight:800; color:#334155; text-transform:uppercase; font-size:0.75rem; border-bottom:2px solid #cbd5e1; text-align:right;">En Çok Satan Kategori</th>
+                </tr>
+            </thead>
+            <tbody>
+                ${bHtml}
+            </tbody>
+        </table>
+        
+        <div style="margin-top:3rem; font-size:0.75rem; color:#94a3b8; text-align:center; font-weight:600; border-top:1px solid #e2e8f0; padding-top:1rem;">
+            Bu rapor HEDEF AVM E-Ticaret CRM Sistemi tarafından otomatik olarak oluşturulmuştur. <br>Oluşturulma Tarihi: ${new Date().toLocaleString('tr-TR')}
+        </div>
+    `;
+
+    document.getElementById('exportPrintableArea').innerHTML = reportHtml;
+    document.getElementById('exportContentArea').style.display = 'block';
+    showToast('Rapor başarıyla oluşturuldu.');
 }
 
-async function triggerManualLog() {
-    var btn = document.getElementById('btnManualLog');
-    var orig = btn.innerHTML;
-    btn.innerHTML = '<span class="loader" style="width:16px;height:16px;margin-right:8px;border-top-color:transparent;"></span> Kaydediliyor...';
-    btn.disabled = true;
-    try {
-        await fetch(GAS_URL, { method: 'POST', body: JSON.stringify({ action: 'manualLogSnapshot' }) });
-        await fetchData(); // Yeniden çek
-        showToast('Manuel log kaydı başarıyla oluşturuldu.');
-    } catch(e) {
-        showWarning('Hata', 'Manuel kayıt alınırken sorun oluştu.');
-    } finally {
-        btn.innerHTML = orig;
-        btn.disabled = false;
+function exportToCSV(filename) {
+    var csv = [];
+    csv.push('\uFEFFŞube Adı,Yönlendirme,Aranan,Satış,Dönüşüm Oranı (%),Toplam Ciro (TL),En Çok Satan Kategori');
+    
+    var rows = document.querySelectorAll("#exportTable tbody tr");
+    if(rows.length === 0) {
+        showWarning('Uyarı', 'İndirilecek veri bulunamadı. Lütfen önce rapor oluşturun.');
+        return;
     }
+
+    for (var i = 0; i < rows.length; i++) {
+        var row = [], cols = rows[i].querySelectorAll("td");
+        for (var j = 0; j < cols.length; j++) {
+            let text = cols[j].innerText.replace(/"/g, '""');
+            if(j === 4) text = text.replace('%', ''); 
+            if(j === 5) text = text.replace('₺', '').replace(/\./g, '');
+            row.push('"' + text + '"');
+        }
+        csv.push(row.join(","));
+    }
+
+    var csvFile = new Blob([csv.join("\n")], {type: "text/csv;charset=utf-8;"});
+    var downloadLink = document.createElement("a");
+    downloadLink.download = filename;
+    downloadLink.href = window.URL.createObjectURL(csvFile);
+    downloadLink.style.display = "none";
+    document.body.appendChild(downloadLink);
+    downloadLink.click();
+    document.body.removeChild(downloadLink);
 }
 
 function applySmartParsing() {
