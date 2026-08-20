@@ -66,7 +66,6 @@ body{
 
 body{background:var(--bg);color:var(--text);font-family:'Plus Jakarta Sans',sans-serif;font-size:15px;-webkit-tap-highlight-color:transparent;margin:0; transition: background 0.3s ease, color 0.3s ease;}
 
-/* ── ANIMATIONS ── */
 @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
 .tab-content { display: none; animation: fadeIn 0.35s cubic-bezier(0.4, 0, 0.2, 1) forwards; }
 .tab-content.active { display: block; }
@@ -76,7 +75,6 @@ body{background:var(--bg);color:var(--text);font-family:'Plus Jakarta Sans',sans
 @keyframes pulse-ring{0%{box-shadow:0 0 0 0 rgba(16,185,129,.4)}70%{box-shadow:0 0 0 6px rgba(16,185,129,0)}100%{box-shadow:0 0 0 0 rgba(16,185,129,0)}}
 .pulse{width:8px;height:8px;border-radius:50%;background:#10b981;box-shadow:0 0 0 0 rgba(16,185,129,.4);animation:pulse-ring 2s infinite;flex-shrink:0}
 
-/* ── COMPONENTS ── */
 .card{background:var(--card-bg);border-radius:1.25rem;border:1px solid var(--border);box-shadow:var(--shadow-sm);overflow:hidden; transition: box-shadow 0.3s ease, transform 0.3s ease;}
 .card:hover { box-shadow: var(--shadow-md); }
 
@@ -230,7 +228,6 @@ body.dark .theme-toggle .knob{transform:translateX(20px)}
   </div>
 </div>
 
-<!-- ════════════════════ MAIN APP ════════════════════ -->
 <div id="mainApp" style="display:none;max-width:1600px;margin:0 auto;padding:1.5rem 1.5rem 5rem">
 
   <!-- HEADER -->
@@ -303,7 +300,6 @@ body.dark .theme-toggle .knob{transform:translateX(20px)}
     </div>
   </div>
 
-  <!-- ══ ENTRY (MÜŞTERİ KAYIT) ══ -->
   <div id="view-entry" class="tab-content active">
     <div class="card border-t-4 border-t-brand-500" style="border-top: 4px solid var(--sys-blue);">
       <div class="sec-header">
@@ -394,7 +390,6 @@ body.dark .theme-toggle .knob{transform:translateX(20px)}
     <div id="branchStatsBody"><div style="display:flex;justify-content:center;padding:4rem"><div class="loader"></div></div></div>
   </div>
 
-  <!-- ══ SALES ══ -->
   <div id="view-sales" class="tab-content">
     <div class="card" style="display:flex;flex-direction:column;min-height:600px; border-top:4px solid var(--sys-green);">
       <div class="sec-header" style="justify-content:space-between; background:var(--surface2)">
@@ -504,7 +499,7 @@ body.dark .theme-toggle .knob{transform:translateX(20px)}
     </div>
   </div>
 
-  <!-- ══ LOGLAR (ZAMAN ÇİZELGESİ) ══ -->
+  <!-- ══ CİRO LOGLARI (ZAMAN ÇİZELGESİ) ══ -->
   <div id="view-log" class="tab-content">
     <div class="card" style="margin-bottom:1.5rem; border-top:4px solid var(--sys-blue);">
       <div class="sec-header" style="background:var(--surface2); justify-content:space-between; align-items:center;">
@@ -516,6 +511,18 @@ body.dark .theme-toggle .knob{transform:translateX(20px)}
             </div>
         </div>
         <button class="btn btn-ghost btn-sm" onclick="triggerManualLog()" id="btnManualLog"><i class="fas fa-camera mr-2" style="color:var(--sys-blue)"></i> Şimdi Manuel Kayıt Al</button>
+      </div>
+      
+      <!-- KAYIP DEDEKTÖRÜ (GİZLİ, GEREKTİĞİNDE AÇILIR) -->
+      <div id="lossDetectorAlert" style="display:none; padding:1.25rem 1.5rem; background:rgba(239, 68, 68, 0.1); border-bottom:1px solid rgba(239, 68, 68, 0.2); align-items:center; justify-content:space-between; gap:1rem; flex-wrap:wrap;">
+         <div style="display:flex; align-items:center; gap:1rem;">
+            <div style="width:40px; height:40px; border-radius:50%; background:var(--sys-red); color:#fff; display:flex; align-items:center; justify-content:center; font-size:1.2rem; flex-shrink:0; box-shadow:0 4px 10px rgba(239, 68, 68, 0.4);"><i class="fas fa-exclamation-triangle"></i></div>
+            <div>
+                <div style="font-size:1rem; font-weight:800; color:var(--sys-red); margin-bottom:0.2rem;">DİKKAT: Ciro Düşüşü (Silinen Kayıt) Tespit Edildi!</div>
+                <div style="font-size:0.85rem; font-weight:600; color:var(--text);" id="lossDetectorText">...</div>
+            </div>
+         </div>
+         <button class="btn btn-sm" style="background:var(--sys-red); color:#fff;" onclick="acknowledgeLoss()">Bilgim Dahilinde (Sıfırla)</button>
       </div>
 
       <div style="padding:1.5rem; display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:1.25rem; align-items:end; border-bottom:1px solid var(--border);">
@@ -534,7 +541,7 @@ body.dark .theme-toggle .knob{transform:translateX(20px)}
           </div>
         </div>
         <div style="grid-column:1/-1; font-size:0.8rem; color:var(--text3); font-weight:600; padding-top:0.5rem; border-top:1px dashed var(--border);">
-            <i class="fas fa-info-circle mr-1"></i> Global ciroyu ve tüm şubelerin <b>güncel kümülatif rakamlarını</b> aşağıda görebilirsiniz.
+            <i class="fas fa-info-circle mr-1"></i> Global ciroyu ve tüm şubelerin <b>güncel kümülatif rakamlarını</b> aşağıda görebilirsiniz. <b>Detaylı hareket geçmişi (zaman çizelgesi) için ilgili şubenin üzerine tıklayın.</b>
         </div>
       </div>
     </div>
@@ -584,7 +591,21 @@ body.dark .theme-toggle .knob{transform:translateX(20px)}
 
 </div><!-- /mainApp -->
 
-<!-- MODALS -->
+<!-- CİRO LOG TIMELINE MODAL -->
+<div id="logBranchModal" class="modal-bg">
+  <div class="modal-content" style="background:var(--card-bg);border:1px solid var(--border);border-radius:1.5rem;width:100%;max-width:600px;max-height:90vh;box-shadow:var(--shadow-md); display:flex; flex-direction:column;">
+    <div style="padding:1.25rem 1.5rem;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;background:var(--surface2); border-radius:1.5rem 1.5rem 0 0; flex-shrink:0;">
+      <div style="display:flex;align-items:center;gap:.875rem">
+        <div class="sec-icon" style="background:rgba(14, 165, 233, 0.1);color:var(--sys-blue)"><i class="fas fa-chart-line"></i></div>
+        <div><div style="font-size:1.1rem;font-weight:800;color:var(--text)" id="modalLogTitle">Şube Adı</div><div style="font-size:.75rem;font-weight:600;color:var(--text3)">Seçili Dönem Ciro Hareketleri</div></div>
+      </div>
+      <button onclick="document.getElementById('logBranchModal').classList.remove('show')" class="btn btn-icon"><i class="fas fa-times"></i></button>
+    </div>
+    <div id="modalLogTimeline" style="padding:1.5rem; overflow-y:auto; flex:1; display:flex; flex-direction:column; gap:1rem;">
+    </div>
+  </div>
+</div>
+
 <div id="branchDetailModal" class="modal-bg">
   <div class="modal-content" style="background:var(--card-bg);border:1px solid var(--border);border-radius:1.5rem;width:100%;max-width:540px;max-height:90vh;overflow-y:auto;box-shadow:var(--shadow-md)">
     <div style="padding:1.25rem 1.5rem;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;background:var(--surface2);position:sticky;top:0;z-index:10">
@@ -652,6 +673,7 @@ var allSalesFiltered = [];
 
 var allSnapLogs = []; 
 var branchNamesData = []; 
+var memPeaks = JSON.parse(localStorage.getItem('crm_mem_peaks') || '{}');
 
 function showWarning(title, message) {
     document.getElementById('warningTitle').textContent = title;
@@ -1060,7 +1082,7 @@ function addInputRow(){
     +'<div><label class="inp-label">Tarih & Saat</label><input type="datetime-local" class="inp" value="'+getTodayDT()+'"></div>'
     +'<div><label class="inp-label" style="color:var(--sys-blue)">Şube <span style="color:var(--sys-red)">*</span></label><select class="inp inp-branch">'+bOpts+'</select></div>'
     +'<div><label class="inp-label" style="color:var(--sys-blue)">Müşteri Adı Soyadı <span style="color:var(--sys-red)">*</span></label><input type="text" class="inp inp-name" placeholder="Örn: Ahmet Yılmaz"></div>'
-    +'<div><label class="inp-label">İletişim Numarası</label><input type="text" class="inp inp-contact" placeholder="5XX..." onchange="checkPhoneDuplicate(this)"></div>'
+    +'<div><label class="inp-label">İletişim Numarası</label><input type="text" class="inp inp-contact" placeholder="5XX..." oninput="if(this.value.length>=7) checkPhoneDuplicate(this)"></div>'
     +'<div><label class="inp-label">Müşteri No (F Sütunu)</label><input type="text" class="inp inp-customerno" placeholder="Opsiyonel"></div>'
     +'<div><label class="inp-label" style="color:var(--sys-blue)">Geliş Medyası <span style="color:var(--sys-red)">*</span></label><select class="inp inp-media"><option value="" disabled selected>Seçiniz...</option><option value="Instagram">Instagram</option><option value="Whatsapp">Whatsapp</option><option value="Facebook">Facebook</option><option value="Çağrı">Çağrı</option><option value="Web Sitesi Form">Web Sitesi Form</option><option value="SMS LİNK">SMS LİNK</option></select></div>'
     +'</div>'
@@ -1559,7 +1581,10 @@ function parseLogDate(timeStr) {
         var dParts = parts[0].split('.');
         var time = parts[1] || '00:00';
         if (dParts.length === 3) {
-            var isoStr = dParts[2] + '-' + dParts[1] + '-' + dParts[0] + 'T' + time + ':00';
+            var dd = dParts[0].padStart(2, '0');
+            var mm = dParts[1].padStart(2, '0');
+            var yyyy = dParts[2];
+            var isoStr = yyyy + '-' + mm + '-' + dd + 'T' + time + ':00';
             var d = new Date(isoStr);
             if (!isNaN(d.getTime())) return d.getTime();
         }
@@ -1567,6 +1592,20 @@ function parseLogDate(timeStr) {
     var fallback = new Date(str);
     if (!isNaN(fallback.getTime())) return fallback.getTime();
     return 0; 
+}
+
+function acknowledgeLoss() {
+    if (allSnapLogs && allSnapLogs.length > 0) {
+        var latest = allSnapLogs[allSnapLogs.length - 1];
+        memPeaks['global'] = latest.g;
+        for (var i = 0; i < branchNamesData.length; i++) {
+            memPeaks[branchNamesData[i]] = latest.b[i] || 0;
+        }
+        localStorage.setItem('crm_mem_peaks', JSON.stringify(memPeaks));
+        var el = document.getElementById('lossDetectorAlert');
+        if (el) el.style.display = 'none';
+        showToast('Kayıp tespiti sıfırlandı.');
+    }
 }
 
 function renderCiroLogs() {
@@ -1577,19 +1616,431 @@ function renderCiroLogs() {
         return;
     }
 
+    var startVal = document.getElementById('logStartDate') ? document.getElementById('logStartDate').value : '';
+    var startTimeVal = document.getElementById('logStartTime') ? document.getElementById('logStartTime').value : '';
+    var endVal = document.getElementById('logEndDate') ? document.getElementById('logEndDate').value : '';
+    var endTimeVal = document.getElementById('logEndTime') ? document.getElementById('logEndTime').value : '';
+    
+    var requestedStartTime = 0;
+    if (startVal) {
+        if (!startTimeVal) {
+            let d = new Date(startVal + 'T00:00:00');
+            d.setMinutes(d.getMinutes() - 1); 
+            requestedStartTime = d.getTime();
+        } else {
+            requestedStartTime = new Date(startVal + 'T' + startTimeVal + ':00').getTime();
+        }
+    }
+    
+    var requestedEndTime = Infinity;
+    if (endVal) {
+        if (!endTimeVal) {
+            requestedEndTime = new Date(endVal + 'T23:59:59').getTime();
+        } else {
+            requestedEndTime = new Date(endVal + 'T' + endTimeVal + ':59').getTime();
+        }
+    }
+
+    var validLogs = [];
+    for (var j = 0; j < allSnapLogs.length; j++) {
+        var lt = parseLogDate(allSnapLogs[j].t);
+        if (lt >= requestedStartTime && lt <= requestedEndTime) {
+            validLogs.push(allSnapLogs[j]);
+        }
+    }
+
+    if (validLogs.length === 0) {
+        var noLogHtml = `
+        <div style="background:var(--surface); border:1px dashed var(--border); border-radius:1rem; padding:3rem; text-align:center; margin-bottom:1.5rem;">
+            <i class="fas fa-search" style="font-size:3rem; color:var(--text3); opacity:0.5; margin-bottom:1rem;"></i>
+            <div style="font-size:1.2rem; font-weight:800; color:var(--text); margin-bottom:0.5rem;">Seçili Tarihlerde Log Yok</div>
+            <div style="font-size:0.9rem; color:var(--text2); font-weight:600;">Bu tarih aralığına ait geçerli ciro logu (snapshot) bulunamadı. Lütfen daha yeni bir tarih seçiniz.</div>
+        </div>`;
+        if (container.innerHTML !== noLogHtml) container.innerHTML = noLogHtml;
+        return;
+    }
+
     var fmt = function(n) { return '₺' + new Intl.NumberFormat('tr-TR',{maximumFractionDigits:0}).format(n||0); };
-    var latestLog = allSnapLogs[allSnapLogs.length - 1];
-    var currentG = latestLog ? latestLog.g : 0;
+
+    var miniReportHtml = '';
+    var isFilterActive = (startVal !== '' || endVal !== '');
+
+    if (isFilterActive) {
+        let firstSystemLogTime = parseLogDate(allSnapLogs[0].t);
+        let warningBanner = '';
+        if (startVal && requestedStartTime > 0 && requestedStartTime < firstSystemLogTime - 86400000) {
+             warningBanner = `<div style="background:rgba(245, 158, 11, 0.1); border-left:4px solid var(--sys-orange); padding:12px 15px; border-radius:8px; font-size:0.8rem; font-weight:600; color:var(--text); margin-bottom:1rem; display:flex; align-items:center; gap:8px;"><i class="fas fa-exclamation-circle text-orange-500 text-lg"></i> <div><b>Bilgi:</b> Sistemin hafızasına çekilen en eski log <b>${allSnapLogs[0].t}</b> tarihlidir. Rapor zorunlu olarak bu tarihten itibaren hesaplanmıştır.</div></div>`;
+        }
+
+        let startLog = validLogs[0];
+        let endLog = validLogs[validLogs.length - 1];
+        let actualStartStr = startLog.t;
+        let actualEndStr = endLog.t;
+
+        let dateTitleStr = `Seçilen Tarih Aralığı Özeti (${actualStartStr} \u2013 ${actualEndStr} Arası)`;
+
+        let startLogTime = parseLogDate(startLog.t);
+        let endLogTime = parseLogDate(endLog.t);
+
+        // Seçilen tarih aralığındaki gerçek satış kayıtlarını filtrele
+        let rangeRecords = allRecordsData.filter(r => {
+            let rt = parseAnyDate(r.timestamp || r.date);
+            return rt >= startLogTime && rt <= endLogTime;
+        });
+
+        let rangeSalesRecords = rangeRecords.filter(r => isRecordSale(r));
+        let actualSalesCount = rangeSalesRecords.length;
+        let actualSalesRevenue = rangeSalesRecords.reduce((sum, r) => sum + parseTurkishFloat(r.amount), 0);
+
+        // Net ciro: Gerçek satış verileri varsa onu kullan, yoksa negatif olmayan farkı kullan
+        let netRevenue = actualSalesRevenue > 0 ? actualSalesRevenue : Math.max(0, endLog.g - startLog.g);
+
+        // ÖNCEKİ DÖNEM KIYASLAMASI
+        let duration = endLogTime - startLogTime;
+        if (duration <= 0) duration = 86400000; 
+        
+        let prevEndTime = startLogTime;
+        let prevStartTime = prevEndTime - duration;
+
+        let prevStartLog = allSnapLogs[0];
+        let prevEndLog = startLog;
+        let closestPrevStartDiff = Infinity;
+        
+        for (let i = 0; i < allSnapLogs.length; i++) {
+            let t = parseLogDate(allSnapLogs[i].t);
+            let diff = Math.abs(t - prevStartTime);
+            if (diff < closestPrevStartDiff && t <= prevEndTime) {
+                closestPrevStartDiff = diff;
+                prevStartLog = allSnapLogs[i];
+            }
+        }
+        
+        let prevNetRevenue = Math.max(0, prevEndLog.g - prevStartLog.g);
+        
+        let pctChangeHtml = '';
+        if (prevNetRevenue > 0) {
+            let pct = ((netRevenue - prevNetRevenue) / prevNetRevenue) * 100;
+            if (pct > 0) pctChangeHtml = `<span style="color:var(--sys-green); font-weight:800;"><i class="fas fa-arrow-up"></i> %${pct.toFixed(1)} artış</span>`;
+            else if (pct < 0) pctChangeHtml = `<span style="color:var(--sys-red); font-weight:800;"><i class="fas fa-arrow-down"></i> %${Math.abs(pct).toFixed(1)} düşüş</span>`;
+            else pctChangeHtml = `<span style="color:var(--text3); font-weight:800;"><i class="fas fa-minus"></i> Değişim yok</span>`;
+        } else if (netRevenue > 0) {
+            pctChangeHtml = `<span style="color:var(--sys-green); font-weight:800;"><i class="fas fa-arrow-up"></i> %100 artış</span>`;
+        } else {
+            pctChangeHtml = `<span style="color:var(--text3);">Önceki dönem artışı: ₺0</span>`;
+        }
+
+        // ŞUBE SIRALAMASI
+        let branchDeltas = [];
+        for (let i = 0; i < branchNamesData.length; i++) {
+            let bName = branchNamesData[i].replace(/ Şubesi/gi, '');
+            let bSalesRev = rangeSalesRecords.filter(r => (r.branch || '').includes(branchNamesData[i])).reduce((sum, r) => sum + parseTurkishFloat(r.amount), 0);
+            let bSnapDiff = endLog.b[i] - startLog.b[i];
+            let diff = bSalesRev > 0 ? bSalesRev : Math.max(0, bSnapDiff);
+            branchDeltas.push({ name: bName, rev: diff });
+        }
+        branchDeltas.sort((a,b) => b.rev - a.rev);
+        let topBranches = branchDeltas.slice(0, 5);
+
+        let topBranchesHtml = '<div style="margin-top:1.5rem; border-top:1px dashed var(--border); padding-top:1.25rem; grid-column:1/-1;">';
+        topBranchesHtml += '<div style="font-weight:800; margin-bottom:1rem; color:var(--text); font-size:0.95rem;"><i class="fas fa-trophy mr-2" style="color:var(--sys-orange)"></i> Seçili Tarihlerde Ciro Büyümesi En Yüksek 5 Şube <span style="font-size:0.75rem; color:var(--text3); font-weight:600;">(Geçmiş kayıtlara yapılan güncellemeler dahildir)</span></div>';
+
+        if (topBranches.length > 0 && topBranches[0].rev > 0) {
+            topBranchesHtml += '<div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:1rem;">';
+            topBranches.forEach((b, idx) => {
+                if (b.rev <= 0) return; 
+                let medalColors = ['var(--sys-orange)', '#94a3b8', '#cd7f32', 'var(--sys-blue)', 'var(--sys-purple)'];
+                let mCol = medalColors[idx] || 'var(--border2)';
+                
+                topBranchesHtml += `
+                <div style="background:var(--surface); border:1px solid var(--border); border-radius:0.75rem; padding:1rem; display:flex; align-items:center; gap:0.75rem; box-shadow:var(--shadow-sm);">
+                    <div style="width:28px; height:28px; border-radius:6px; background:rgba(0,0,0,0.03); color:${mCol}; font-weight:800; display:flex; align-items:center; justify-content:center; font-size:0.85rem; border:1px solid ${mCol}; flex-shrink:0;">${idx+1}</div>
+                    <div style="flex:1; min-width:0;">
+                        <div style="font-size:0.8rem; font-weight:800; color:var(--text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${b.name}</div>
+                        <div style="font-size:0.95rem; font-weight:800; color:var(--sys-green); font-family:monospace;">+${fmt(b.rev)}</div>
+                    </div>
+                </div>`;
+            });
+            topBranchesHtml += '</div>';
+        } else {
+            topBranchesHtml += '<div style="color:var(--text3); font-size:0.85rem; font-weight:600;">Bu tarihlerde pozitif ciro artışı gösteren şube bulunamadı.</div>';
+        }
+        topBranchesHtml += '</div>';
+
+        // TREND KATEGORİ
+        let rCats = {};
+        rangeSalesRecords.forEach(r => {
+            let c = r.category || 'Diğer';
+            rCats[c] = (rCats[c] || 0) + 1;
+        });
+
+        let topCat = 'Veri Yok';
+        let topCatCount = 0;
+        Object.keys(rCats).forEach(k => {
+            if (k !== 'Diğer' && k !== 'GENEL ÜRÜN BİLGİSİ' && rCats[k] > topCatCount) { 
+                topCatCount = rCats[k]; 
+                topCat = k; 
+            }
+        });
+        
+        if (topCat === 'Veri Yok') {
+            if (rCats['GENEL ÜRÜN BİLGİSİ'] > 0) { topCat = 'Genel Ürün Bilgisi'; topCatCount = rCats['GENEL ÜRÜN BİLGİSİ']; }
+            else if (rCats['Diğer'] > 0) { topCat = 'Diğer Kategoriler'; topCatCount = rCats['Diğer']; }
+        }
+
+        // İŞLEM ADEDİ HESAPLAMA (Gerçekleşen varsa onu göster, yoksa tahmini)
+        let totalRevForAvg = 0;
+        let totalSalesForAvg = 0;
+        allRecordsData.forEach(function(r) {
+           let amt = parseTurkishFloat(r.amount);
+           if(amt > 0) { totalRevForAvg += amt; totalSalesForAvg++; }
+        });
+        var avgBasket = totalSalesForAvg > 0 ? Math.round(totalRevForAvg / totalSalesForAvg) : 0;
+        var displaySalesCount = actualSalesCount > 0 ? actualSalesCount : (avgBasket > 0 ? Math.max(0, Math.round(netRevenue / avgBasket)) : 0);
+        var displaySalesCaption = actualSalesCount > 0 ? "(Geçerli döneme ait gerçekleşen satış adedi)" : "(Net Ciro / Ort. Sepet Tutarı)";
+
+        miniReportHtml = warningBanner + `
+        <div style="background:var(--surface-glass); border:1px solid var(--border); border-left:4px solid var(--sys-purple); border-radius:1.5rem; padding:1.5rem; margin-bottom:1.5rem; box-shadow:var(--shadow-md); animation: fadeIn 0.4s ease; backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);">
+            <div style="font-size:1.1rem; font-weight:800; color:var(--text); letter-spacing:0.02em; border-bottom:1px solid var(--border); padding-bottom:0.75rem; margin-bottom:1rem; display:flex; align-items:center; gap:10px;">
+                <i class="fas fa-calendar-check" style="color:var(--sys-purple); font-size:1.4rem;"></i> ${dateTitleStr}
+            </div>
+            
+            <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:1.25rem;">
+                <div>
+                    <div style="font-size:0.75rem; font-weight:800; color:var(--text3); text-transform:uppercase; margin-bottom:6px;">DÖNEM TOPLAM CİROSU</div>
+                    <div style="font-size:1.8rem; font-weight:800; color:var(--text); font-family:monospace; line-height:1.2;">${fmt(netRevenue)}</div>
+                    <div style="font-size:0.75rem; font-weight:700; margin-top:4px;">${pctChangeHtml} <span style="color:var(--text3); font-weight:600;">(Önceki eşdeğer döneme göre)</span></div>
+                </div>
+                <div>
+                    <div style="font-size:0.75rem; font-weight:800; color:var(--text3); text-transform:uppercase; margin-bottom:6px;">SATIŞ / İŞLEM ADEDİ</div>
+                    <div style="font-size:1.8rem; font-weight:800; color:var(--sys-green); font-family:monospace; line-height:1.2;">${displaySalesCount}</div>
+                    <div style="font-size:0.7rem; font-weight:600; color:var(--text3); margin-top:4px;">${displaySalesCaption}</div>
+                </div>
+                <div>
+                    <div style="font-size:0.75rem; font-weight:800; color:var(--text3); text-transform:uppercase; margin-bottom:6px;" title="Bu tarihler arasında sisteme yeni girilmiş müşterilerden gelen satışların en yoğun olduğu kategori.">YENİ MÜŞTERİ TRENDİ <i class="fas fa-info-circle text-xs opacity-70"></i></div>
+                    <div style="font-size:1.4rem; font-weight:800; color:var(--sys-orange); line-height:1.2; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${topCat}</div>
+                    <div style="font-size:0.8rem; font-weight:800; color:var(--text3); margin-top:4px;">${topCatCount > 0 ? topCatCount + ' <span style="font-size:0.7rem; font-weight:600;">YENİ KAYIT SATIŞI</span>' : 'Yeni Kayıt Yok'}</div>
+                </div>
+            </div>
+            
+            ${topBranchesHtml}
+        </div>`;
+    }
+
+    var latestLog = validLogs[validLogs.length - 1];
+    var latestDateStr = latestLog.t.split(' ')[0]; 
+
+    var yesterdayLog = null;
+    for (var i = allSnapLogs.length - 1; i >= 0; i--) {
+        var checkDateStr = allSnapLogs[i].t.split(' ')[0];
+        var checkT = parseLogDate(allSnapLogs[i].t);
+        var latestT = parseLogDate(latestLog.t);
+        
+        if (checkDateStr !== latestDateStr && checkT < latestT) {
+            yesterdayLog = allSnapLogs[i];
+            break;
+        }
+    }
+
+    var dParts = latestDateStr.split('.');
+    var currentDay = parseInt(dParts[0], 10);
+    var currentMonth = parseInt(dParts[1], 10);
+    var currentYear = parseInt(dParts[2], 10);
+    var daysInMonth = new Date(currentYear, currentMonth, 0).getDate();
+
+    var lastMonthLog = null;
+    var lastMonth = currentMonth - 1;
+    var lmYear = currentYear;
+    if (lastMonth === 0) { lastMonth = 12; lmYear--; }
+    var lastMonthDateStr = (currentDay < 10 ? '0'+currentDay : currentDay) + '.' + (lastMonth < 10 ? '0'+lastMonth : lastMonth) + '.' + lmYear;
+    
+    var lmLogs = allSnapLogs.filter(l => l.t.startsWith(lastMonthDateStr));
+    if (lmLogs.length > 0) {
+        lastMonthLog = lmLogs[lmLogs.length - 1]; 
+    }
+
+    var currentG = latestLog.g;
+    var yestG = yesterdayLog ? yesterdayLog.g : 0;
+    var lmG = lastMonthLog ? lastMonthLog.g : 0;
+
+    var yestDiff = currentG - yestG;
+    var yestPct = yestG > 0 ? (yestDiff / yestG * 100) : 0;
+    
+    var lmDiff = currentG - lmG;
+    var lmPct = lmG > 0 ? (lmDiff / lmG * 100) : 0;
+
+    var projectedG = (currentG / Math.max(1, currentDay)) * daysInMonth;
+
+    var yestHtml = yesterdayLog ? `
+        <div style="display:flex; align-items:center; gap:8px; margin-top:10px;">
+            <div style="background:rgba(255,255,255,0.2); padding:6px 10px; border-radius:8px; font-size:0.9rem; font-weight:800; font-family:monospace;">
+                <i class="fas ${yestDiff>=0?'fa-arrow-up':'fa-arrow-down'}"></i> ${yestDiff>=0?'+':''}${fmt(yestDiff)}
+            </div>
+            <div style="background:rgba(255,255,255,0.2); padding:6px 10px; border-radius:8px; font-size:0.9rem; font-weight:800;">
+                %${Math.abs(yestPct).toFixed(1)} Günlük ${yestDiff>=0?'Artış':'Düşüş'}
+            </div>
+        </div>
+    ` : '<div style="font-size:0.85rem; opacity:0.8; margin-top:10px;"><i class="fas fa-info-circle"></i> Dün gün sonu verisi sistemde yok.</div>';
+
+    var lmHtml = lastMonthLog ? `
+        <div style="margin-top:8px; font-size:0.85rem; font-weight:600; background:rgba(0,0,0,0.1); padding:8px; border-radius:8px;">
+            <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
+                <span>Geçen Ay (${currentDay} ${TR_MONTHS[lastMonth-1]}):</span>
+                <span style="font-family:monospace; font-weight:800;">${fmt(lmG)}</span>
+            </div>
+            <div style="color:${lmDiff>=0?'#a7f3d0':'#fecaca'}; font-weight:800; display:flex; align-items:center; gap:4px;">
+                <i class="fas ${lmDiff>=0?'fa-arrow-up':'fa-arrow-down'}"></i> Geçen aya göre %${Math.abs(lmPct).toFixed(1)} ${lmDiff>=0?'ileridesiniz':'geridesiniz'}
+            </div>
+        </div>
+    ` : `<div style="margin-top:8px; font-size:0.8rem; opacity:0.7; font-style:italic;"><i class="fas fa-history"></i> ${currentDay} ${TR_MONTHS[lastMonth-1]} tarihine ait geçmiş ciro logu bulunamadı.</div>`;
 
     var globalHtml = `
-    <div style="background:linear-gradient(135deg, var(--sys-blue), #0284c7); border-radius:1.5rem; padding:2rem; margin-bottom:1.5rem; color:#fff; box-shadow:0 10px 25px -5px rgba(14,165,233,0.4);">
+    ${miniReportHtml}
+    <div style="background:linear-gradient(135deg, var(--sys-blue), #0284c7); border-radius:1.5rem; padding:2rem; margin-bottom:1.5rem; color:#fff; display:grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap:1.5rem; box-shadow:0 10px 25px -5px rgba(14,165,233,0.4);">
         <div>
             <div style="font-size:0.85rem; font-weight:800; text-transform:uppercase; letter-spacing:0.1em; opacity:0.9; margin-bottom:0.5rem;">TÜM ŞUBELER TOPLAM (KÜMÜLATİF)</div>
             <div style="font-size:3rem; font-weight:800; line-height:1; font-family:monospace; letter-spacing:-1px;">${fmt(currentG)}</div>
+            ${yestHtml}
+        </div>
+        
+        <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap:1rem;">
+            <div style="background:rgba(255,255,255,0.15); backdrop-filter:blur(10px); padding:1.25rem; border-radius:1rem; display:flex; flex-direction:column; justify-content:center;">
+                <div style="font-size:0.75rem; font-weight:800; text-transform:uppercase; opacity:0.9; margin-bottom:0.4rem;"><i class="fas fa-calendar-alt mr-1"></i> ÖNCEKİ GÜN SONU</div>
+                <div style="font-size:1.6rem; font-weight:800; font-family:monospace; line-height:1;">${yesterdayLog ? fmt(yestG) : 'Veri Yok'}</div>
+                ${lmHtml}
+            </div>
+            
+            <div style="background:rgba(255,255,255,0.15); backdrop-filter:blur(10px); padding:1.25rem; border-radius:1rem; display:flex; flex-direction:column; justify-content:center;">
+                <div style="font-size:0.75rem; font-weight:800; text-transform:uppercase; opacity:0.9; margin-bottom:0.4rem;"><i class="fas fa-rocket mr-1"></i> TAHMİNİ AY SONU CİROSU</div>
+                <div style="font-size:1.8rem; font-weight:800; font-family:monospace; color:#a7f3d0; line-height:1;">${fmt(projectedG)}</div>
+                <div style="font-size:0.75rem; font-weight:600; margin-top:8px; opacity:0.85; line-height:1.4;">Şu anki hız korunursa ${daysInMonth} gün sonunda ulaşılması beklenen tutar.</div>
+            </div>
         </div>
     </div>`;
 
-    container.innerHTML = globalHtml;
+    var branchGrid = '<div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(280px, 1fr)); gap:1.25rem;">';
+    
+    for (let i = 0; i < branchNamesData.length; i++) {
+        let bName = branchNamesData[i].replace(/ Şubesi/gi, '');
+        let currentVal = latestLog.b[i] || 0;
+        let yestVal = yesterdayLog ? yesterdayLog.b[i] : 0;
+        let delta = currentVal - yestVal;
+        let deltaPct = yestVal > 0 ? (delta / yestVal * 100) : 0;
+        
+        let deltaHtml = '';
+        if (yesterdayLog) {
+            if (delta > 0) {
+                deltaHtml = `<div style="display:flex; align-items:center; gap:6px; margin-top:0.5rem;"><span style="background:rgba(16,185,129,0.1); color:var(--sys-green); padding:4px 8px; border-radius:6px; font-weight:800; font-size:0.8rem; font-family:monospace;"><i class="fas fa-arrow-up mr-1"></i> +${fmt(delta)}</span><span style="background:rgba(16,185,129,0.1); color:var(--sys-green); padding:4px 8px; border-radius:6px; font-weight:800; font-size:0.8rem;">%${deltaPct.toFixed(1)}</span></div>`;
+            } else if (delta < 0) {
+                deltaHtml = `<div style="display:flex; align-items:center; gap:6px; margin-top:0.5rem;"><span style="background:rgba(239,68,68,0.1); color:var(--sys-red); padding:4px 8px; border-radius:6px; font-weight:800; font-size:0.8rem; font-family:monospace;"><i class="fas fa-arrow-down mr-1"></i> ${fmt(delta)}</span><span style="background:rgba(239,68,68,0.1); color:var(--sys-red); padding:4px 8px; border-radius:6px; font-weight:800; font-size:0.8rem;">%${Math.abs(deltaPct).toFixed(1)}</span></div>`;
+            } else {
+                deltaHtml = `<div style="margin-top:0.5rem; color:var(--text3); font-weight:800; font-size:0.8rem; padding:4px 0;">Düne Göre Değişim Yok</div>`;
+            }
+        } else {
+             deltaHtml = `<div style="margin-top:0.5rem; color:var(--text3); font-weight:800; font-size:0.8rem; padding:4px 0;">Önceki gün verisi yok</div>`;
+        }
+
+        branchGrid += `
+        <div class="card" style="padding:1.5rem; cursor:pointer; transition:transform 0.2s;" onclick="openLogModal(${i}, '${bName}')" onmouseover="this.style.transform='translateY(-4px)'; this.style.borderColor='var(--sys-blue)';" onmouseout="this.style.transform='translateY(0)'; this.style.borderColor='var(--border)';">
+            <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:1rem;">
+                <div style="font-weight:800; color:var(--text); font-size:1.1rem;">${bName}</div>
+                <div style="width:32px; height:32px; border-radius:8px; background:var(--surface2); display:flex; justify-content:center; align-items:center; color:var(--sys-blue);"><i class="fas fa-search"></i></div>
+            </div>
+            <div style="font-size:1.6rem; font-weight:800; color:var(--sys-blue); font-family:monospace; line-height:1; letter-spacing:-0.5px;">${fmt(currentVal)}</div>
+            ${deltaHtml}
+        </div>`;
+    }
+    branchGrid += '</div>';
+
+    var finalHtml = globalHtml + branchGrid;
+    if (container.innerHTML !== finalHtml) {
+        container.innerHTML = finalHtml;
+    }
+}
+
+/* ── ŞUBE CİRO DEĞİŞİM GEÇMİŞİ MODALI (SADECE DEĞİŞİM OLAN ANLAR) ── */
+function openLogModal(branchIndex, branchName) {
+    document.getElementById('modalLogTitle').textContent = branchName + " Ciro Değişim Geçmişi";
+    var timelineContainer = document.getElementById('modalLogTimeline');
+    timelineContainer.innerHTML = '';
+
+    if (!allSnapLogs || allSnapLogs.length === 0) {
+        timelineContainer.innerHTML = '<div style="color:var(--text3); text-align:center; padding:2rem; font-weight:600;">Log kaydı bulunamadı.</div>';
+        document.getElementById('logBranchModal').classList.add('show');
+        return;
+    }
+
+    var fmt = function(n) { return '₺' + new Intl.NumberFormat('tr-TR',{maximumFractionDigits:0}).format(n||0); };
+    
+    // Kronolojik sıra için baştan sona array
+    var logsChronological = allSnapLogs.slice();
+    var changeEvents = [];
+
+    // Cironun gerçekten değiştiği anları tespit et
+    for (var i = 0; i < logsChronological.length; i++) {
+        var currentLog = logsChronological[i];
+        var currentVal = currentLog.b[branchIndex] || 0;
+        
+        // İlk kayıt veya bir önceki kayda göre ciro farkı var mı?
+        if (i === 0) {
+            changeEvents.push({
+                t: currentLog.t,
+                val: currentVal,
+                diff: 0,
+                isInitial: true
+            });
+        } else {
+            var prevVal = logsChronological[i - 1].b[branchIndex] || 0;
+            var diff = currentVal - prevVal;
+            
+            // Eğer ciro değiştiyse (+ / -) veya en son kayıtsa ekle
+            if (Math.abs(diff) > 0.01) {
+                changeEvents.push({
+                    t: currentLog.t,
+                    val: currentVal,
+                    diff: diff,
+                    isInitial: false
+                });
+            } else if (i === logsChronological.length - 1 && changeEvents.length > 0) {
+                // En son anlık snapshot kaydını da güncelleme zamanı olarak sakla
+                changeEvents[changeEvents.length - 1].latestT = currentLog.t;
+            }
+        }
+    }
+
+    // Yeniden eskiye doğru sırala (en güncel ciro en üstte)
+    var displayList = changeEvents.slice().reverse();
+    var html = '';
+
+    if (displayList.length === 0 || (displayList.length === 1 && displayList[0].val === 0)) {
+        html = '<div style="color:var(--text3); text-align:center; padding:3rem; font-weight:600;">Seçili dönemde ciro hareketi gerçekleşmedi.</div>';
+    } else {
+        for (var j = 0; j < displayList.length; j++) {
+            var item = displayList[j];
+            var diffHtml = '';
+
+            if (item.diff > 0) {
+                diffHtml = `<span style="background:rgba(16, 185, 129, 0.1); color:var(--sys-green); padding:6px 12px; border-radius:8px; font-weight:800; font-family:monospace; font-size:0.9rem;"><i class="fas fa-arrow-up mr-1"></i> +${fmt(item.diff)}</span>`;
+            } else if (item.diff < 0) {
+                diffHtml = `<span style="background:rgba(239, 68, 68, 0.1); color:var(--sys-red); padding:6px 12px; border-radius:8px; font-weight:800; font-family:monospace; font-size:0.9rem;"><i class="fas fa-arrow-down mr-1"></i> ${fmt(item.diff)}</span>`;
+            } else {
+                diffHtml = `<span style="background:var(--surface); color:var(--text3); padding:6px 12px; border-radius:8px; font-weight:700; font-size:0.8rem;">Açılış Bakiyesi</span>`;
+            }
+
+            var timeDisplay = item.latestT ? `${item.t} – ${item.latestT.split(' ')[1]}` : item.t;
+
+            html += `
+            <div style="background:var(--surface2); border:1px solid var(--border); border-radius:1rem; padding:1.15rem; display:flex; justify-content:space-between; align-items:center; box-shadow:var(--shadow-sm);">
+                <div>
+                    <div style="font-size:0.8rem; font-weight:800; color:var(--text3); font-family:monospace;"><i class="far fa-clock mr-1" style="color:var(--sys-blue);"></i> ${timeDisplay}</div>
+                    <div style="font-size:1.25rem; font-weight:800; color:var(--text); font-family:monospace; margin-top:4px;">${fmt(item.val)}</div>
+                </div>
+                <div>${diffHtml}</div>
+            </div>`;
+        }
+    }
+
+    timelineContainer.innerHTML = html;
+    document.getElementById('logBranchModal').classList.add('show');
 }
 
 async function triggerManualLog() {
@@ -1678,6 +2129,8 @@ async function renderExportReport() {
             bStats[clean] = { leads:0, calls:0, sales:0, rev:0, cats:{} };
         });
 
+        var trendMap = {};
+
         fRecords.forEach(function(r) {
             var isSale = isRecordSale(r);
             var status = String(r.status).toLowerCase();
@@ -1695,6 +2148,14 @@ async function renderExportReport() {
                     bStats[bName].sales++;
                     bStats[bName].rev += amt;
                     bStats[bName].cats[cat] = (bStats[bName].cats[cat] || 0) + 1;
+                }
+            }
+
+            if(isSale) {
+                var mKey = r.sheetName; 
+                if(mKey) {
+                    if(!trendMap[mKey]) trendMap[mKey] = { rev:0, label: mKey, sortKey: getY(mKey)*100 + getM(mKey) };
+                    trendMap[mKey].rev += amt;
                 }
             }
         });
@@ -1727,8 +2188,37 @@ async function renderExportReport() {
             '</tr>';
         });
 
+        var tVals = Object.values(trendMap).sort((a,b) => a.sortKey - b.sortKey);
+        var tHtml = '';
+        if(tVals.length > 1) {
+            tHtml += '<h3 style="margin-top:2.5rem; margin-bottom:1rem; font-size:1.1rem; font-weight:800; color:#1e293b; border-bottom:2px solid #e2e8f0; padding-bottom:8px;">Aylar Arası İvme ve Büyüme Trendi</h3>';
+            tHtml += '<div style="display:flex; gap:1.25rem; flex-wrap:wrap;">';
+            var prevRev = 0;
+            tVals.forEach(function(d, index) {
+                var growthStr = '';
+                if(prevRev > 0) {
+                    var pct = ((d.rev - prevRev) / prevRev) * 100;
+                    if(pct > 0) growthStr = '<span style="color:#10b981; font-size:0.8rem; font-weight:800;"><i class="fas fa-arrow-up"></i> %' + pct.toFixed(1) + '</span>';
+                    else if(pct < 0) growthStr = '<span style="color:#ef4444; font-size:0.8rem; font-weight:800;"><i class="fas fa-arrow-down"></i> %' + Math.abs(pct).toFixed(1) + '</span>';
+                    else growthStr = '<span style="color:#94a3b8; font-size:0.8rem; font-weight:800;">%0 (Değişim Yok)</span>';
+                } else if (prevRev === 0 && index !== 0) {
+                     growthStr = '<span style="color:#10b981; font-size:0.8rem; font-weight:800;"><i class="fas fa-arrow-up"></i> %100</span>';
+                } else {
+                     growthStr = '<span style="color:#94a3b8; font-size:0.8rem; font-weight:700;">- (Başlangıç Ayı)</span>';
+                }
+                
+                tHtml += '<div style="background:#f8fafc; border:1px solid #e2e8f0; padding:15px 20px; border-radius:12px; min-width:180px; page-break-inside: avoid;">' +
+                    '<div style="font-size:0.85rem; font-weight:800; text-transform:uppercase; letter-spacing:0.05em; color:#64748b; margin-bottom:8px;">' + d.label + '</div>' +
+                    '<div style="font-size:1.5rem; font-weight:800; color:#0f172a; font-family:monospace; line-height:1; letter-spacing:-0.5px;">' + fmt(d.rev) + '</div>' +
+                    '<div style="margin-top:6px;">' + growthStr + '</div>' +
+                '</div>';
+                prevRev = d.rev;
+            });
+            tHtml += '</div>';
+        }
+
         var gConv = gCalls > 0 ? ((gSales / gCalls) * 100).toFixed(1) : 0;
-        var periodString = startVal === endVal ? startVal : (startVal + ' – ' + endVal);
+        var periodString = startVal === endVal ? startVal : (startVal + ' \u2013 ' + endVal);
 
         window.currentExportData = {
             period: periodString,
@@ -1748,41 +2238,47 @@ async function renderExportReport() {
             </div>
             
             <div style="display:flex; gap:1.5rem; margin-bottom:2rem; flex-wrap:wrap; justify-content:space-between;">
-                <div style="flex:1; min-width:160px; background:#f0f9ff; padding:20px; border-radius:12px; border-left:5px solid #0ea5e9;">
-                    <div style="font-size:0.75rem; font-weight:800; color:#0284c7; text-transform:uppercase; margin-bottom:6px;">Toplam Ciro</div>
-                    <div style="font-size:2.2rem; font-weight:800; color:#0369a1; font-family:monospace;">${fmt(gRev)}</div>
+                <div style="flex:1; min-width:160px; background:#f0f9ff; padding:20px; border-radius:12px; border-left:5px solid #0ea5e9; page-break-inside: avoid;">
+                    <div style="font-size:0.75rem; font-weight:800; color:#0284c7; text-transform:uppercase; letter-spacing:0.05em; margin-bottom:6px;">Toplam Ciro</div>
+                    <div style="font-size:2.2rem; font-weight:800; color:#0369a1; font-family:monospace; line-height:1; letter-spacing:-1px;">${fmt(gRev)}</div>
                 </div>
-                <div style="flex:1; min-width:160px; background:#ecfdf5; padding:20px; border-radius:12px; border-left:5px solid #10b981;">
-                    <div style="font-size:0.75rem; font-weight:800; color:#047857; text-transform:uppercase; margin-bottom:6px;">Başarılı Satış</div>
-                    <div style="font-size:2.2rem; font-weight:800; color:#047857; font-family:monospace;">${gSales} <span style="font-size:0.9rem;">adet</span></div>
+                <div style="flex:1; min-width:160px; background:#ecfdf5; padding:20px; border-radius:12px; border-left:5px solid #10b981; page-break-inside: avoid;">
+                    <div style="font-size:0.75rem; font-weight:800; color:#047857; text-transform:uppercase; letter-spacing:0.05em; margin-bottom:6px;">Başarılı Satış</div>
+                    <div style="font-size:2.2rem; font-weight:800; color:#047857; font-family:monospace; line-height:1;">${gSales} <span style="font-size:0.9rem; font-weight:700; color:#059669;">adet</span></div>
                 </div>
-                <div style="flex:1; min-width:160px; background:#f5f3ff; padding:20px; border-radius:12px; border-left:5px solid #8b5cf6;">
-                    <div style="font-size:0.75rem; font-weight:800; color:#6d28d9; text-transform:uppercase; margin-bottom:6px;">Yönlendirme / Aranan</div>
-                    <div style="font-size:2.2rem; font-weight:800; color:#6d28d9; font-family:monospace;">${gLeads} <span style="font-size:1rem;">/ ${gCalls}</span></div>
+                <div style="flex:1; min-width:160px; background:#f5f3ff; padding:20px; border-radius:12px; border-left:5px solid #8b5cf6; page-break-inside: avoid;">
+                    <div style="font-size:0.75rem; font-weight:800; color:#6d28d9; text-transform:uppercase; letter-spacing:0.05em; margin-bottom:6px;">Yönlendirme / Aranan</div>
+                    <div style="font-size:2.2rem; font-weight:800; color:#6d28d9; font-family:monospace; line-height:1;">${gLeads} <span style="font-size:1rem;color:#7c3aed;">/ ${gCalls}</span></div>
                 </div>
-                <div style="flex:1; min-width:160px; background:#fffbeb; padding:20px; border-radius:12px; border-left:5px solid #f59e0b;">
-                    <div style="font-size:0.75rem; font-weight:800; color:#b45309; text-transform:uppercase; margin-bottom:6px;">Ortalama Dönüşüm</div>
-                    <div style="font-size:2.2rem; font-weight:800; color:#b45309; font-family:monospace;">%${gConv}</div>
+                <div style="flex:1; min-width:160px; background:#fffbeb; padding:20px; border-radius:12px; border-left:5px solid #f59e0b; page-break-inside: avoid;">
+                    <div style="font-size:0.75rem; font-weight:800; color:#b45309; text-transform:uppercase; letter-spacing:0.05em; margin-bottom:6px;">Ortalama Dönüşüm</div>
+                    <div style="font-size:2.2rem; font-weight:800; color:#b45309; font-family:monospace; line-height:1;">%${gConv}</div>
                 </div>
             </div>
 
+            ${tHtml}
+
             <h3 style="margin-top:2.5rem; margin-bottom:1rem; font-size:1.1rem; font-weight:800; color:#1e293b; border-bottom:2px solid #e2e8f0; padding-bottom:8px;">Şube Bazlı Detaylı Performans Tablosu</h3>
-            <table id="exportTable" style="width:100%; border-collapse:collapse; font-size:0.9rem; text-align:left;">
+            <table id="exportTable" style="width:100%; border-collapse:collapse; font-size:0.9rem; text-align:left; font-family:'Plus Jakarta Sans', sans-serif;">
                 <thead style="background:#f1f5f9;">
                     <tr>
-                        <th style="padding:12px 10px; font-weight:800; color:#334155; text-transform:uppercase; font-size:0.75rem;">Şube Adı</th>
-                        <th style="padding:12px 10px; font-weight:800; color:#334155; text-transform:uppercase; font-size:0.75rem; text-align:center;">Yönlendirme</th>
-                        <th style="padding:12px 10px; font-weight:800; color:#334155; text-transform:uppercase; font-size:0.75rem; text-align:center;">Aranan</th>
-                        <th style="padding:12px 10px; font-weight:800; color:#334155; text-transform:uppercase; font-size:0.75rem; text-align:center;">Satış</th>
-                        <th style="padding:12px 10px; font-weight:800; color:#334155; text-transform:uppercase; font-size:0.75rem; text-align:center;">Dönüşüm</th>
-                        <th style="padding:12px 10px; font-weight:800; color:#334155; text-transform:uppercase; font-size:0.75rem; text-align:right;">Toplam Ciro</th>
-                        <th style="padding:12px 10px; font-weight:800; color:#334155; text-transform:uppercase; font-size:0.75rem; text-align:right;">En Çok Satan Kategori</th>
+                        <th style="padding:12px 10px; font-weight:800; color:#334155; text-transform:uppercase; font-size:0.75rem; border-bottom:2px solid #cbd5e1;">Şube Adı</th>
+                        <th style="padding:12px 10px; font-weight:800; color:#334155; text-transform:uppercase; font-size:0.75rem; border-bottom:2px solid #cbd5e1; text-align:center;">Yönlendirme</th>
+                        <th style="padding:12px 10px; font-weight:800; color:#334155; text-transform:uppercase; font-size:0.75rem; border-bottom:2px solid #cbd5e1; text-align:center;">Aranan</th>
+                        <th style="padding:12px 10px; font-weight:800; color:#334155; text-transform:uppercase; font-size:0.75rem; border-bottom:2px solid #cbd5e1; text-align:center;">Satış</th>
+                        <th style="padding:12px 10px; font-weight:800; color:#334155; text-transform:uppercase; font-size:0.75rem; border-bottom:2px solid #cbd5e1; text-align:center;">Dönüşüm</th>
+                        <th style="padding:12px 10px; font-weight:800; color:#334155; text-transform:uppercase; font-size:0.75rem; border-bottom:2px solid #cbd5e1; text-align:right;">Toplam Ciro</th>
+                        <th style="padding:12px 10px; font-weight:800; color:#334155; text-transform:uppercase; font-size:0.75rem; border-bottom:2px solid #cbd5e1; text-align:right;">En Çok Satan Kategori</th>
                     </tr>
                 </thead>
                 <tbody>
                     ${bHtml}
                 </tbody>
             </table>
+            
+            <div style="margin-top:3rem; font-size:0.75rem; color:#94a3b8; text-align:center; font-weight:600; border-top:1px solid #e2e8f0; padding-top:1rem;">
+                Bu rapor HEDEF AVM E-Ticaret CRM Sistemi tarafından otomatik olarak oluşturulmuştur. <br>Oluşturulma Tarihi: ${new Date().toLocaleString('tr-TR')}
+            </div>
         `;
 
         document.getElementById('exportPrintableArea').innerHTML = reportHtml;
@@ -1841,6 +2337,9 @@ function exportToCSV() {
         csv.push(row.join(";")); 
     }
     
+    csv.push('');
+    csv.push(`Oluşturulma Tarihi:;"${new Date().toLocaleString('tr-TR')}"`);
+
     var csvFile = new Blob([csv.join("\n")], {type: "text/csv;charset=utf-8;"});
     var downloadLink = document.createElement("a");
     downloadLink.download = filename;
