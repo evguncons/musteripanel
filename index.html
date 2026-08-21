@@ -66,6 +66,7 @@ body{
 
 body{background:var(--bg);color:var(--text);font-family:'Plus Jakarta Sans',sans-serif;font-size:15px;-webkit-tap-highlight-color:transparent;margin:0; transition: background 0.3s ease, color 0.3s ease;}
 
+/* ── ANIMATIONS ── */
 @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
 .tab-content { display: none; animation: fadeIn 0.35s cubic-bezier(0.4, 0, 0.2, 1) forwards; }
 .tab-content.active { display: block; }
@@ -75,6 +76,7 @@ body{background:var(--bg);color:var(--text);font-family:'Plus Jakarta Sans',sans
 @keyframes pulse-ring{0%{box-shadow:0 0 0 0 rgba(16,185,129,.4)}70%{box-shadow:0 0 0 6px rgba(16,185,129,0)}100%{box-shadow:0 0 0 0 rgba(16,185,129,0)}}
 .pulse{width:8px;height:8px;border-radius:50%;background:#10b981;box-shadow:0 0 0 0 rgba(16,185,129,.4);animation:pulse-ring 2s infinite;flex-shrink:0}
 
+/* ── COMPONENTS ── */
 .card{background:var(--card-bg);border-radius:1.25rem;border:1px solid var(--border);box-shadow:var(--shadow-sm);overflow:hidden; transition: box-shadow 0.3s ease, transform 0.3s ease;}
 .card:hover { box-shadow: var(--shadow-md); }
 
@@ -138,6 +140,7 @@ select.inp{appearance:none;line-height:1.5;background-image:url("data:image/svg+
 .sec-header{display:flex;align-items:center;gap:1rem;padding:1.25rem 1.5rem;border-bottom:1px solid var(--border);flex-wrap:wrap; background:var(--surface2)}
 .sec-icon{width:42px;height:42px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0; box-shadow:0 2px 8px rgba(0,0,0,0.05)}
 
+/* ── HEADER STICKY GLASSMORPHISM ── */
 .app-header {
   background: var(--surface-glass);
   backdrop-filter: blur(16px);
@@ -153,9 +156,11 @@ select.inp{appearance:none;line-height:1.5;background-image:url("data:image/svg+
   transition: all 0.3s ease;
 }
 
+/* ── LAYOUT ── */
 .grid-2col{display:grid;grid-template-columns:1fr 1fr;gap:1.25rem}
 .grid-kpi{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1rem;margin-bottom:1.5rem}
 
+/* ── RESPONSIVE ── */
 @media(max-width:1024px){
   .grid-2col{grid-template-columns:1fr}
   .app-header { top: 0.5rem; }
@@ -186,15 +191,20 @@ select.inp{appearance:none;line-height:1.5;background-image:url("data:image/svg+
   .podium-wrap{flex-direction:column!important;align-items:center!important;min-height:unset!important;padding-top:1.5rem!important}
 }
 
+/* ── MÜKEMMEL PDF / YAZDIRMA STİLLERİ ── */
 @media print {
   @page { size: landscape; margin: 10mm; }
   body { background: #fff !important; color: #000 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  
   #loginScreen, .app-header, .tabs-row, .no-print, .modal-bg, .toast { display: none !important; }
+  
   #view-dashboard, #view-entry, #view-category, #view-performance, #view-sales, #view-report, #view-log { display: none !important; }
   #view-export { display: block !important; }
+  
   #mainApp { padding: 0 !important; margin: 0 !important; max-width: none !important; }
   .card { box-shadow: none !important; border: none !important; }
   #exportContentArea { padding: 0 !important; border: none !important; background: transparent !important; }
+  
   table { page-break-inside: auto; width: 100% !important; }
   tr { page-break-inside: avoid; page-break-after: auto; }
   thead { display: table-header-group; }
@@ -202,11 +212,13 @@ select.inp{appearance:none;line-height:1.5;background-image:url("data:image/svg+
   .print-break-avoid { page-break-inside: avoid; }
 }
 
+/* Dark mode toggle */
 .theme-toggle{width:46px;height:26px;border-radius:13px;border:none;cursor:pointer;position:relative;transition:background .3s;flex-shrink:0;padding:0; box-shadow: inset 0 2px 4px rgba(0,0,0,0.1)}
 .theme-toggle .knob{position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:transform .3s cubic-bezier(0.4, 0, 0.2, 1);box-shadow:0 2px 5px rgba(0,0,0,.2)}
 body:not(.dark) .theme-toggle{background:#cbd5e1}
 body.dark .theme-toggle{background:#0ea5e9}
 body.dark .theme-toggle .knob{transform:translateX(20px)}
+
 </style>
 </head>
 <body>
@@ -228,6 +240,7 @@ body.dark .theme-toggle .knob{transform:translateX(20px)}
   </div>
 </div>
 
+<!-- ════════════════════ MAIN APP ════════════════════ -->
 <div id="mainApp" style="display:none;max-width:1600px;margin:0 auto;padding:1.5rem 1.5rem 5rem">
 
   <!-- HEADER -->
@@ -307,7 +320,7 @@ body.dark .theme-toggle .knob{transform:translateX(20px)}
         <div class="sec-icon" style="background:rgba(14, 165, 233, 0.1);color:var(--sys-blue)"><i class="fas fa-user-plus text-xl"></i></div>
         <div style="flex:1">
           <div style="font-size:1.1rem;font-weight:800;color:var(--text)">Yeni Müşteri Kayıtları</div>
-          <div style="font-size:.75rem;font-weight:600;color:var(--text3)">Birden fazla müşteri satırı ekleyerek tek seferde gönderebilirsiniz. Tutar girilirse otomatik olarak "Satışa Döndü" olarak işaretlenir.</div>
+          <div style="font-size:.75rem;font-weight:600;color:var(--text3)">Birden fazla müşteri satırı ekleyerek tek seferde gönderebilirsiniz. Tutar girilirse otomatik olarak "Satışa Döndü" işaretlenir.</div>
         </div>
       </div>
 
@@ -321,7 +334,8 @@ body.dark .theme-toggle .knob{transform:translateX(20px)}
                 </div>
             </div>
             <div style="display:flex; gap:0.75rem;">
-                <textarea id="smartParserInput" class="inp" style="height:50px; resize:none; padding-top:0.8rem; font-family:monospace; font-size:0.85rem;" placeholder="Kopyalanan metni buraya yapıştırın..." onpaste="setTimeout(applySmartParsing, 50);" oninput="if(this.value.trim().length > 5) { clearTimeout(window.parseTimer); window.parseTimer = setTimeout(applySmartParsing, 200); }"></textarea>
+                <!-- onpaste eklendi, otomatik çözümleme için -->
+                <textarea id="smartParserInput" class="inp" style="height:50px; resize:none; padding-top:0.8rem; font-family:monospace; font-size:0.85rem;" placeholder="Kopyalanan metni buraya yapıştırın..." onpaste="setTimeout(applySmartParsing, 50);" oninput="if(this.value.trim().length > 10) { clearTimeout(window.parseTimer); window.parseTimer = setTimeout(applySmartParsing, 250); }"></textarea>
                 <button onclick="applySmartParsing()" class="btn btn-primary" style="height:50px; flex-shrink:0; background:linear-gradient(135deg,var(--sys-purple),#7e22ce); box-shadow:0 4px 12px rgba(139, 92, 246, 0.25);"><i class="fas fa-bolt"></i> Çözümle</button>
             </div>
         </div>
@@ -501,7 +515,7 @@ body.dark .theme-toggle .knob{transform:translateX(20px)}
     </div>
   </div>
 
-  <!-- ══ CİRO LOGLARI (ZAMAN ÇİZELGESİ) ══ -->
+  <!-- ══ LOGLAR (ZAMAN ÇİZELGESİ) ══ -->
   <div id="view-log" class="tab-content">
     <div class="card" style="margin-bottom:1.5rem; border-top:4px solid var(--sys-blue);">
       <div class="sec-header" style="background:var(--surface2); justify-content:space-between; align-items:center;">
@@ -573,6 +587,7 @@ body.dark .theme-toggle .knob{transform:translateX(20px)}
     </div>
     
     <div id="exportContentArea" style="display:none; background:#fff; color:#000; padding:2.5rem; border-radius:1rem;" class="card print-break-avoid">
+       <!-- BU KISIM PDF'TE GÖRÜNMEYECEK (class="no-print" ile) -->
        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:2rem;" class="no-print">
           <div>
             <h2 style="font-size:1.3rem; font-weight:800; color:var(--text); margin-bottom:4px;">Rapor Önizlemesi</h2>
@@ -608,6 +623,7 @@ body.dark .theme-toggle .knob{transform:translateX(20px)}
   </div>
 </div>
 
+<!-- BRANCH DETAIL MODAL -->
 <div id="branchDetailModal" class="modal-bg">
   <div class="modal-content" style="background:var(--card-bg);border:1px solid var(--border);border-radius:1.5rem;width:100%;max-width:540px;max-height:90vh;overflow-y:auto;box-shadow:var(--shadow-md)">
     <div style="padding:1.25rem 1.5rem;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;background:var(--surface2);position:sticky;top:0;z-index:10">
@@ -631,6 +647,7 @@ body.dark .theme-toggle .knob{transform:translateX(20px)}
   </div>
 </div>
 
+<!-- ÖZEL HATA / UYARI MODALI -->
 <div id="warningModal" class="modal-bg" style="z-index: 9999;">
   <div class="modal-content" style="background:var(--card-bg);border:2px solid var(--sys-red);border-radius:1.5rem;width:100%;max-width:480px;text-align:center;box-shadow:var(--shadow-md); padding:2rem;">
     <div style="width:64px;height:64px;background:rgba(239, 68, 68, 0.1);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 1.2rem;" id="warningIconBg">
@@ -645,6 +662,7 @@ body.dark .theme-toggle .knob{transform:translateX(20px)}
   </div>
 </div>
 
+<!-- TOAST BİLDİRİMİ -->
 <div id="successToast" class="toast"><i class="fas fa-check-circle" style="font-size:1.2rem"></i> <span id="toastMsg"></span></div>
 
 <script>
@@ -846,80 +864,6 @@ function parseAnyDate(dStr) {
     return 0;
 }
 
-function checkPhoneDuplicate(inputEl) {
-    var rawContact = inputEl.value;
-    var compContact = getCompareNum(rawContact);
-    if (compContact.length < 7) return;
-
-    var existing = allRecordsData.find(function(r) {
-        return getCompareNum(r.contact) === compContact;
-    });
-
-    if (existing) {
-        var isSale = isRecordSale(existing);
-        var statusText = isSale ? 'Satış Gerçekleşti (₺' + new Intl.NumberFormat('tr-TR').format(parseTurkishFloat(existing.amount)) + ')' : 'Müşteri Kaydı / Yönlendirme';
-        var customerNoText = existing.customerNo ? '\n• Müşteri No: ' + existing.customerNo : '';
-        
-        var msg = 'Bu telefon numarasına (' + rawContact + ') ait sistemde kayıt bulunmaktadır.\n\n' +
-                  '• Müşteri Adı: ' + (existing.name || 'Belirtilmemiş') + customerNoText + '\n' +
-                  '• Kayıtlı Olduğu Şube: ' + (existing.branch || 'Belirtilmemiş') + '\n' +
-                  '• Geliş Medyası: ' + (existing.media || 'Belirtilmemiş') + '\n' +
-                  '• İlgilendiği Kategori: ' + (existing.category || 'Belirtilmemiş') + '\n' +
-                  '• Ürün: ' + (existing.product || 'Belirtilmemiş') + '\n' +
-                  '• Mevcut Durum: ' + statusText + '\n\n' +
-                  'Eğer bu müşteriye yeni bir SATIŞ eklemek istiyorsanız "Satış Ekle" butonuna basarak tutarı girebilirsiniz.';
-
-        showDuplicatePrompt(
-            'Mükerrer Müşteri Kaydı!',
-            msg,
-            function onTamam() {
-                var card = inputEl.closest('.entry-card');
-                if (card) {
-                    card.querySelector('.inp-contact').value = '';
-                    card.querySelector('.inp-name').value = '';
-                    var cNo = card.querySelector('.inp-customerno');
-                    if (cNo) cNo.value = '';
-                }
-            },
-            function onSatisEkle() {
-                var card = inputEl.closest('.entry-card');
-                if (card) {
-                    if (existing.name) card.querySelector('.inp-name').value = existing.name;
-                    var cNo = card.querySelector('.inp-customerno');
-                    if (cNo && existing.customerNo) cNo.value = existing.customerNo;
-                    
-                    if (existing.branch) {
-                        var selB = card.querySelector('.inp-branch');
-                        for(var i=0; i<selB.options.length; i++) {
-                            if(selB.options[i].value === existing.branch) { selB.selectedIndex = i; break; }
-                        }
-                    }
-                    if (existing.media) {
-                        var selM = card.querySelector('.inp-media');
-                        for(var j=0; j<selM.options.length; j++) {
-                            if(selM.options[j].value === existing.media) { selM.selectedIndex = j; break; }
-                        }
-                    }
-                    if (existing.category) {
-                        var selC = card.querySelector('.inp-category');
-                        for(var k=0; k<selC.options.length; k++) {
-                            if(selC.options[k].value === existing.category) { selC.selectedIndex = k; break; }
-                        }
-                    }
-                    if (existing.product) card.querySelector('.inp-product').value = existing.product;
-
-                    var amountInp = card.querySelector('.inp-amount');
-                    if (amountInp) {
-                        amountInp.focus();
-                        amountInp.style.boxShadow = '0 0 0 4px rgba(16, 185, 129, 0.35)';
-                        setTimeout(function() { amountInp.style.boxShadow = ''; }, 2500);
-                    }
-                }
-            }
-        );
-    }
-}
-
 function doLogin(){
   var pass=document.getElementById('loginPass').value;
   if(pass==='134679'){
@@ -1075,104 +1019,6 @@ function updateKPIsFromGlobal(globalData){
   previousSalesCount = globalData.totalSalesCount;
 }
 
-function addInputRow(){
-  var c=document.getElementById('inputContainer');
-  if(!c) return;
-  var d=document.createElement('div');d.className='entry-card';
-  var bOpts='<option value="" disabled selected>Seçiniz...</option>'+BRANCHES.map(function(b){return '<option value="'+b+'">'+b+'</option>';}).join('');
-  d.innerHTML='<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:1rem;margin-bottom:1rem">'
-    +'<div><label class="inp-label">Tarih & Saat</label><input type="datetime-local" class="inp" value="'+getTodayDT()+'"></div>'
-    +'<div><label class="inp-label" style="color:var(--sys-blue)">Şube <span style="color:var(--sys-red)">*</span></label><select class="inp inp-branch">'+bOpts+'</select></div>'
-    +'<div><label class="inp-label" style="color:var(--sys-blue)">Müşteri Adı Soyadı <span style="color:var(--sys-red)">*</span></label><input type="text" class="inp inp-name" placeholder="Örn: Ahmet Yılmaz"></div>'
-    +'<div><label class="inp-label">İletişim Numarası</label><input type="text" class="inp inp-contact" placeholder="5XX..." oninput="if(this.value.length>=7) checkPhoneDuplicate(this)"></div>'
-    +'<div><label class="inp-label">Müşteri No (F Sütunu)</label><input type="text" class="inp inp-customerno" placeholder="Opsiyonel"></div>'
-    +'<div><label class="inp-label" style="color:var(--sys-blue)">Geliş Medyası <span style="color:var(--sys-red)">*</span></label><select class="inp inp-media"><option value="" disabled selected>Seçiniz...</option><option value="Instagram">Instagram</option><option value="Whatsapp">Whatsapp</option><option value="Facebook">Facebook</option><option value="Çağrı">Çağrı</option><option value="Web Sitesi Form">Web Sitesi Form</option><option value="SMS LİNK">SMS LİNK</option></select></div>'
-    +'</div>'
-    +'<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:1rem;align-items:end; background:var(--surface2); padding:1rem; border-radius:12px;">'
-    +'<div><label class="inp-label">İlgilendiği Kategori</label><select class="inp inp-category"><option value="Mobilya">Mobilya</option><option value="Baza+Yatak+Başlık">Baza+Yatak+Başlık</option><option value="Bebek ve Çocuk">Bebek ve Çocuk</option><option value="Beyaz Eşya">Beyaz Eşya</option><option value="Elektrikli Ev Aletleri">Elektrikli Ev Aletleri</option><option value="Elektrikli-Benzinli Araç">Elektrikli-Benzinli Araç</option><option value="Elektronik">Elektronik</option><option value="Ev Dekorasyonu">Ev Dekorasyonu</option><option value="Halı">Halı</option><option value="Kişisel Aksesuar">Kişisel Aksesuar</option><option value="Mobilya Aksesuarı">Mobilya Aksesuarı</option><option value="Tekstil">Tekstil</option><option value="Züccaciye">Züccaciye</option><option value="Ayakkabı">Ayakkabı</option><option value="LİMİT ÖĞREN">LİMİT ÖĞREN</option><option value="GENEL ÜRÜN BİLGİSİ" selected>GENEL ÜRÜN BİLGİSİ</option></select></div>'
-    +'<div><label class="inp-label">Ürün Adı / Modeli</label><input type="text" class="inp inp-product" placeholder="Örn: L Koltuk"></div>'
-    +'<div style="display:flex;gap:.75rem;align-items:flex-end"><div style="flex:1"><label class="inp-label">Tutar (TL - Opsiyonel)</label><input type="number" class="inp inp-amount" placeholder="Örn: 15000" min="0" step="any"></div>'
-    +'<button onclick="this.closest(\'.entry-card\').remove()" class="btn btn-icon" style="flex-shrink:0;color:var(--sys-red);" title="Sil"><i class="fas fa-trash-alt"></i></button></div>'
-    +'</div>';
-  c.appendChild(d);
-}
-
-async function submitAllRows(){
-  var rows=document.querySelectorAll('#inputContainer > .entry-card');
-  var data=[];
-  var hasEmptyError=false;
-  var currentSalesContacts=[];
-
-  for(var i=0; i<rows.length; i++){
-    var row = rows[i];
-    var branch=row.querySelector('.inp-branch').value;
-    var name=row.querySelector('.inp-name').value.trim();
-    var media=row.querySelector('.inp-media').value;
-    var rawContact=row.querySelector('.inp-contact').value;
-    var customerNoInp=row.querySelector('.inp-customerno');
-    var customerNoVal=customerNoInp ? customerNoInp.value.trim() : '';
-    var dv=row.querySelector('input[type="datetime-local"]').value;
-    var amountVal=row.querySelector('.inp-amount') ? row.querySelector('.inp-amount').value : '';
-
-    row.classList.toggle('error',!branch||!name||!media);
-    if(!branch||!name||!media){hasEmptyError=true; continue;}
-    
-    var contact = rawContact.replace(/^0+/, '');
-    var compContact = getCompareNum(contact);
-
-    if (compContact.length >= 7) {
-        if (currentSalesContacts.includes(compContact)) {
-            row.classList.add('error');
-            showWarning('Mükerrer Satış Engellendi', 'Aynı telefon numarasına (' + rawContact + ') aynı anda ekrandaki formda birden fazla kez satış kaydı girilemez!');
-            return;
-        }
-        currentSalesContacts.push(compContact);
-    }
-    
-    data.push({
-      date:dv.replace('T',' '),
-      branch:branch,
-      name:name,
-      contact:contact,
-      customerNo:customerNoVal,
-      media:media,
-      category:row.querySelector('.inp-category').value,
-      product:row.querySelector('.inp-product').value,
-      amount:amountVal
-    });
-  }
-
-  if(hasEmptyError){ showWarning('Eksik Bilgi','Lütfen işaretli olan tüm zorunlu alanları doldurun.'); return; }
-  if(!data.length){ showWarning('Uyarı','Gönderilecek veri bulunamadı.'); return; }
-
-  var btn=document.getElementById('submitBtn');
-  var orig=btn.innerHTML;
-  btn.innerHTML='<i class="fas fa-spinner fa-spin mr-2"></i> Kaydediliyor...';
-  btn.disabled=true;
-  
-  try{
-    var res=await fetch(GAS_URL,{method:'POST',body:JSON.stringify({action:'addCustomersBulk',data:data})});
-    var result=JSON.parse(await res.text());
-    if(result.status==='success'){
-      showSuccess('Tüm kayıtlar başarıyla eklendi!');
-      document.getElementById('inputContainer').innerHTML='';
-      addInputRow();
-      refreshData();
-    }else if(result.status==='warning'){
-        showWarning('Kısmi Başarı', result.message);
-        document.getElementById('inputContainer').innerHTML='';
-        addInputRow();
-        refreshData();
-    }else{
-      showWarning('Hata', result.message);
-    }
-  }catch(e){
-    showWarning('Bağlantı Hatası','İşlem sırasında bir hata oluştu.');
-  }
-  btn.innerHTML=orig;
-  btn.disabled=false;
-}
-
 function renderDashCharts(){
   var ALLOWED_MEDIA=['Whatsapp','Instagram','Web Sitesi Form','Facebook','Çağrı','SMS LİNK'];
   var mediaCounts={};
@@ -1196,6 +1042,8 @@ function renderDashCharts(){
             resCounts['Tekrar Aranacak'] = (resCounts['Tekrar Aranacak'] || 0) + 1;
         } else if (lowerRes === 'bilgi verildi, olumsuz' || lowerRes === 'olumsuz') {
             resCounts['Bilgi Verildi, Olumsuz'] = (resCounts['Bilgi Verildi, Olumsuz'] || 0) + 1;
+        } else if (lowerRes === 'borç nedeniyle satış i̇ptal' || lowerRes === 'borç nedeniyle satış iptal') {
+            resCounts['Borç Nedeniyle Satış İptal'] = (resCounts['Borç Nedeniyle Satış İptal'] || 0) + 1;
         }
     }
   });
@@ -1470,9 +1318,9 @@ function renderSalesGrid() {
         c.innerHTML = '<div style="text-align:center;color:var(--text3);padding:3rem;grid-column:1/-1; font-weight:600;">Bu kriterlere uygun satış bulunamadı.</div>';
         return;
     }
-    var fmt=function(n){return '₺'+new Intl.NumberFormat('tr-TR',{maximumFractionDigits:0}).format(n||0);};
+    var fmt=function(n){return '\u20ba'+new Intl.NumberFormat('tr-TR',{maximumFractionDigits:0}).format(n||0);};
     c.innerHTML=currentData.map(function(s){
-        var clean=(s.branch||'').replace(/ Şubesi/gi,'');
+        var clean=(s.branch||'').replace(/ \u015eubesi/gi,'');
         var ds='';
         var t = parseAnyDate(s.timestamp || s.date);
         if (t > 0) {
@@ -1535,12 +1383,36 @@ async function fetchAdvancedReport() {
                     let current = monthlyData[i];
                     let prev = i > 0 ? monthlyData[i-1] : null;
                     let growthHtml = '';
+                    let analysisHtml = '';
                     
                     if (prev && prev.revenue > 0) {
                         let pct = ((current.revenue - prev.revenue) / prev.revenue) * 100;
                         let color = pct >= 0 ? 'var(--sys-green)' : 'var(--sys-red)';
                         let icon = pct >= 0 ? 'fa-arrow-up' : 'fa-arrow-down';
                         growthHtml = `<div style="font-size:0.75rem; font-weight:800; color:${color}; padding:4px 8px; background:rgba(${pct >= 0 ? '16,185,129':'239,68,68'},0.1); border-radius:6px;"><i class="fas ${icon}"></i> %${Math.abs(pct).toFixed(1)}</div>`;
+                        
+                        let prevConv = prev.leads > 0 ? (prev.sales / prev.leads) : 0;
+                        let currConv = current.leads > 0 ? (current.sales / current.leads) : 0;
+                        let prevAvg = prev.sales > 0 ? (prev.revenue / prev.sales) : 0;
+                        let currAvg = current.sales > 0 ? (current.revenue / current.sales) : 0;
+
+                        let analysisText = "";
+                        if (pct >= 0) {
+                            let reasons = [];
+                            if (current.leads > prev.leads) reasons.push("yönlendirme artışı");
+                            if (currConv > prevConv) reasons.push("dönüşüm oranındaki yükseliş");
+                            if (currAvg > prevAvg) reasons.push("sepet tutarındaki artış");
+                            if(reasons.length > 0) analysisText = `Büyüme temel olarak <b>${reasons.join(" ve ")}</b> kaynaklıdır.`;
+                            else analysisText = "Genel ve istikrarlı bir büyüme gerçekleşmiştir.";
+                        } else {
+                            let reasons = [];
+                            if (current.leads < prev.leads) reasons.push("yönlendirme eksikliği");
+                            if (currConv < prevConv) reasons.push("dönüşüm oranındaki düşüş");
+                            if (currAvg < prevAvg) reasons.push("sepet tutarındaki gerileme");
+                            if(reasons.length > 0) analysisText = `Düşüş temel olarak <b>${reasons.join(" ve ")}</b> kaynaklıdır.`;
+                            else analysisText = "Genel performans daralması gözlemlenmiştir.";
+                        }
+                        analysisHtml = `<div style="font-size:0.75rem; color:var(--text3); margin-top:0.875rem; border-top:1px dashed var(--border); padding-top:0.75rem; line-height:1.4;"><i class="fas fa-lightbulb" style="color:var(--sys-orange); margin-right:4px;"></i> ${analysisText}</div>`;
                     }
 
                     trendHtml += `
@@ -1561,10 +1433,87 @@ async function fetchAdvancedReport() {
                             <span style="font-size:0.8rem; color:var(--text3); font-weight:700; text-transform:uppercase;">Ciro</span>
                             <span style="font-size:1.1rem; font-weight:800; color:var(--sys-blue); font-family:monospace;">${fmt(current.revenue)}</span>
                         </div>
+                        ${analysisHtml}
                     </div>`;
                 }
+            } else {
+                trendHtml = '<div style="color:var(--text3); padding:2rem; text-align:center; font-weight:600; grid-column:1/-1;">Bu dönem için veri bulunamadı.</div>';
             }
             document.getElementById('trendMonthsContainer').innerHTML = trendHtml;
+
+            let n = revArr.length;
+            let predRev = 0, predLeads = 0, predSales = 0;
+            let nextMonthLabel = "Gelecek Ay";
+            
+            if (n > 1) {
+                let sumX = 0, sumY_rev = 0, sumY_leads = 0, sumY_sales = 0, sumXY_rev = 0, sumXY_leads = 0, sumXY_sales = 0, sumX2 = 0;
+                for (let i = 0; i < n; i++) {
+                    sumX += i; sumX2 += i * i;
+                    sumY_rev += revArr[i]; sumXY_rev += i * revArr[i];
+                    sumY_leads += leadsArr[i]; sumXY_leads += i * leadsArr[i];
+                    sumY_sales += salesArr[i]; sumXY_sales += i * salesArr[i];
+                }
+                
+                let slopeRev = (n * sumXY_rev - sumX * sumY_rev) / (n * sumX2 - sumX * sumX);
+                let interceptRev = (sumY_rev - slopeRev * sumX) / n;
+                predRev = Math.max(0, slopeRev * n + interceptRev);
+                
+                let slopeLeads = (n * sumXY_leads - sumX * sumY_leads) / (n * sumX2 - sumX * sumX);
+                let interceptLeads = (sumY_leads - slopeLeads * sumX) / n;
+                predLeads = Math.max(0, slopeLeads * n + interceptLeads);
+                
+                let slopeSales = (n * sumXY_sales - sumX * sumY_sales) / (n * sumX2 - sumX * sumX);
+                let interceptSales = (sumY_sales - slopeSales * sumX) / n;
+                predSales = Math.max(0, slopeSales * n + interceptSales);
+                
+                let lastDate = monthlyData[n-1].period.split(' ');
+                let lastMIdx = TR_MONTHS.indexOf(lastDate[0]);
+                let nextMIdx = (lastMIdx + 1) % 12;
+                let nextY = lastMIdx === 11 ? parseInt(lastDate[1]) + 1 : parseInt(lastDate[1]);
+                nextMonthLabel = TR_MONTHS[nextMIdx] + ' ' + nextY;
+            } else if (n === 1) {
+                predRev = revArr[0]; predLeads = leadsArr[0]; predSales = salesArr[0];
+            }
+            
+            predRev = Math.round(predRev); predLeads = Math.round(predLeads); predSales = Math.round(predSales);
+            let predConv = predLeads > 0 ? (predSales / predLeads * 100).toFixed(1) : 0;
+
+            let aiExplanation = "";
+            let isTrendPositive = predRev > (revArr[revArr.length - 1] || 0);
+            
+            if (monthlyData.length < 2) {
+                aiExplanation = "Tahminleme için yeterli geçmiş veri bulunamadı. Yapay zeka modeli (Doğrusal Regresyon) eğilim hesaplamak için en az 2 aylık veri ile daha tutarlı çalışır.";
+            } else if (isTrendPositive) {
+                aiExplanation = `Son <b>${monthlyData.length} aylık</b> periyotta tespit edilen <b>yükseliş ivmesi</b> baz alınmıştır. Formül, yönlendirme hacminin ve dönüşüm oranlarının mevcut stabiliteyi koruyacağını varsayarak büyümenin devam edeceğini öngörmektedir.`;
+            } else {
+                aiExplanation = `Son dönemdeki <b>yatay veya düşüş trendi</b> baz alınarak muhafazakar bir tahmin üretilmiştir. Ciroyu korumak veya hedeflerin üzerine çıkmak için dönüşüm oranlarını (satış kapatma kabiliyetini) iyileştirici aksiyonlar alınması sistem tarafından önerilir.`;
+            }
+
+            document.getElementById('aiPredictionContainer').innerHTML = `
+                <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:1.5rem; margin-bottom:1.5rem;">
+                    <div style="background:var(--card-bg); border:1px solid var(--border); border-radius:1rem; padding:1.5rem; text-align:center; box-shadow:var(--shadow-sm);">
+                        <div style="font-size:0.75rem; font-weight:800; color:var(--text3); text-transform:uppercase; margin-bottom:0.5rem;">Tahmini Yönlendirme</div>
+                        <div style="font-size:2rem; font-weight:800; color:var(--text); line-height:1;">${predLeads}</div>
+                        <div style="font-size:0.75rem; color:var(--text3); font-weight:600; margin-top:0.4rem;">${nextMonthLabel} Beklentisi</div>
+                    </div>
+                    <div style="background:var(--card-bg); border:1px solid var(--border); border-radius:1rem; padding:1.5rem; text-align:center; box-shadow:var(--shadow-sm);">
+                        <div style="font-size:0.75rem; font-weight:800; color:var(--text3); text-transform:uppercase; margin-bottom:0.5rem;">Tahmini Satış</div>
+                        <div style="font-size:2rem; font-weight:800; color:var(--sys-green); line-height:1;">${predSales}</div>
+                        <div style="font-size:0.8rem; font-weight:700; color:var(--sys-orange); margin-top:0.4rem;">Tahmini Dönüşüm: %${predConv}</div>
+                    </div>
+                    <div style="background:var(--card-bg); border:1px solid var(--border); border-radius:1rem; padding:1.5rem; text-align:center; box-shadow:var(--shadow-sm); border-bottom:4px solid var(--sys-blue);">
+                        <div style="font-size:0.75rem; font-weight:800; color:var(--text3); text-transform:uppercase; margin-bottom:0.5rem;">Tahmini Ciro</div>
+                        <div style="font-size:2rem; font-weight:800; color:var(--sys-blue); font-family:monospace; line-height:1;">${fmt(predRev)}</div>
+                        <div style="font-size:0.75rem; color:var(--text3); font-weight:600; margin-top:0.4rem;">${nextMonthLabel} Beklentisi</div>
+                    </div>
+                </div>
+                
+                <div style="background:rgba(139, 92, 246, 0.05); border-left:4px solid var(--sys-purple); padding:1.25rem; border-radius:0 1rem 1rem 0; font-size:0.85rem; color:var(--text2); line-height:1.6;">
+                    <div style="font-weight:800; color:var(--text); margin-bottom:0.5rem; display:flex; align-items:center; gap:6px;"><i class="fas fa-brain text-purple-500"></i> Algoritma (AI) Yorumu</div>
+                    ${aiExplanation}
+                </div>
+            `;
+            
             document.getElementById('reportAnalyticsWrap').style.display = 'flex';
         }
     } catch (e) {
@@ -2293,7 +2242,7 @@ function exportToCSV() {
     var filename = `Hedef_AVM_Rapor_${data.startDate.replace(/\s+/g, '_')}-${data.endDate.replace(/\s+/g, '_')}.csv`;
 
     var csv = [];
-    csv.push('\uFEFF');
+    csv.push('\uFEFF'); 
     
     csv.push('HEDEF AVM SATIŞ & PERFORMANS RAPORU');
     csv.push(`Dönem:;"${data.period}"`);
@@ -2352,21 +2301,75 @@ function applySmartParsing() {
         .replace(/^\d{2}:\d{2}$/gm, "") 
         .replace(/Yapay zeka temsilcin yanıt verecek/gi, "")
         .replace(/Bu sohbeti yapay zeka temsilcinden devraldın/gi, "")
+        .replace(/Yapay zeka yanıtını iyileştir/gi, "")
+        .replace(/En Son Uygulamayı Kullan/gi, "")
+        .replace(/Bu türdeki mesajları görmek için Instagram uygulamasının en son sürümünü kullan/gi, "")
+        .replace(/Hedef Alışveriş\s*gönderdi/gi, "")
+        .replace(/Müşteri detayları algılandı.*?Kaydet/gi, "")
+        .replace(/satışımız yoktur/gi, "")
+        .replace(/satısımız yoktur/gi, "")
+        .replace(/mağazalarımız mevcuttur/gi, "")
+        .replace(/İsim Soyisim Telefon iletirseniz/gi, "")
+        .replace(/Yapay zeka aracın bu sohbeti sana aktardı/gi, "")
+        .replace(/Önerilen yanıt.*?Eklemek için tıkla/gi, "")
+        .replace(/bir reklama yanıt verdi/gi, "")
+        .replace(/il,?\s*ilçe\s*ve\s*telefon\s*numarası\s*belirtirseniz/gi, "")
+        .replace(/telefon\s*numarası\s*belirtirseniz/gi, "")
+        .replace(/irtibat\s*numaranızı\s*iletirseniz.*?fiyatlarını\s*iletsin/gi, "")
+        .replace(/size bir mesaj gönderdi/gi, "")
+        .replace(/Bu mesajı yanıtlamak için dokun/gi, "")
+        .replace(/https?:\/\/[^\s]+/gi, "")
+        .replace(/www\.[^\s]+/gi, "")
+        .replace(/Ürün Hakkında bilgi için linke tıklayıp formu doldurabilirsiniz/gi, "")
+        .replace(/Sizleri Arayalım/gi, "")
+        .replace(/Elden Taksit Başvurusu/gi, "")
+        .replace(/Hedef AVM,\s*elden taksit alışveriş ve senetle alışveriş imkanı sunan.*/gi, "")
+        .replace(/merhabalar,\s*öncelikle ürünler ve fiyatlar için mağazalarımız bilgi vermektedir/gi, "")
+        .replace(/merhabalar, sizlere nasıl yardımcı olabiliriz\?/gi, "")
+        .replace(/hangi il ve ilçedeydiniz\? isim\/soyisminiz nedir\?/gi, "")
+        .replace(/mağazamız sizlere istediğiniz ürünün hem modellerini hem de elden taksitli fiyatlarını iletsin/gi, "")
+        .replace(/bizleri beklerken size özel alışveriş limitinizi öğrenmek için aşağıdaki bağlantıya tıklayarak formu doldurabilirsiniz/gi, "")
+        .replace(/mesajlarınıza sırasıyla dönüş yapılmaktadır/gi, "")
+        .replace(/bu sohbet, bilgi almak için mesaj atın reklamına verilmiş bir yanıt içeriyor/gi, "")
+        .replace(/reklamı gör/gi, "")
+        .replace(/This app was built in Streamlit! Check it out and visit/gi, "")
+        .replace(/HEDEF AVM LİMİT ÖĞREN/gi, "")
+        .replace(/fb\.com/gi, "")
+        .replace(/Hangi il ve ilçedeydiniz\?/gi, "")
+        .replace(/İrtibat numaranızı iletirseniz en yakın mağazamız sizlere istediğiniz ürünün hem modellerini hem de elden taksitli fiyatlarını iletsin\.?/gi, "")
+        .replace(/Volta EV1 fiyatları ve elden taksit seçenekleri hakkında mağazalarımız bilgi vermektedir efendim\.?/gi, "")
+        .replace(/İstanbul, Kocaeli, Bursa ve Düzce bölgelerinde şubelerimiz bulunuyor\.?/gi, "")
+        .replace(/İl, ilçe ve telefon numarası belirtirseniz mağazamız sizleri arayıp bilgi versinler\.?/gi, "")
+        .replace(/Ürün modelleri ve elden taksitli fiyatlar hakkında mağazalarımız bilgi vermektedir efendim\.?/gi, "")
+        .replace(/Apple marka ürünler \(iPhone, iPad vb\.\) stoklarımızda bulunmamaktadır\.?/gi, "")
+        .replace(/İstanbul, Kocaeli ve Bursa illerinde hizmet vermekteyiz; il ilçe ve telefon numarası belirtirseniz mağazamız sizleri arayıp detaylı bilgi versinler\.?/gi, "")
+        .replace(/[a-zA-ZçğıöşüÇĞIÖŞÜ\s]+ Avrupa yakasında olduğu için bu bölgede elden taksit imkanımız bulunmuyor\.?/gi, "")
+        .replace(/Dilerseniz en yakın şubemiz olan Anadolu yakasındaki [a-zA-ZçğıöşüÇĞIÖŞÜ\s]+'nden veya www\.hedefavm\.com sitemizden online olarak alışveriş yapabilirsiniz\.?/gi, "")
+        .replace(/İlgilendiğiniz ürün için telefon numaranızı belirtirseniz ekibimiz sizi arayıp bilgi versinler\.?/gi, "")
+        .replace(/Merhaba [a-zA-ZçğıöşüÇĞIÖŞÜ\s]+! Lütfen size nasıl yardımcı olabileceğimizi bize bildirin\.?/gi, "")
+        .replace(/Yardımcı olalım efendim[,\s]*hangi il ve ilçedesiniz\?/gi, "")
         .trim();
 
     var flatText = cleanText.replace(/\n/g, ' ');
     var isWebForm = rawText.includes("Talep #") || rawText.includes("TC Kimlik") || flatText.includes("Ad Soyad");
-    var isFacebook = rawText.includes("Bu konuşmayı ata") || rawText.includes("bir reklama yanıt verdi") || rawText.includes("Yapay zeka temsilcin");
+    var isFacebook = rawText.includes("Bu konuşmayı ata") || rawText.includes("bir reklama yanıt verdi") || rawText.includes("Yapay zeka temsilcin") || rawText.includes("Reklamı gör") || rawText.includes("fb.com") || rawText.toLowerCase().includes("reklama yanıt");
 
     var lines = cleanText.split('\n').map(l => l.trim()).filter(l => l.length > 0);
     if(lines.length === 0) return;
 
     var name = "";
     var phone = "";
-    var media = isFacebook ? "Facebook" : isWebForm ? "Web Sitesi Form" : ""; 
+    var branch = "";
+    var media = isFacebook ? "Facebook" : ""; 
+    var category = "";
+    var product = "";
 
-    var phoneMatch = cleanText.match(/(?:0|90|\+90)?\s*5\d{2}\s*\d{3}\s*\d{2}\s*\d{2}/);
-    if (!phoneMatch) phoneMatch = flatText.match(/(?:0|90|\+90)?5\d{9}/);
+    if(isWebForm) media = "Web Sitesi Form";
+
+    var phoneMatch = cleanText.match(/(?:0|90|\+90)?\s*5\d{2}[-\s]?\d{3}[-\s]?\d{2}[-\s]?\d{2}/);
+    if (!phoneMatch) {
+        phoneMatch = flatText.match(/(?:0|90|\+90)?5\d{9}/);
+    }
     
     if (phoneMatch) {
         phone = phoneMatch[0].replace(/\D/g, '');
@@ -2374,82 +2377,342 @@ function applySmartParsing() {
         else if(phone.length === 11 && phone.startsWith('0')) phone = phone.substring(1);
     }
 
-    if (phone) {
-        flatText = flatText.replace(phoneMatch[0], "");
-    }
-
     if (isWebForm) {
         var nameMatch = flatText.match(/Ad Soyad\s*([^\d]+?)\s*Telefon/i);
-        if (nameMatch && nameMatch[1]) name = nameMatch[1].trim();
+        if (nameMatch && nameMatch[1]) {
+            name = nameMatch[1].trim();
+        } else {
+            var talepMatch = rawText.match(/Talep #\d+\s*[—\-]\s*(.*)/i);
+            if (talepMatch && talepMatch[1]) name = talepMatch[1].trim();
+        }
     } else {
-        for(let i=0; i<Math.min(lines.length, 6); i++) {
-            let line = lines[i];
-            if(line.match(/[a-zA-ZçğıöşüÇĞIÖŞÜ]/) && line.length > 2 && line.length < 35) {
-                name = line;
+        var nameDeclMatch = flatText.match(/(?:adım|ismim|ben)\s+([a-zA-ZçğıöşüÇĞIÖŞÜ\s]{3,20})(?:\s+ben)?/i);
+        if(nameDeclMatch && !nameDeclMatch[0].toLowerCase().includes('ben')) {
+             var benMatch = flatText.match(/([a-zA-ZçğıöşüÇĞIÖŞÜ\s]{3,20})\s+ben\b/i);
+             if(benMatch) name = benMatch[1].trim();
+        } else if (nameDeclMatch) {
+             name = nameDeclMatch[1].trim();
+        }
+
+        if (!name) {
+            for(let i=0; i<Math.min(lines.length, 6); i++) {
+                let line = lines[i].replace(/^merhaba(?:lar)?\s*/i, '').replace(/^selam(?:lar)?\s*/i, '').replace(/^iyi (?:günler|akşamlar)\s*/i, '').trim();
+                if(line.match(/[a-zA-ZçğıöşüÇĞIÖŞÜ]/) && !line.match(/^[\d\s]+$/) && line.length > 2 && line.length < 35 && !line.includes("http") && !line.includes(".com") && !line.toLowerCase().includes("mesaj") && !line.toLowerCase().includes("reklam") && !line.toLowerCase().includes("temsilci") && !line.toLowerCase().includes("reklama yanıt")) {
+                    name = line;
+                    break;
+                }
+            }
+        }
+    }
+    if (name) {
+         name = name.split(/\s+/).map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ');
+    }
+
+    const branchMap = {
+        "inegöl": "İnegöl Şubesi", "inegol": "İnegöl Şubesi", "bursa": "İnegöl Şubesi", "gemlik": "İnegöl Şubesi",
+        "paşabahçe": "Paşabahçe Şubesi", "pasabahce": "Paşabahçe Şubesi", "çubuklu": "Paşabahçe Şubesi",
+        "çekmeköy": "Çekmeköy Şubesi", "cekmekoy": "Çekmeköy Şubesi", "şile": "Çekmeköy Şubesi", "sile": "Çekmeköy Şubesi", "kumbaba": "Çekmeköy Şubesi", "taşdelen": "Çekmeköy Şubesi", "tasdelen": "Çekmeköy Şubesi", "madenler": "Çekmeköy Şubesi", "sancaktepe": "Çekmeköy Şubesi",
+        "izmit": "İzmit Şubesi", "i̇zmit": "İzmit Şubesi", "kocaeli": "İzmit Şubesi", "kartepe": "İzmit Şubesi", "yahyakaptan": "İzmit Şubesi",
+        "gölcük": "Gölcük Şubesi", "golcuk": "Gölcük Şubesi", "başiskele": "Gölcük Şubesi", "karamürsel": "Gölcük Şubesi", "değirmendere": "Gölcük Şubesi",
+        "körfez": "Körfez Şubesi", "korfez": "Körfez Şubesi", "yarımca": "Körfez Şubesi", "tütünçiftlik": "Körfez Şubesi",
+        "derince": "Derince Şubesi",
+        "sultanbeyli": "Sultanbeyli Şubesi", "pendik": "Sultanbeyli Şubesi", "kurtköy": "Sultanbeyli Şubesi",
+        "yenidoğan": "Yenidoğan Şubesi", "yenidogan": "Yenidoğan Şubesi", "sarıgazi": "Yenidoğan Şubesi",
+        "kavacık": "Kavacık Şubesi", "kavacik": "Kavacık Şubesi", "beykoz": "Kavacık Şubesi", "göksu": "Kavacık Şubesi",
+        "çayırova": "Çayırova Şubesi", "cayirova": "Çayırova Şubesi", "darıca": "Çayırova Şubesi", "şekerpınar": "Çayırova Şubesi",
+        "gebze": "Gebze Şubesi", "dilovası": "Gebze Şubesi",
+        "düzce": "Düzce Şubesi", "duzce": "Düzce Şubesi", "hendek": "Düzce Şubesi", "gölyaka": "Düzce Şubesi", "akçakoca": "Düzce Şubesi"
+    };
+    
+    let lowerClean = flatText.toLocaleLowerCase('tr-TR');
+    let lowerNFKC = rawText.toLocaleLowerCase('tr-TR'); 
+    
+    if (isWebForm) {
+        let bm = lowerClean.match(/Mağaza\s*([a-zçğıöşü\s]+?)\s*\(\d+\)/i);
+        if(!bm) bm = lowerClean.match(/Mağaza\s*([a-zçğıöşü]+)/i);
+        if (bm && bm[1]) {
+            let bn = bm[1].trim();
+            for (let key in branchMap) { if (bn.includes(key)) branch = branchMap[key]; }
+        }
+    }
+    if(!branch) {
+        let searchSpace = lowerClean + " " + lowerNFKC;
+        for (let key in branchMap) {
+            let regex = new RegExp("\\b" + key + "\\b", "i");
+            if (regex.test(searchSpace)) { branch = branchMap[key]; break; }
+        }
+        if(!branch) {
+           for (let key in branchMap) {
+               if (searchSpace.includes(key)) { branch = branchMap[key]; break; }
+           }
+        }
+    }
+
+    let isCampaignMatch = false;
+    if (lowerClean.includes('şehrin ritmine elektrikli') || lowerClean.includes('volta motor') || lowerClean.includes('volta ev1') || lowerClean.includes('elektrikli motorlu bisiklet')) {
+        product = "VOLTA ELEKTRİKLİ BİSİKLET / ARAÇ";
+        category = "Elektrikli-Benzinli Araç";
+        isCampaignMatch = true;
+    } else if (lowerClean.includes('playstation') || lowerClean.includes('playstatıon') || lowerClean.includes('ps5') || lowerClean.includes('sony eurasia')) {
+        product = "PLAYSTATION 5";
+        category = "Elektronik";
+        isCampaignMatch = true;
+    } else if (lowerClean.includes('taksit limit') || lowerClean.includes('limitini öğren') || lowerClean.includes('limit sorgula') || lowerClean.includes('limitogren')) {
+        product = "LİMİT SORGULAMA";
+        category = "LİMİT ÖĞREN";
+        isCampaignMatch = true;
+    }
+
+    if (!isCampaignMatch) {
+        let explicitProduct = "";
+        
+        if (isWebForm) {
+            let formProdMatch = flatText.match(/(?:Tutar|Fiyat)\s*(.*?)(?=\s*(?:Tutar|Fiyat|$))/i);
+            if(formProdMatch && formProdMatch[1]) {
+                explicitProduct = formProdMatch[1].trim();
+            }
+        }
+        
+        if (!explicitProduct) {
+            let formProdMatch = flatText.match(/(?:Ürün(?:SKU)?AdetTaksitTutar|Ürün Adı|İlgilendiği Ürün|Sepet|Model)\s*[:\-]?\s*(.*?)(?=\s*(?:Tutar|Fiyat|$))/i);
+            if (!formProdMatch) {
+                formProdMatch = flatText.match(/(?:Ürün)\s*[:\-]\s*(.*?)(?=\s*(?:Tutar|Fiyat|$))/i);
+            }
+            if (formProdMatch && formProdMatch[1]) {
+                explicitProduct = formProdMatch[1].replace(/^[-\s:]+/g, '').trim();
+            }
+        }
+
+        if (!explicitProduct) {
+            let lineProdMatch = rawText.match(/(?:Ürün Adı|İlgilendiği Ürün)\s*[:\-]?\s*([^\n]+)/i);
+            if (!lineProdMatch) lineProdMatch = rawText.match(/(?:Ürün)\s*[:\-]\s*([^\n]+)/i);
+            if (lineProdMatch) explicitProduct = lineProdMatch[1].trim();
+        }
+        
+        if (explicitProduct) {
+            product = explicitProduct.replace(/^(?:Adet|Taksit|Tutar|SKU|Ürün|Sepet|\s)+/gi, '').trim();
+            product = product.replace(/^(?:AdetTaksitTutar)\s*/gi, '').trim(); 
+            let bcMatch = product.match(/(.*?)\s+\d{8,}$/);
+            if (bcMatch) product = bcMatch[1].trim();
+        }
+
+        const keywordToCat = {
+            "çamaşır makinesi": "Beyaz Eşya", "bulaşık makinesi": "Beyaz Eşya", "kurutma makinesi": "Beyaz Eşya", "derin dondurucu": "Beyaz Eşya", "ankastre set": "Beyaz Eşya", "ankastre": "Beyaz Eşya", "buzdolabı": "Beyaz Eşya", "fırın": "Beyaz Eşya", "ocak": "Beyaz Eşya", "davlumbaz": "Beyaz Eşya", "aspiratör": "Beyaz Eşya", "klima": "Beyaz Eşya", "kombi": "Beyaz Eşya", "su sebili": "Beyaz Eşya", "uğur": "Beyaz Eşya", "arçelik": "Beyaz Eşya", "beko": "Beyaz Eşya", "vestel": "Beyaz Eşya", "profilo": "Beyaz Eşya", "altus": "Beyaz Eşya", "bosch": "Beyaz Eşya", "siemens": "Beyaz Eşya",
+            "elektrikli bisiklet": "Elektrikli-Benzinli Araç", "elektrikli motor": "Elektrikli-Benzinli Araç", "motorlu bisiklet": "Elektrikli-Benzinli Araç", "üç tekerlekli": "Elektrikli-Benzinli Araç", "benzinli motor": "Elektrikli-Benzinli Araç", "volta": "Elektrikli-Benzinli Araç", "scooter": "Elektrikli-Benzinli Araç", "scoter": "Elektrikli-Benzinli Araç", "vsm": "Elektrikli-Benzinli Araç", "bisiklet": "Elektrikli-Benzinli Araç", "moped": "Elektrikli-Benzinli Araç", "atv": "Elektrikli-Benzinli Araç", "kuba": "Elektrikli-Benzinli Araç", "rks": "Elektrikli-Benzinli Araç", "arora": "Elektrikli-Benzinli Araç", "yuki": "Elektrikli-Benzinli Araç", "kanuni": "Elektrikli-Benzinli Araç", "elektrikli araba": "Elektrikli-Benzinli Araç", "ev1": "Elektrikli-Benzinli Araç",
+            "cep telefonu": "Elektronik", "telefon varmı": "Elektronik", "telefon fiyat": "Elektronik", "telefon almak": "Elektronik", "akıllı saat": "Elektronik", "playstation": "Elektronik", "playstatıon": "Elektronik", "oyun konsolu": "Elektronik", "smart tv": "Elektronik", "sony": "Elektronik", "televizyon": "Elektronik", "laptop": "Elektronik", "bilgisayar": "Elektronik", "tablet": "Elektronik", "kulaklık": "Elektronik", "ps5": "Elektronik", "ps4": "Elektronik", "apple": "Elektronik", "iphone": "Elektronik", "samsung": "Elektronik", "xiaomi": "Elektronik", "redmi": "Elektronik", "huawei": "Elektronik", "oled": "Elektronik", "qled": "Elektronik", "hoparlör": "Elektronik", "soundbar": "Elektronik", "watch": "Elektronik", "monitör": "Elektronik", "kasa": "Elektronik", "nintendo": "Elektronik", "tv": "Elektronik",
+            "yatak odası": "Mobilya", "yemek odası": "Mobilya", "düğün paketi": "Mobilya", "oturma grubu": "Mobilya", "tv ünitesi": "Mobilya", "köşe takımı": "Mobilya", "koltuk takımı": "Mobilya", "çalışma masası": "Mobilya", "oyuncu koltuğu": "Mobilya", "orta sehpa": "Mobilya", "zigon sehpa": "Mobilya", "yemek masası": "Mobilya", "mutfak masası": "Mobilya", "kitaplık": "Mobilya", "telefonluk": "Mobilya", "koltuk": "Mobilya", "kanepe": "Mobilya", "gardırop": "Mobilya", "dolap": "Mobilya", "masa": "Mobilya", "sandalye": "Mobilya", "berjer": "Mobilya", "şifonyer": "Mobilya", "komodin": "Mobilya", "sehpa": "Mobilya", "zigon": "Mobilya", "puf": "Mobilya", "konsol": "Mobilya", "vitrin": "Mobilya", "portmanto": "Mobilya", "çekyat": "Mobilya", "vestiyer": "Mobilya", "ayakkabılık": "Mobilya", "makyaj masası": "Mobilya",
+            "baza yatak başlık": "Baza+Yatak+Başlık", "baza": "Baza+Yatak+Başlık", "yatak": "Baza+Yatak+Başlık", "başlık": "Baza+Yatak+Başlık", "ranza": "Baza+Yatak+Başlık", "karyola": "Baza+Yatak+Başlık",
+            "bebek arabası": "Bebek ve Çocuk", "mama sandalyesi": "Bebek ve Çocuk", "çocuk odası": "Bebek ve Çocuk", "genç odası": "Bebek ve Çocuk", "park yatak": "Bebek ve Çocuk", "oto koltuğu": "Bebek ve Çocuk", "akülü": "Bebek ve Çocuk", "beşik": "Bebek ve Çocuk",
+            "robot süpürge": "Elektrikli Ev Aletleri", "şarjlı süpürge": "Elektrikli Ev Aletleri", "dik süpürge": "Elektrikli Ev Aletleri", "elektrikli süpürge": "Elektrikli Ev Aletleri", "çay makinesi": "Elektrikli Ev Aletleri", "tost makinesi": "Elektrikli Ev Aletleri", "saç kurutma": "Elektrikli Ev Aletleri", "su ısıtıcı": "Elektrikli Ev Aletleri", "kahve makinesi": "Elektrikli Ev Aletleri", "espresso": "Elektrikli Ev Aletleri", "süpürge": "Elektrikli Ev Aletleri", "roborock": "Elektrikli Ev Aletleri", "ütü": "Elektrikli Ev Aletleri", "airfryer": "Elektrikli Ev Aletleri", "fritöz": "Elektrikli Ev Aletleri", "blender": "Elektrikli Ev Aletleri", "çaycı": "Elektrikli Ev Aletleri", "dyson": "Elektrikli Ev Aletleri", "philips": "Elektrikli Ev Aletleri", "phılıps": "Elektrikli Ev Aletleri", "mikser": "Elektrikli Ev Aletleri", "rondo": "Elektrikli Ev Aletleri", "epilatör": "Elektrikli Ev Aletleri", "tıraş": "Elektrikli Ev Aletleri", "vantilatör": "Elektrikli Ev Aletleri", "kettle": "Elektrikli Ev Aletleri", "braun": "Elektrikli Ev Aletleri", "tefal": "Elektrikli Ev Aletleri", "arzum": "Elektrikli Ev Aletleri", "fakir": "Elektrikli Ev Aletleri",
+            "yemek takımı": "Züccaciye", "kahvaltı takımı": "Züccaciye", "çeyiz seti": "Züccaciye", "çatal bıçak": "Züccaciye", "tencere takımı": "Züccaciye", "çay takımı": "Züccaciye", "su takımı": "Züccaciye", "tencere": "Züccaciye", "tava": "Züccaciye", "bardak": "Züccaciye", "çatal": "Züccaciye", "kaşık": "Züccaciye", "bıçak": "Züccaciye", "tabak": "Züccaciye", "termos": "Züccaciye", "karaca": "Züccaciye", "emsan": "Züccaciye", "korkmaz": "Züccaciye", "schafer": "Züccaciye", "düdüklü": "Züccaciye", "bernardo": "Züccaciye", "fincan": "Züccaciye", "kadeh": "Züccaciye", "güral": "Züccaciye", "kütahya porselen": "Züccaciye",
+            "duvar saati": "Ev Dekorasyonu", "tablo": "Ev Dekorasyonu", "ayna": "Ev Dekorasyonu", "vazo": "Ev Dekorasyonu", "biblo": "Ev Dekorasyonu", "avize": "Ev Dekorasyonu", "aydınlatma": "Ev Dekorasyonu", "lambader": "Ev Dekorasyonu", "abajur": "Ev Dekorasyonu", "lamba": "Ev Dekorasyonu", "boy aynası": "Ev Dekorasyonu",
+            "halı": "Halı", "yolluk": "Halı", "kilim": "Halı", "paspas": "Halı", "merinos": "Halı", "padişah": "Halı", "dinarsu": "Halı",
+            "cüzdan": "Kişisel Aksesuar", "çanta": "Kişisel Aksesuar", "parfüm": "Kişisel Aksesuar", "saat": "Kişisel Aksesuar", "gözlük": "Kişisel Aksesuar", "takı": "Kişisel Aksesuar", "kolye": "Kişisel Aksesuar", "valiz": "Kişisel Aksesuar", "bavul": "Kişisel Aksesuar",
+            "uyku seti": "Tekstil", "yatak örtüsü": "Tekstil", "nevresim": "Tekstil", "yorgan": "Tekstil", "yastık": "Tekstil", "battaniye": "Tekstil", "pike": "Tekstil", "havlu": "Tekstil", "bornoz": "Tekstil", "perde": "Tekstil", "tül": "Tekstil", "çarşaf": "Tekstil", "alez": "Tekstil",
+            "spor ayakkabı": "Ayakkabı", "ayakkabı": "Ayakkabı", "bot": "Ayakkabı", "çizme": "Ayakkabı", "terlik": "Ayakkabı", "sneaker": "Ayakkabı", "nike": "Ayakkabı", "adidas": "Ayakkabı", "puma": "Ayakkabı", "kinetix": "Ayakkabı", "lumberjack": "Ayakkabı", "skechers": "Ayakkabı",
+            "limit sorgulama": "LİMİT ÖĞREN", "taksit limiti": "LİMİT ÖĞREN", "limit öğrenme": "LİMİT ÖĞREN", "limit": "LİMİT ÖĞREN", "kredi": "LİMİT ÖĞREN"
+        };
+
+        let searchSpace = explicitProduct ? explicitProduct.toLocaleLowerCase('tr-TR') : lowerClean;
+        let sortedKeys = Object.keys(keywordToCat).sort((a, b) => b.length - a.length); 
+        let matchedKeyword = "";
+        
+        for(let i=0; i<sortedKeys.length; i++) {
+            let key = sortedKeys[i];
+            if(searchSpace.includes(key)) {
+                category = keywordToCat[key];
+                matchedKeyword = key;
                 break;
+            }
+        }
+
+        if (!product && matchedKeyword) {
+            let escapedKey = matchedKeyword.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+            let regex = new RegExp(`(?:[a-zA-ZçğıöşüÇĞIÖŞÜ0-9]+\\s+){0,2}${escapedKey}(?:\\s+[a-zA-ZçğıöşüÇĞIÖŞÜ0-9]+){0,1}`, 'gi');
+            let ctxMatch = searchSpace.match(regex);
+            
+            if (ctxMatch) {
+                let ctx = ctxMatch[0];
+                let nameParts = name ? name.toLocaleLowerCase('tr-TR').split(/\s+/) : [];
+                let stopWords = ['fiyat', 'fiyatı', 'fiyatları', 'fiyatlar', 'nedir', 'ne', 'kadar', 'merhaba', 'merhabalar', 'slm', 'selam', 'iyi', 'günler', 'akşamlar', 'istiyorum', 'bilgi', 'almak', 'alabilir', 'miyim', 'yardımcı', 'olur', 'musunuz', 'var', 'mı', 'yok', 'mu', 'bana', 'sipariş', 'vermek', 'için', 'bunun', 'şunun', 'ilgileniyorum', 'bu', 'şu', 'o', 'satışınız', 'varmı', 'varmıydı', 'var mıydı', 'sizde', 'bizde', 'lütfen', 'efendim', 'nasıl', 'olabiliriz', 'bize', 'bildirin', 'hangi'].concat(nameParts);
+                
+                let words = ctx.split(/\s+/);
+                let filtered = words.filter(w => !stopWords.includes(w.toLocaleLowerCase('tr-TR').replace(/[.,?!]/g, '')));
+                product = filtered.join(' ').toUpperCase();
+            }
+            
+            if (!product || product.length < 3) product = matchedKeyword.toUpperCase();
+            if (product === "TELEFON" || product === "CEP TELEFONU VARMI" || product.includes("TELEFON SİZDE")) product = "CEP TELEFONU";
+        }
+
+        if (product) {
+            let pTest = product.toLowerCase();
+            if (pTest.includes("satın alabilir miyim") || pTest.includes("merhaba") || pTest.includes("öncelikle") || pTest.includes("hedefavm.com") || pTest.includes("https") || product.length > 50) {
+                product = "";
+                category = ""; 
             }
         }
     }
 
-    // Akıllı çözümleme esnasında veritabanındaki mükerrer numarayı kontrol et
+    if (!category) category = "GENEL ÜRÜN BİLGİSİ";
+    if (!product) {
+        if (category === "LİMİT ÖĞREN") product = "LİMİT SORGULAMA";
+        else product = "GENEL ÜRÜN BİLGİSİ";
+    }
+
     if (phone) {
         var compContact = getCompareNum(phone);
-        var existing = allRecordsData.find(function(r) {
+        if (compContact.length >= 7) {
+            var exists = allRecordsData.find(function(r){ return getCompareNum(r.contact) === compContact; });
+            if(exists) { 
+                var isSale = isRecordSale(exists);
+                var statusText = isSale ? 'Satış Gerçekleşti (₺' + new Intl.NumberFormat('tr-TR').format(parseTurkishFloat(exists.amount)) + ')' : 'Müşteri Kaydı / Yönlendirme';
+                var customerNoText = exists.customerNo ? '\n• Müşteri No: ' + exists.customerNo : '';
+                
+                var msg = 'Çözümlenen numaraya (' + phone + ') ait kayıt bulunmaktadır.\n\n' +
+                          '• Müşteri Adı: ' + (exists.name || 'Belirtilmemiş') + customerNoText + '\n' +
+                          '• Şube: ' + (exists.branch || 'Belirtilmemiş') + '\n' +
+                          '• Ürün: ' + (exists.product || 'Belirtilmemiş') + '\n' +
+                          '• Durum: ' + statusText;
+
+                showDuplicatePrompt(
+                    'Mükerrer Müşteri Tespit Edildi!',
+                    msg,
+                    function onTamam() {
+                        document.getElementById('smartParserInput').value = "";
+                    },
+                    function onSatisEkle() {
+                        addInputRow();
+                        var rows = document.querySelectorAll('#inputContainer > .entry-card');
+                        var targetRow = rows[rows.length - 1];
+
+                        targetRow.querySelector('.inp-contact').value = phone;
+                        if (exists.name) targetRow.querySelector('.inp-name').value = exists.name;
+                        var cNo = targetRow.querySelector('.inp-customerno');
+                        if (cNo && exists.customerNo) cNo.value = exists.customerNo;
+
+                        if (exists.branch) {
+                            var selB = targetRow.querySelector('.inp-branch');
+                            for(var i=0; i<selB.options.length; i++) {
+                                if(selB.options[i].value === exists.branch) { selB.selectedIndex = i; break; }
+                            }
+                        }
+                        if (exists.media || media) {
+                            var selM = targetRow.querySelector('.inp-media');
+                            var mVal = exists.media || media;
+                            for(var j=0; j<selM.options.length; j++) {
+                                if(selM.options[j].value === mVal) { selM.selectedIndex = j; break; }
+                            }
+                        }
+                        if (exists.category) {
+                            var selC = targetRow.querySelector('.inp-category');
+                            for(var k=0; k<selC.options.length; k++) {
+                                if(selC.options[k].value === exists.category) { selC.selectedIndex = k; break; }
+                            }
+                        }
+                        if (exists.product) targetRow.querySelector('.inp-product').value = exists.product;
+
+                        document.getElementById('smartParserInput').value = "";
+                        var amountInp = targetRow.querySelector('.inp-amount');
+                        if (amountInp) {
+                            amountInp.focus();
+                            amountInp.style.boxShadow = '0 0 0 4px rgba(16, 185, 129, 0.35)';
+                            setTimeout(function() { amountInp.style.boxShadow = ''; }, 2500);
+                        }
+                    }
+                );
+                return; 
+            }
+        }
+    }
+
+    addInputRow();
+    var rows = document.querySelectorAll('#inputContainer > .entry-card');
+    var targetRow = rows[rows.length - 1];
+
+    if(name) targetRow.querySelector('.inp-name').value = name;
+    if(phone) targetRow.querySelector('.inp-contact').value = phone;
+    
+    if(branch) {
+        let selBranch = targetRow.querySelector('.inp-branch');
+        for(let i=0; i<selBranch.options.length; i++) {
+            if(selBranch.options[i].value === branch) { selBranch.selectedIndex = i; break; }
+        }
+    }
+    
+    if(media) {
+        let selMedia = targetRow.querySelector('.inp-media');
+        for(let i=0; i<selMedia.options.length; i++) {
+            if(selMedia.options[i].value === media) { selMedia.selectedIndex = i; break; }
+        }
+    }
+
+    if (category) {
+        let selCat = targetRow.querySelector('.inp-category');
+        for(let i=0; i<selCat.options.length; i++) {
+            if(selCat.options[i].value === category) { selCat.selectedIndex = i; break; }
+        }
+    }
+    
+    if(product) targetRow.querySelector('.inp-product').value = product;
+
+    document.getElementById('smartParserInput').value = "";
+    showToast('Metin başarıyla çözümlendi, lütfen eksik alanları doldurunuz.');
+}
+
+function checkDuplicatePhone(inputEl) {
+    var rawContact = inputEl.value;
+    var contact = rawContact.replace(/^0+/, ''); 
+    var compContact = getCompareNum(contact);
+
+    if (compContact.length >= 7) {
+        var exists = allRecordsData.find(function(r){
             return getCompareNum(r.contact) === compContact;
         });
-
-        if (existing) {
-            var isSale = isRecordSale(existing);
-            var statusText = isSale ? 'Satış Gerçekleşti (₺' + new Intl.NumberFormat('tr-TR').format(parseTurkishFloat(existing.amount)) + ')' : 'Müşteri Kaydı / Yönlendirme';
-            var customerNoText = existing.customerNo ? '\n• Müşteri No: ' + existing.customerNo : '';
+        
+        if(exists) {
+            var isSale = isRecordSale(exists);
+            var statusText = isSale ? 'Satış Gerçekleşti (₺' + new Intl.NumberFormat('tr-TR').format(parseTurkishFloat(exists.amount)) + ')' : 'Müşteri Kaydı / Yönlendirme';
+            var customerNoText = exists.customerNo ? '\n• Müşteri No: ' + exists.customerNo : '';
             
-            var msg = 'Çözümlenen telefon numarasına (' + phone + ') ait sistemde kayıt bulunmaktadır.\n\n' +
-                      '• Müşteri Adı: ' + (existing.name || 'Belirtilmemiş') + customerNoText + '\n' +
-                      '• Kayıtlı Olduğu Şube: ' + (existing.branch || 'Belirtilmemiş') + '\n' +
-                      '• Geliş Medyası: ' + (existing.media || 'Belirtilmemiş') + '\n' +
-                      '• İlgilendiği Kategori: ' + (existing.category || 'Belirtilmemiş') + '\n' +
-                      '• Ürün: ' + (existing.product || 'Belirtilmemiş') + '\n' +
-                      '• Mevcut Durum: ' + statusText + '\n\n' +
-                      'Eğer bu müşteriye yeni bir SATIŞ eklemek istiyorsanız "Satış Ekle" butonuna basarak tutarı girebilirsiniz.';
+            var msg = 'Girdiğiniz numaraya (' + rawContact + ') ait kayıt bulunmaktadır.\n\n' +
+                      '• Müşteri Adı: ' + (exists.name || 'Belirtilmemiş') + customerNoText + '\n' +
+                      '• Şube: ' + (exists.branch || 'Belirtilmemiş') + '\n' +
+                      '• Ürün: ' + (exists.product || 'Belirtilmemiş') + '\n' +
+                      '• Durum: ' + statusText;
 
             showDuplicatePrompt(
                 'Mükerrer Müşteri Tespit Edildi!',
                 msg,
                 function onTamam() {
-                    document.getElementById('smartParserInput').value = "";
+                    inputEl.value = '';
                 },
                 function onSatisEkle() {
-                    addInputRow();
-                    var rows = document.querySelectorAll('#inputContainer > .entry-card');
-                    var targetRow = rows[rows.length - 1];
-
-                    targetRow.querySelector('.inp-contact').value = phone;
-                    if (existing.name) targetRow.querySelector('.inp-name').value = existing.name;
+                    var targetRow = inputEl.closest('.entry-card');
+                    if (exists.name) targetRow.querySelector('.inp-name').value = exists.name;
                     var cNo = targetRow.querySelector('.inp-customerno');
-                    if (cNo && existing.customerNo) cNo.value = existing.customerNo;
+                    if (cNo && exists.customerNo) cNo.value = exists.customerNo;
 
-                    if (existing.branch) {
+                    if (exists.branch) {
                         var selB = targetRow.querySelector('.inp-branch');
                         for(var i=0; i<selB.options.length; i++) {
-                            if(selB.options[i].value === existing.branch) { selB.selectedIndex = i; break; }
+                            if(selB.options[i].value === exists.branch) { selB.selectedIndex = i; break; }
                         }
                     }
-                    if (existing.media || media) {
+                    if (exists.media) {
                         var selM = targetRow.querySelector('.inp-media');
-                        var mVal = existing.media || media;
                         for(var j=0; j<selM.options.length; j++) {
-                            if(selM.options[j].value === mVal) { selM.selectedIndex = j; break; }
+                            if(selM.options[j].value === exists.media) { selM.selectedIndex = j; break; }
                         }
                     }
-                    if (existing.category) {
+                    if (exists.category) {
                         var selC = targetRow.querySelector('.inp-category');
                         for(var k=0; k<selC.options.length; k++) {
-                            if(selC.options[k].value === existing.category) { selC.selectedIndex = k; break; }
+                            if(selC.options[k].value === exists.category) { selC.selectedIndex = k; break; }
                         }
                     }
-                    if (existing.product) targetRow.querySelector('.inp-product').value = existing.product;
+                    if (exists.product) targetRow.querySelector('.inp-product').value = exists.product;
 
-                    document.getElementById('smartParserInput').value = "";
                     var amountInp = targetRow.querySelector('.inp-amount');
                     if (amountInp) {
                         amountInp.focus();
@@ -2460,23 +2723,140 @@ function applySmartParsing() {
             );
             return;
         }
-    }
 
-    addInputRow();
-    var rows = document.querySelectorAll('#inputContainer > .entry-card');
-    var targetRow = rows[rows.length - 1];
-
-    if(name) targetRow.querySelector('.inp-name').value = name;
-    if(phone) targetRow.querySelector('.inp-contact').value = phone;
-    if(media) {
-        let selMedia = targetRow.querySelector('.inp-media');
-        for(let i=0; i<selMedia.options.length; i++) {
-            if(selMedia.options[i].value === media) { selMedia.selectedIndex = i; break; }
+        var allContacts = document.querySelectorAll('.inp-contact');
+        var matchCount = 0;
+        allContacts.forEach(function(el) {
+            var loopContact = el.value.replace(/^0+/, '');
+            if (getCompareNum(loopContact) === compContact) matchCount++;
+        });
+        if (matchCount > 1) {
+            showWarning('Spam Engeli', 'Bu numarayı aynı formda birden fazla kez girdiniz!');
+            inputEl.value = ''; 
+            inputEl.closest('.entry-card').classList.add('error');
+            setTimeout(() => inputEl.closest('.entry-card').classList.remove('error'), 600);
         }
     }
+}
 
-    document.getElementById('smartParserInput').value = "";
-    showToast('Metin başarıyla çözümlendi.');
+function addInputRow(){
+  var c=document.getElementById('inputContainer');
+  if(!c) return;
+  var d=document.createElement('div');d.className='entry-card';
+  var bOpts='<option value="" disabled selected>Seçiniz...</option>'+BRANCHES.map(function(b){return '<option value="'+b+'">'+b+'</option>';}).join('');
+  d.innerHTML='<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:1rem;margin-bottom:1rem">'
+    +'<div><label class="inp-label">Tarih & Saat</label><input type="datetime-local" class="inp" value="'+getTodayDT()+'"></div>'
+    +'<div><label class="inp-label" style="color:var(--sys-blue)">Şube <span style="color:var(--sys-red)">*</span></label><select class="inp inp-branch">'+bOpts+'</select></div>'
+    +'<div><label class="inp-label" style="color:var(--sys-blue)">Müşteri Adı Soyadı <span style="color:var(--sys-red)">*</span></label><input type="text" class="inp inp-name" placeholder="Örn: Ahmet Yılmaz"></div>'
+    +'<div><label class="inp-label">İletişim Numarası</label><input type="text" class="inp inp-contact" placeholder="5XX..." oninput="if(this.value.length>=7) checkDuplicatePhone(this)"></div>'
+    +'<div><label class="inp-label">Müşteri No (F Sütunu)</label><input type="text" class="inp inp-customerno" placeholder="Opsiyonel"></div>'
+    +'<div><label class="inp-label" style="color:var(--sys-blue)">Geliş Medyası <span style="color:var(--sys-red)">*</span></label><select class="inp inp-media"><option value="" disabled selected>Seçiniz...</option><option value="Instagram">Instagram</option><option value="Whatsapp">Whatsapp</option><option value="Facebook">Facebook</option><option value="Çağrı">Çağrı</option><option value="Web Sitesi Form">Web Sitesi Form</option><option value="SMS LİNK">SMS LİNK</option></select></div>'
+    +'</div>'
+    +'<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:1rem;align-items:end; background:var(--surface2); padding:1rem; border-radius:12px;">'
+    +'<div><label class="inp-label">İlgilendiği Kategori</label><select class="inp inp-category"><option value="Mobilya">Mobilya</option><option value="Baza+Yatak+Başlık">Baza+Yatak+Başlık</option><option value="Bebek ve Çocuk">Bebek ve Çocuk</option><option value="Beyaz Eşya">Beyaz Eşya</option><option value="Elektrikli Ev Aletleri">Elektrikli Ev Aletleri</option><option value="Elektrikli-Benzinli Araç">Elektrikli-Benzinli Araç</option><option value="Elektronik">Elektronik</option><option value="Ev Dekorasyonu">Ev Dekorasyonu</option><option value="Halı">Halı</option><option value="Kişisel Aksesuar">Kişisel Aksesuar</option><option value="Mobilya Aksesuarı">Mobilya Aksesuarı</option><option value="Tekstil">Tekstil</option><option value="Züccaciye">Züccaciye</option><option value="Ayakkabı">Ayakkabı</option><option value="LİMİT ÖĞREN">LİMİT ÖĞREN</option><option value="GENEL ÜRÜN BİLGİSİ" selected>GENEL ÜRÜN BİLGİSİ</option></select></div>'
+    +'<div><label class="inp-label">Ürün Adı / Modeli</label><input type="text" class="inp inp-product" placeholder="Örn: L Koltuk"></div>'
+    +'<div style="display:flex;gap:.75rem;align-items:flex-end"><div style="flex:1"><label class="inp-label">Tutar (TL - Opsiyonel)</label><input type="number" class="inp inp-amount" placeholder="Örn: 15000" min="0" step="any"></div>'
+    +'<button onclick="this.closest(\'.entry-card\').remove()" class="btn btn-icon" style="flex-shrink:0;color:var(--sys-red);" title="Sil"><i class="fas fa-trash-alt"></i></button></div>'
+    +'</div>';
+  c.appendChild(d);
+}
+
+async function submitAllRows(){
+  var rows=document.querySelectorAll('#inputContainer > .entry-card');
+  var data=[];
+  var hasEmptyError=false;
+  var currentSubmissions=[];
+
+  for(var i=0; i<rows.length; i++){
+    var row = rows[i];
+    var branch=row.querySelector('.inp-branch').value;
+    var name=row.querySelector('.inp-name').value.trim();
+    var media=row.querySelector('.inp-media').value;
+    var rawContact=row.querySelector('.inp-contact').value;
+    var customerNoInp=row.querySelector('.inp-customerno');
+    var customerNoVal=customerNoInp ? customerNoInp.value.trim() : '';
+    var dv=row.querySelector('input[type="datetime-local"]').value;
+    var amountVal=row.querySelector('.inp-amount') ? row.querySelector('.inp-amount').value : '';
+
+    row.classList.toggle('error',!branch||!name||!media);
+    if(!branch||!name||!media){hasEmptyError=true; continue;}
+    
+    var contact = rawContact.replace(/^0+/, '');
+    var compContact = getCompareNum(contact);
+
+    // Mükerrer SATIŞ kontrolü (Tutar girildiyse)
+    if (amountVal && compContact.length >= 7) {
+        var isSaleDuplicate = false;
+        
+        // Veritabanı taraması
+        var existingSale = allRecordsData.find(function(r){ 
+            return getCompareNum(r.contact) === compContact && isRecordSale(r); 
+        });
+        
+        if (existingSale) {
+            row.classList.add('error');
+            var existingDate = new Date(parseAnyDate(existingSale.timestamp || existingSale.date));
+            var dateStr = existingDate.toLocaleDateString('tr-TR') + ' ' + existingDate.toLocaleTimeString('tr-TR',{hour:'2-digit',minute:'2-digit'});
+            var msg = 'Bu müşterinin (' + (existingSale.name || name) + ' – ' + rawContact + ') zaten sisteme işlenmiş bir satışı bulunmaktadır!\n\n' +
+                      '• Kayıtlı Olduğu Şube: ' + existingSale.branch + '\n' +
+                      '• Satış Tutarı: ₺' + new Intl.NumberFormat('tr-TR').format(parseTurkishFloat(existingSale.amount)) + '\n' +
+                      '• İşlem Tarihi: ' + dateStr + '\n\n' +
+                      'Aynı kişi için farklı veya aynı şubeden tekrar mükerrer satış eklenemez.';
+            showWarning('Mükerrer Satış Engellendi!', msg);
+            return;
+        }
+
+        // Aynı anda birden fazla kez ekleme kontrolü
+        if (currentSubmissions.includes(compContact)) {
+            row.classList.add('error');
+            showWarning('Mükerrer Satış Engellendi', 'Aynı telefon numarasına (' + rawContact + ') tek seferde birden fazla satış kaydı girilemez!');
+            return;
+        }
+        currentSubmissions.push(compContact);
+    }
+    
+    data.push({
+      date:dv.replace('T',' '),
+      branch:branch,
+      name:name,
+      contact:contact,
+      customerNo:customerNoVal,
+      media:media,
+      category:row.querySelector('.inp-category').value,
+      product:row.querySelector('.inp-product').value,
+      amount:amountVal
+    });
+  }
+
+  if(hasEmptyError){ showWarning('Eksik Bilgi','Lütfen işaretli olan tüm zorunlu alanları doldurun.'); return; }
+  if(!data.length){ showWarning('Uyarı','Gönderilecek veri bulunamadı.'); return; }
+
+  var btn=document.getElementById('submitBtn');
+  var orig=btn.innerHTML;
+  btn.innerHTML='<i class="fas fa-spinner fa-spin mr-2"></i> Kaydediliyor...';
+  btn.disabled=true;
+  
+  try{
+    var res=await fetch(GAS_URL,{method:'POST',body:JSON.stringify({action:'addCustomersBulk',data:data})});
+    var result=JSON.parse(await res.text());
+    if(result.status==='success'){
+      showSuccess('Tüm kayıtlar başarıyla eklendi!');
+      document.getElementById('inputContainer').innerHTML='';
+      addInputRow();
+      refreshData();
+    }else if(result.status==='warning'){
+        showWarning('Kısmi Başarı', result.message);
+        document.getElementById('inputContainer').innerHTML='';
+        addInputRow();
+        refreshData();
+    }else{
+      showWarning('Hata', result.message);
+    }
+  }catch(e){
+    showWarning('Bağlantı Hatası','İşlem sırasında bir hata oluştu.');
+  }
+  btn.innerHTML=orig;
+  btn.disabled=false;
 }
 </script>
 </body>
