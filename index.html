@@ -320,7 +320,7 @@ body.dark .theme-toggle .knob{transform:translateX(20px)}
         <div class="sec-icon" style="background:rgba(14, 165, 233, 0.1);color:var(--sys-blue)"><i class="fas fa-user-plus text-xl"></i></div>
         <div style="flex:1">
           <div style="font-size:1.1rem;font-weight:800;color:var(--text)">Yeni Müşteri Kayıtları</div>
-          <div style="font-size:.75rem;font-weight:600;color:var(--text3)">Birden fazla müşteri satırı ekleyerek tek seferde gönderebilirsiniz. Tutar girilirse otomatik olarak "Satışa Döndü" işaretlenir.</div>
+          <div style="font-size:.75rem;font-weight:600;color:var(--text3)">Birden fazla müşteri satırı ekleyerek tek seferde gönderebilirsiniz. Tutar girilirse otomatik "Satışa Döndü" işaretlenir.</div>
         </div>
       </div>
 
@@ -334,7 +334,6 @@ body.dark .theme-toggle .knob{transform:translateX(20px)}
                 </div>
             </div>
             <div style="display:flex; gap:0.75rem;">
-                <!-- onpaste eklendi, otomatik çözümleme için -->
                 <textarea id="smartParserInput" class="inp" style="height:50px; resize:none; padding-top:0.8rem; font-family:monospace; font-size:0.85rem;" placeholder="Kopyalanan metni buraya yapıştırın..." onpaste="setTimeout(applySmartParsing, 50);" oninput="if(this.value.trim().length > 10) { clearTimeout(window.parseTimer); window.parseTimer = setTimeout(applySmartParsing, 250); }"></textarea>
                 <button onclick="applySmartParsing()" class="btn btn-primary" style="height:50px; flex-shrink:0; background:linear-gradient(135deg,var(--sys-purple),#7e22ce); box-shadow:0 4px 12px rgba(139, 92, 246, 0.25);"><i class="fas fa-bolt"></i> Çözümle</button>
             </div>
@@ -752,27 +751,6 @@ function showDuplicatePrompt(title, message, onTamamCb, onSatisEkleCb) {
     };
 
     document.querySelector('#warningModal .modal-content').style.borderColor = 'var(--sys-orange)';
-    document.getElementById('warningModal').classList.add('show');
-}
-
-function showSuccess(message) {
-    document.getElementById('warningTitle').textContent = 'Başarılı';
-    document.getElementById('warningTitle').style.color = 'var(--sys-green)';
-    document.getElementById('warningIcon').className = 'fas fa-check-circle';
-    document.getElementById('warningIcon').style.color = 'var(--sys-green)';
-    document.getElementById('warningIconBg').style.background = 'rgba(16, 185, 129, 0.1)';
-    document.getElementById('warningMessage').textContent = message;
-    
-    var btn = document.getElementById('warningBtn');
-    btn.className = 'btn';
-    btn.style.background = 'var(--sys-green)';
-    btn.style.color = '#fff';
-    btn.textContent = 'Tamam';
-
-    var altBtn = document.getElementById('warningAltBtn');
-    if(altBtn) altBtn.style.display = 'none';
-
-    document.querySelector('#warningModal .modal-content').style.borderColor = 'var(--sys-green)';
     document.getElementById('warningModal').classList.add('show');
 }
 
@@ -1918,7 +1896,7 @@ function openLogModal(branchIndex, branchName) {
     var logsChronological = allSnapLogs.slice();
     var changeEvents = [];
 
-    // Tekrarlayan durağan logları eleyip sadece ciro değişim anlarını bul
+    // Tekrarlayan durağan logları eleyip sadece GERÇEK ciro değişim anlarını bul
     for (var i = 0; i < logsChronological.length; i++) {
         var currentLog = logsChronological[i];
         var currentVal = currentLog.b[branchIndex] || 0;
@@ -1934,6 +1912,7 @@ function openLogModal(branchIndex, branchName) {
             var prevVal = logsChronological[i - 1].b[branchIndex] || 0;
             var diff = currentVal - prevVal;
             
+            // Yalnızca bakiye farkı 0'dan farklı olan anları geçmiş kaydı olarak al
             if (Math.abs(diff) > 0.01) {
                 changeEvents.push({
                     t: currentLog.t,
@@ -1942,6 +1921,7 @@ function openLogModal(branchIndex, branchName) {
                     isInitial: false
                 });
             } else if (i === logsChronological.length - 1 && changeEvents.length > 0) {
+                // Son log anının zamanını güncelle
                 changeEvents[changeEvents.length - 1].latestT = currentLog.t;
             }
         }
@@ -1993,7 +1973,7 @@ async function triggerManualLog() {
         let res = await fetch(GAS_URL, { method: 'POST', body: JSON.stringify({ action: 'manualLogSnapshot' }) });
         let result = JSON.parse(await res.text());
         if (result.status === 'success') {
-            showSuccess('Manuel ciro logu başarıyla alındı!');
+            showToast('Manuel ciro logu başarıyla alındı!');
             refreshData();
         } else {
             showWarning('Hata', result.message || 'Log alınamadı.');
@@ -2343,6 +2323,9 @@ function applySmartParsing() {
         .replace(/Ürün modelleri ve elden taksitli fiyatlar hakkında mağazalarımız bilgi vermektedir efendim\.?/gi, "")
         .replace(/Apple marka ürünler \(iPhone, iPad vb\.\) stoklarımızda bulunmamaktadır\.?/gi, "")
         .replace(/İstanbul, Kocaeli ve Bursa illerinde hizmet vermekteyiz; il ilçe ve telefon numarası belirtirseniz mağazamız sizleri arayıp detaylı bilgi versinler\.?/gi, "")
+        .replace(/İstanbul, Kocaeli ve Bursa illerinde hizmet veriyoruz; il, ilçe ve telefon numarası belirtirseniz mağazamız sizleri arayıp bilgi versinler\.?/gi, "")
+        .replace(/Ürün fiyatları ve elden taksit seçenekleri hakkında mağazalarımız bilgi vermektedir\.?/gi, "")
+        .replace(/Hizmet bölgelerimiz İstanbul, Kocaeli ve Bursa illeridir\.?/gi, "")
         .replace(/[a-zA-ZçğıöşüÇĞIÖŞÜ\s]+ Avrupa yakasında olduğu için bu bölgede elden taksit imkanımız bulunmuyor\.?/gi, "")
         .replace(/Dilerseniz en yakın şubemiz olan Anadolu yakasındaki [a-zA-ZçğıöşüÇĞIÖŞÜ\s]+'nden veya www\.hedefavm\.com sitemizden online olarak alışveriş yapabilirsiniz\.?/gi, "")
         .replace(/İlgilendiğiniz ürün için telefon numaranızı belirtirseniz ekibimiz sizi arayıp bilgi versinler\.?/gi, "")
@@ -2351,6 +2334,7 @@ function applySmartParsing() {
         .trim();
 
     var flatText = cleanText.replace(/\n/g, ' ');
+    var lowerClean = flatText.toLocaleLowerCase('tr-TR');
     var isWebForm = rawText.includes("Talep #") || rawText.includes("TC Kimlik") || flatText.includes("Ad Soyad");
     var isFacebook = rawText.includes("Bu konuşmayı ata") || rawText.includes("bir reklama yanıt verdi") || rawText.includes("Yapay zeka temsilcin") || rawText.includes("Reklamı gör") || rawText.includes("fb.com") || rawText.toLowerCase().includes("reklama yanıt");
 
@@ -2408,44 +2392,93 @@ function applySmartParsing() {
          name = name.split(/\s+/).map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ');
     }
 
-    const branchMap = {
-        "inegöl": "İnegöl Şubesi", "inegol": "İnegöl Şubesi", "bursa": "İnegöl Şubesi", "gemlik": "İnegöl Şubesi",
-        "paşabahçe": "Paşabahçe Şubesi", "pasabahce": "Paşabahçe Şubesi", "çubuklu": "Paşabahçe Şubesi",
-        "çekmeköy": "Çekmeköy Şubesi", "cekmekoy": "Çekmeköy Şubesi", "şile": "Çekmeköy Şubesi", "sile": "Çekmeköy Şubesi", "kumbaba": "Çekmeköy Şubesi", "taşdelen": "Çekmeköy Şubesi", "tasdelen": "Çekmeköy Şubesi", "madenler": "Çekmeköy Şubesi", "sancaktepe": "Çekmeköy Şubesi",
-        "izmit": "İzmit Şubesi", "i̇zmit": "İzmit Şubesi", "kocaeli": "İzmit Şubesi", "kartepe": "İzmit Şubesi", "yahyakaptan": "İzmit Şubesi",
-        "gölcük": "Gölcük Şubesi", "golcuk": "Gölcük Şubesi", "başiskele": "Gölcük Şubesi", "karamürsel": "Gölcük Şubesi", "değirmendere": "Gölcük Şubesi",
-        "körfez": "Körfez Şubesi", "korfez": "Körfez Şubesi", "yarımca": "Körfez Şubesi", "tütünçiftlik": "Körfez Şubesi",
-        "derince": "Derince Şubesi",
-        "sultanbeyli": "Sultanbeyli Şubesi", "pendik": "Sultanbeyli Şubesi", "kurtköy": "Sultanbeyli Şubesi",
-        "yenidoğan": "Yenidoğan Şubesi", "yenidogan": "Yenidoğan Şubesi", "sarıgazi": "Yenidoğan Şubesi",
-        "kavacık": "Kavacık Şubesi", "kavacik": "Kavacık Şubesi", "beykoz": "Kavacık Şubesi", "göksu": "Kavacık Şubesi",
-        "çayırova": "Çayırova Şubesi", "cayirova": "Çayırova Şubesi", "darıca": "Çayırova Şubesi", "şekerpınar": "Çayırova Şubesi",
-        "gebze": "Gebze Şubesi", "dilovası": "Gebze Şubesi",
-        "düzce": "Düzce Şubesi", "duzce": "Düzce Şubesi", "hendek": "Düzce Şubesi", "gölyaka": "Düzce Şubesi", "akçakoca": "Düzce Şubesi"
-    };
-    
-    let lowerClean = flatText.toLocaleLowerCase('tr-TR');
-    let lowerNFKC = rawText.toLocaleLowerCase('tr-TR'); 
+    const districtBranchMap = [
+        { priority: 10, key: "kavacık", branch: "Kavacık Şubesi" },
+        { priority: 10, key: "kavacik", branch: "Kavacık Şubesi" },
+        { priority: 10, key: "beykoz", branch: "Kavacık Şubesi" },
+        { priority: 10, key: "göksu", branch: "Kavacık Şubesi" },
+        { priority: 10, key: "derince", branch: "Derince Şubesi" },
+        { priority: 10, key: "gölcük", branch: "Gölcük Şubesi" },
+        { priority: 10, key: "golcuk", branch: "Gölcük Şubesi" },
+        { priority: 10, key: "başiskele", branch: "Gölcük Şubesi" },
+        { priority: 10, key: "karamürsel", branch: "Gölcük Şubesi" },
+        { priority: 10, key: "değirmendere", branch: "Gölcük Şubesi" },
+        { priority: 10, key: "körfez", branch: "Körfez Şubesi" },
+        { priority: 10, key: "korfez", branch: "Körfez Şubesi" },
+        { priority: 10, key: "yarımca", branch: "Körfez Şubesi" },
+        { priority: 10, key: "tütünçiftlik", branch: "Körfez Şubesi" },
+        { priority: 10, key: "çayırova", branch: "Çayırova Şubesi" },
+        { priority: 10, key: "cayirova", branch: "Çayırova Şubesi" },
+        { priority: 10, key: "darıca", branch: "Çayırova Şubesi" },
+        { priority: 10, key: "şekerpınar", branch: "Çayırova Şubesi" },
+        { priority: 10, key: "gebze", branch: "Gebze Şubesi" },
+        { priority: 10, key: "dilovası", branch: "Gebze Şubesi" },
+        { priority: 10, key: "çekmeköy", branch: "Çekmeköy Şubesi" },
+        { priority: 10, key: "cekmekoy", branch: "Çekmeköy Şubesi" },
+        { priority: 10, key: "şile", branch: "Çekmeköy Şubesi" },
+        { priority: 10, key: "sile", branch: "Çekmeköy Şubesi" },
+        { priority: 10, key: "kumbaba", branch: "Çekmeköy Şubesi" },
+        { priority: 10, key: "taşdelen", branch: "Çekmeköy Şubesi" },
+        { priority: 10, key: "tasdelen", branch: "Çekmeköy Şubesi" },
+        { priority: 10, key: "madenler", branch: "Çekmeköy Şubesi" },
+        { priority: 10, key: "sultanbeyli", branch: "Sultanbeyli Şubesi" },
+        { priority: 10, key: "pendik", branch: "Sultanbeyli Şubesi" },
+        { priority: 10, key: "kurtköy", branch: "Sultanbeyli Şubesi" },
+        { priority: 10, key: "yenidoğan", branch: "Yenidoğan Şubesi" },
+        { priority: 10, key: "yenidogan", branch: "Yenidoğan Şubesi" },
+        { priority: 10, key: "sarıgazi", branch: "Yenidoğan Şubesi" },
+        { priority: 10, key: "sancaktepe", branch: "Yenidoğan Şubesi" },
+        { priority: 10, key: "paşabahçe", branch: "Paşabahçe Şubesi" },
+        { priority: 10, key: "pasabahce", branch: "Paşabahçe Şubesi" },
+        { priority: 10, key: "çubuklu", branch: "Paşabahçe Şubesi" },
+        { priority: 10, key: "inegöl", branch: "İnegöl Şubesi" },
+        { priority: 10, key: "inegol", branch: "İnegöl Şubesi" },
+        { priority: 10, key: "gemlik", branch: "İnegöl Şubesi" },
+        { priority: 10, key: "düzce", branch: "Düzce Şubesi" },
+        { priority: 10, key: "duzce", branch: "Düzce Şubesi" },
+        { priority: 10, key: "hendek", branch: "Düzce Şubesi" },
+        { priority: 10, key: "gölyaka", branch: "Düzce Şubesi" },
+        { priority: 10, key: "akçakoca", branch: "Düzce Şubesi" },
+        { priority: 10, key: "izmit", branch: "İzmit Şubesi" },
+        { priority: 10, key: "i̇zmit", branch: "İzmit Şubesi" },
+        { priority: 10, key: "kartepe", branch: "İzmit Şubesi" },
+        { priority: 10, key: "yahyakaptan", branch: "İzmit Şubesi" },
+        { priority: 1, key: "bursa", branch: "İnegöl Şubesi" },
+        { priority: 1, key: "kocaeli", branch: "İzmit Şubesi" }
+    ];
+
+    let searchSpace = (flatText + " " + rawText).toLocaleLowerCase('tr-TR');
     
     if (isWebForm) {
-        let bm = lowerClean.match(/Mağaza\s*([a-zçğıöşü\s]+?)\s*\(\d+\)/i);
-        if(!bm) bm = lowerClean.match(/Mağaza\s*([a-zçğıöşü]+)/i);
+        let bm = searchSpace.match(/Mağaza\s*([a-zçğıöşü\s]+?)\s*\(\d+\)/i);
+        if(!bm) bm = searchSpace.match(/Mağaza\s*([a-zçğıöşü]+)/i);
         if (bm && bm[1]) {
             let bn = bm[1].trim();
-            for (let key in branchMap) { if (bn.includes(key)) branch = branchMap[key]; }
+            for (let item of districtBranchMap) { if (bn.includes(item.key)) { branch = item.branch; break; } }
         }
     }
+
     if(!branch) {
-        let searchSpace = lowerClean + " " + lowerNFKC;
-        for (let key in branchMap) {
-            let regex = new RegExp("\\b" + key + "\\b", "i");
-            if (regex.test(searchSpace)) { branch = branchMap[key]; break; }
+        let bestMatch = null;
+        let highestPriority = -1;
+
+        let bottomText = lines.slice(-4).join(' ').toLocaleLowerCase('tr-TR');
+
+        for (let item of districtBranchMap) {
+            let regex = new RegExp("\\b" + item.key + "\\b", "i");
+            let inBottom = regex.test(bottomText);
+            let inFull = regex.test(searchSpace);
+
+            if (inBottom && item.priority === 10) {
+                branch = item.branch;
+                break;
+            } else if (inFull && item.priority > highestPriority) {
+                highestPriority = item.priority;
+                bestMatch = item.branch;
+            }
         }
-        if(!branch) {
-           for (let key in branchMap) {
-               if (searchSpace.includes(key)) { branch = branchMap[key]; break; }
-           }
-        }
+
+        if(!branch && bestMatch) branch = bestMatch;
     }
 
     let isCampaignMatch = false;
@@ -2513,13 +2546,13 @@ function applySmartParsing() {
             "limit sorgulama": "LİMİT ÖĞREN", "taksit limiti": "LİMİT ÖĞREN", "limit öğrenme": "LİMİT ÖĞREN", "limit": "LİMİT ÖĞREN", "kredi": "LİMİT ÖĞREN"
         };
 
-        let searchSpace = explicitProduct ? explicitProduct.toLocaleLowerCase('tr-TR') : lowerClean;
+        let prodSearchSpace = explicitProduct ? explicitProduct.toLocaleLowerCase('tr-TR') : lowerClean;
         let sortedKeys = Object.keys(keywordToCat).sort((a, b) => b.length - a.length); 
         let matchedKeyword = "";
         
         for(let i=0; i<sortedKeys.length; i++) {
             let key = sortedKeys[i];
-            if(searchSpace.includes(key)) {
+            if(prodSearchSpace.includes(key)) {
                 category = keywordToCat[key];
                 matchedKeyword = key;
                 break;
@@ -2529,7 +2562,7 @@ function applySmartParsing() {
         if (!product && matchedKeyword) {
             let escapedKey = matchedKeyword.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
             let regex = new RegExp(`(?:[a-zA-ZçğıöşüÇĞIÖŞÜ0-9]+\\s+){0,2}${escapedKey}(?:\\s+[a-zA-ZçğıöşüÇĞIÖŞÜ0-9]+){0,1}`, 'gi');
-            let ctxMatch = searchSpace.match(regex);
+            let ctxMatch = prodSearchSpace.match(regex);
             
             if (ctxMatch) {
                 let ctx = ctxMatch[0];
@@ -2784,37 +2817,6 @@ async function submitAllRows(){
     var contact = rawContact.replace(/^0+/, '');
     var compContact = getCompareNum(contact);
 
-    // Mükerrer SATIŞ kontrolü (Tutar girildiyse)
-    if (amountVal && compContact.length >= 7) {
-        var isSaleDuplicate = false;
-        
-        // Veritabanı taraması
-        var existingSale = allRecordsData.find(function(r){ 
-            return getCompareNum(r.contact) === compContact && isRecordSale(r); 
-        });
-        
-        if (existingSale) {
-            row.classList.add('error');
-            var existingDate = new Date(parseAnyDate(existingSale.timestamp || existingSale.date));
-            var dateStr = existingDate.toLocaleDateString('tr-TR') + ' ' + existingDate.toLocaleTimeString('tr-TR',{hour:'2-digit',minute:'2-digit'});
-            var msg = 'Bu müşterinin (' + (existingSale.name || name) + ' – ' + rawContact + ') zaten sisteme işlenmiş bir satışı bulunmaktadır!\n\n' +
-                      '• Kayıtlı Olduğu Şube: ' + existingSale.branch + '\n' +
-                      '• Satış Tutarı: ₺' + new Intl.NumberFormat('tr-TR').format(parseTurkishFloat(existingSale.amount)) + '\n' +
-                      '• İşlem Tarihi: ' + dateStr + '\n\n' +
-                      'Aynı kişi için farklı veya aynı şubeden tekrar mükerrer satış eklenemez.';
-            showWarning('Mükerrer Satış Engellendi!', msg);
-            return;
-        }
-
-        // Aynı anda birden fazla kez ekleme kontrolü
-        if (currentSubmissions.includes(compContact)) {
-            row.classList.add('error');
-            showWarning('Mükerrer Satış Engellendi', 'Aynı telefon numarasına (' + rawContact + ') tek seferde birden fazla satış kaydı girilemez!');
-            return;
-        }
-        currentSubmissions.push(compContact);
-    }
-    
     data.push({
       date:dv.replace('T',' '),
       branch:branch,
