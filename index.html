@@ -300,6 +300,7 @@ body.dark .theme-toggle .knob{transform:translateX(20px)}
     </div>
   </div>
 
+  <!-- ══ ENTRY (MÜŞTERİ KAYIT) ══ -->
   <div id="view-entry" class="tab-content active">
     <div class="card border-t-4 border-t-brand-500" style="border-top: 4px solid var(--sys-blue);">
       <div class="sec-header">
@@ -320,7 +321,7 @@ body.dark .theme-toggle .knob{transform:translateX(20px)}
                 </div>
             </div>
             <div style="display:flex; gap:0.75rem;">
-                <textarea id="smartParserInput" class="inp" style="height:50px; resize:none; padding-top:0.8rem; font-family:monospace; font-size:0.85rem;" placeholder="Kopyalanan metni buraya yapıştırın..." oninput="if(this.value.trim().length > 10) { clearTimeout(window.parseTimer); window.parseTimer = setTimeout(applySmartParsing, 250); }"></textarea>
+                <textarea id="smartParserInput" class="inp" style="height:50px; resize:none; padding-top:0.8rem; font-family:monospace; font-size:0.85rem;" placeholder="Kopyalanan metni buraya yapıştırın..." onpaste="setTimeout(applySmartParsing, 50);" oninput="if(this.value.trim().length > 5) { clearTimeout(window.parseTimer); window.parseTimer = setTimeout(applySmartParsing, 200); }"></textarea>
                 <button onclick="applySmartParsing()" class="btn btn-primary" style="height:50px; flex-shrink:0; background:linear-gradient(135deg,var(--sys-purple),#7e22ce); box-shadow:0 4px 12px rgba(139, 92, 246, 0.25);"><i class="fas fa-bolt"></i> Çözümle</button>
             </div>
         </div>
@@ -390,6 +391,7 @@ body.dark .theme-toggle .knob{transform:translateX(20px)}
     <div id="branchStatsBody"><div style="display:flex;justify-content:center;padding:4rem"><div class="loader"></div></div></div>
   </div>
 
+  <!-- ══ SALES ══ -->
   <div id="view-sales" class="tab-content">
     <div class="card" style="display:flex;flex-direction:column;min-height:600px; border-top:4px solid var(--sys-green);">
       <div class="sec-header" style="justify-content:space-between; background:var(--surface2)">
@@ -1682,7 +1684,6 @@ function renderCiroLogs() {
         let startLogTime = parseLogDate(startLog.t);
         let endLogTime = parseLogDate(endLog.t);
 
-        // Seçilen tarih aralığındaki gerçek satış kayıtlarını filtrele
         let rangeRecords = allRecordsData.filter(r => {
             let rt = parseAnyDate(r.timestamp || r.date);
             return rt >= startLogTime && rt <= endLogTime;
@@ -1692,10 +1693,8 @@ function renderCiroLogs() {
         let actualSalesCount = rangeSalesRecords.length;
         let actualSalesRevenue = rangeSalesRecords.reduce((sum, r) => sum + parseTurkishFloat(r.amount), 0);
 
-        // Net ciro: Gerçek satış verileri varsa onu kullan, yoksa negatif olmayan farkı kullan
         let netRevenue = actualSalesRevenue > 0 ? actualSalesRevenue : Math.max(0, endLog.g - startLog.g);
 
-        // ÖNCEKİ DÖNEM KIYASLAMASI
         let duration = endLogTime - startLogTime;
         if (duration <= 0) duration = 86400000; 
         
@@ -1729,7 +1728,6 @@ function renderCiroLogs() {
             pctChangeHtml = `<span style="color:var(--text3);">Önceki dönem artışı: ₺0</span>`;
         }
 
-        // ŞUBE SIRALAMASI
         let branchDeltas = [];
         for (let i = 0; i < branchNamesData.length; i++) {
             let bName = branchNamesData[i].replace(/ Şubesi/gi, '');
@@ -1766,7 +1764,6 @@ function renderCiroLogs() {
         }
         topBranchesHtml += '</div>';
 
-        // TREND KATEGORİ
         let rCats = {};
         rangeSalesRecords.forEach(r => {
             let c = r.category || 'Diğer';
@@ -1787,7 +1784,6 @@ function renderCiroLogs() {
             else if (rCats['Diğer'] > 0) { topCat = 'Diğer Kategoriler'; topCatCount = rCats['Diğer']; }
         }
 
-        // İŞLEM ADEDİ HESAPLAMA (Gerçekleşen varsa onu göster, yoksa tahmini)
         let totalRevForAvg = 0;
         let totalSalesForAvg = 0;
         allRecordsData.forEach(function(r) {
@@ -1957,7 +1953,6 @@ function renderCiroLogs() {
     }
 }
 
-/* ── ŞUBE CİRO DEĞİŞİM GEÇMİŞİ MODALI (SADECE DEĞİŞİM OLAN ANLAR) ── */
 function openLogModal(branchIndex, branchName) {
     document.getElementById('modalLogTitle').textContent = branchName + " Ciro Değişim Geçmişi";
     var timelineContainer = document.getElementById('modalLogTimeline');
@@ -1971,16 +1966,14 @@ function openLogModal(branchIndex, branchName) {
 
     var fmt = function(n) { return '₺' + new Intl.NumberFormat('tr-TR',{maximumFractionDigits:0}).format(n||0); };
     
-    // Kronolojik sıra için baştan sona array
     var logsChronological = allSnapLogs.slice();
     var changeEvents = [];
 
-    // Cironun gerçekten değiştiği anları tespit et
+    // Tekrarlayan durağan logları eleyip sadece ciro değişim anlarını bul
     for (var i = 0; i < logsChronological.length; i++) {
         var currentLog = logsChronological[i];
         var currentVal = currentLog.b[branchIndex] || 0;
         
-        // İlk kayıt veya bir önceki kayda göre ciro farkı var mı?
         if (i === 0) {
             changeEvents.push({
                 t: currentLog.t,
@@ -1992,7 +1985,6 @@ function openLogModal(branchIndex, branchName) {
             var prevVal = logsChronological[i - 1].b[branchIndex] || 0;
             var diff = currentVal - prevVal;
             
-            // Eğer ciro değiştiyse (+ / -) veya en son kayıtsa ekle
             if (Math.abs(diff) > 0.01) {
                 changeEvents.push({
                     t: currentLog.t,
@@ -2001,13 +1993,11 @@ function openLogModal(branchIndex, branchName) {
                     isInitial: false
                 });
             } else if (i === logsChronological.length - 1 && changeEvents.length > 0) {
-                // En son anlık snapshot kaydını da güncelleme zamanı olarak sakla
                 changeEvents[changeEvents.length - 1].latestT = currentLog.t;
             }
         }
     }
 
-    // Yeniden eskiye doğru sırala (en güncel ciro en üstte)
     var displayList = changeEvents.slice().reverse();
     var html = '';
 
@@ -2398,6 +2388,77 @@ function applySmartParsing() {
                 name = line;
                 break;
             }
+        }
+    }
+
+    // Akıllı çözümleme esnasında veritabanındaki mükerrer numarayı kontrol et
+    if (phone) {
+        var compContact = getCompareNum(phone);
+        var existing = allRecordsData.find(function(r) {
+            return getCompareNum(r.contact) === compContact;
+        });
+
+        if (existing) {
+            var isSale = isRecordSale(existing);
+            var statusText = isSale ? 'Satış Gerçekleşti (₺' + new Intl.NumberFormat('tr-TR').format(parseTurkishFloat(existing.amount)) + ')' : 'Müşteri Kaydı / Yönlendirme';
+            var customerNoText = existing.customerNo ? '\n• Müşteri No: ' + existing.customerNo : '';
+            
+            var msg = 'Çözümlenen telefon numarasına (' + phone + ') ait sistemde kayıt bulunmaktadır.\n\n' +
+                      '• Müşteri Adı: ' + (existing.name || 'Belirtilmemiş') + customerNoText + '\n' +
+                      '• Kayıtlı Olduğu Şube: ' + (existing.branch || 'Belirtilmemiş') + '\n' +
+                      '• Geliş Medyası: ' + (existing.media || 'Belirtilmemiş') + '\n' +
+                      '• İlgilendiği Kategori: ' + (existing.category || 'Belirtilmemiş') + '\n' +
+                      '• Ürün: ' + (existing.product || 'Belirtilmemiş') + '\n' +
+                      '• Mevcut Durum: ' + statusText + '\n\n' +
+                      'Eğer bu müşteriye yeni bir SATIŞ eklemek istiyorsanız "Satış Ekle" butonuna basarak tutarı girebilirsiniz.';
+
+            showDuplicatePrompt(
+                'Mükerrer Müşteri Tespit Edildi!',
+                msg,
+                function onTamam() {
+                    document.getElementById('smartParserInput').value = "";
+                },
+                function onSatisEkle() {
+                    addInputRow();
+                    var rows = document.querySelectorAll('#inputContainer > .entry-card');
+                    var targetRow = rows[rows.length - 1];
+
+                    targetRow.querySelector('.inp-contact').value = phone;
+                    if (existing.name) targetRow.querySelector('.inp-name').value = existing.name;
+                    var cNo = targetRow.querySelector('.inp-customerno');
+                    if (cNo && existing.customerNo) cNo.value = existing.customerNo;
+
+                    if (existing.branch) {
+                        var selB = targetRow.querySelector('.inp-branch');
+                        for(var i=0; i<selB.options.length; i++) {
+                            if(selB.options[i].value === existing.branch) { selB.selectedIndex = i; break; }
+                        }
+                    }
+                    if (existing.media || media) {
+                        var selM = targetRow.querySelector('.inp-media');
+                        var mVal = existing.media || media;
+                        for(var j=0; j<selM.options.length; j++) {
+                            if(selM.options[j].value === mVal) { selM.selectedIndex = j; break; }
+                        }
+                    }
+                    if (existing.category) {
+                        var selC = targetRow.querySelector('.inp-category');
+                        for(var k=0; k<selC.options.length; k++) {
+                            if(selC.options[k].value === existing.category) { selC.selectedIndex = k; break; }
+                        }
+                    }
+                    if (existing.product) targetRow.querySelector('.inp-product').value = existing.product;
+
+                    document.getElementById('smartParserInput').value = "";
+                    var amountInp = targetRow.querySelector('.inp-amount');
+                    if (amountInp) {
+                        amountInp.focus();
+                        amountInp.style.boxShadow = '0 0 0 4px rgba(16, 185, 129, 0.35)';
+                        setTimeout(function() { amountInp.style.boxShadow = ''; }, 2500);
+                    }
+                }
+            );
+            return;
         }
     }
 
