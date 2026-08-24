@@ -10,7 +10,6 @@
 <style>
 *{box-sizing:border-box;}
 
-/* ── MODERN SAAS THEME VARIABLES ── */
 body.dark{
   --bg:#0b0f19;
   --surface:#151a2a;
@@ -66,7 +65,6 @@ body{
 
 body{background:var(--bg);color:var(--text);font-family:'Plus Jakarta Sans',sans-serif;font-size:15px;-webkit-tap-highlight-color:transparent;margin:0; transition: background 0.3s ease, color 0.3s ease;}
 
-/* ── ANIMATIONS ── */
 @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
 .tab-content { display: none; animation: fadeIn 0.35s cubic-bezier(0.4, 0, 0.2, 1) forwards; }
 .tab-content.active { display: block; }
@@ -76,7 +74,6 @@ body{background:var(--bg);color:var(--text);font-family:'Plus Jakarta Sans',sans
 @keyframes pulse-ring{0%{box-shadow:0 0 0 0 rgba(16,185,129,.4)}70%{box-shadow:0 0 0 6px rgba(16,185,129,0)}100%{box-shadow:0 0 0 0 rgba(16,185,129,0)}}
 .pulse{width:8px;height:8px;border-radius:50%;background:#10b981;box-shadow:0 0 0 0 rgba(16,185,129,.4);animation:pulse-ring 2s infinite;flex-shrink:0}
 
-/* ── COMPONENTS ── */
 .card{background:var(--card-bg);border-radius:1.25rem;border:1px solid var(--border);box-shadow:var(--shadow-sm);overflow:hidden; transition: box-shadow 0.3s ease, transform 0.3s ease;}
 .card:hover { box-shadow: var(--shadow-md); }
 
@@ -112,20 +109,13 @@ select.inp{appearance:none;line-height:1.5;background-image:url("data:image/svg+
 .kpi-card .kpi-icon-bg { position:absolute; right:-15px; bottom:-15px; font-size:5rem; color:var(--accent); opacity:0.07; transform:rotate(-15deg); transition:all 0.3s ease; pointer-events:none;}
 .kpi-card:hover .kpi-icon-bg { transform:rotate(0deg) scale(1.1); opacity:0.12; }
 
-.entry-card{background:var(--card-bg);border:1px solid var(--border);border-radius:1rem;padding:1.5rem;transition:all .3s ease;box-shadow:var(--shadow-sm)}
-.entry-card:hover{border-color:#0ea5e9; box-shadow:var(--shadow-md)}
-.entry-card.error{border-color:#ef4444!important; animation: shake 0.4s;}
-@keyframes shake { 0%, 100% {transform: translateX(0);} 25% {transform: translateX(-4px);} 75% {transform: translateX(4px);} }
-
 .loader{width:22px;height:22px;border:3px solid var(--border);border-top-color:#0ea5e9;border-radius:50%;animation:spin .8s linear infinite}
 .prog-bg{background:var(--prog-bg);border-radius:6px;height:8px;overflow:hidden}
 .prog-fill{height:100%;border-radius:6px;transition:width 0.8s cubic-bezier(0.4, 0, 0.2, 1)}
 
-/* Toast Notification */
 .toast { position:fixed; bottom:-100px; left:50%; transform:translateX(-50%); background:var(--sys-green); color:#fff; padding:12px 24px; border-radius:50px; font-weight:700; font-size:1rem; box-shadow:0 10px 25px rgba(16,185,129,0.4); transition:bottom 0.4s cubic-bezier(0.4, 0, 0.2, 1); z-index:9999; display:flex; align-items:center; gap:8px; pointer-events:none;}
 .toast.show { bottom: 30px; }
 
-/* Modals */
 .modal-bg{position:fixed;inset:0;z-index:999;background:rgba(15,23,42,.6);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;padding:1rem; opacity:0; visibility:hidden; transition:all 0.3s ease;}
 .modal-bg.show { opacity:1; visibility:visible; }
 .modal-content { transform:scale(0.95); transition:all 0.3s cubic-bezier(0.4, 0, 0.2, 1); max-height: 90vh; display: flex; flex-direction: column;}
@@ -140,7 +130,6 @@ select.inp{appearance:none;line-height:1.5;background-image:url("data:image/svg+
 .sec-header{display:flex;align-items:center;gap:1rem;padding:1.25rem 1.5rem;border-bottom:1px solid var(--border);flex-wrap:wrap; background:var(--surface2)}
 .sec-icon{width:42px;height:42px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0; box-shadow:0 2px 8px rgba(0,0,0,0.05)}
 
-/* ── HEADER STICKY GLASSMORPHISM ── */
 .app-header {
   background: var(--surface-glass);
   backdrop-filter: blur(16px);
@@ -156,11 +145,9 @@ select.inp{appearance:none;line-height:1.5;background-image:url("data:image/svg+
   transition: all 0.3s ease;
 }
 
-/* ── LAYOUT ── */
 .grid-2col{display:grid;grid-template-columns:1fr 1fr;gap:1.25rem}
 .grid-kpi{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1rem;margin-bottom:1.5rem}
 
-/* ── RESPONSIVE ── */
 @media(max-width:1024px){
   .grid-2col{grid-template-columns:1fr}
   .app-header { top: 0.5rem; }
@@ -191,39 +178,15 @@ select.inp{appearance:none;line-height:1.5;background-image:url("data:image/svg+
   .podium-wrap{flex-direction:column!important;align-items:center!important;min-height:unset!important;padding-top:1.5rem!important}
 }
 
-/* ── MÜKEMMEL PDF / YAZDIRMA STİLLERİ ── */
-@media print {
-  @page { size: landscape; margin: 10mm; }
-  body { background: #fff !important; color: #000 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-  
-  #loginScreen, .app-header, .tabs-row, .no-print, .modal-bg, .toast { display: none !important; }
-  
-  #view-dashboard, #view-entry, #view-category, #view-performance, #view-sales, #view-report, #view-log { display: none !important; }
-  #view-export { display: block !important; }
-  
-  #mainApp { padding: 0 !important; margin: 0 !important; max-width: none !important; }
-  .card { box-shadow: none !important; border: none !important; }
-  #exportContentArea { padding: 0 !important; border: none !important; background: transparent !important; }
-  
-  table { page-break-inside: auto; width: 100% !important; }
-  tr { page-break-inside: avoid; page-break-after: auto; }
-  thead { display: table-header-group; }
-  tfoot { display: table-footer-group; }
-  .print-break-avoid { page-break-inside: avoid; }
-}
-
-/* Dark mode toggle */
 .theme-toggle{width:46px;height:26px;border-radius:13px;border:none;cursor:pointer;position:relative;transition:background .3s;flex-shrink:0;padding:0; box-shadow: inset 0 2px 4px rgba(0,0,0,0.1)}
 .theme-toggle .knob{position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:transform .3s cubic-bezier(0.4, 0, 0.2, 1);box-shadow:0 2px 5px rgba(0,0,0,.2)}
 body:not(.dark) .theme-toggle{background:#cbd5e1}
 body.dark .theme-toggle{background:#0ea5e9}
 body.dark .theme-toggle .knob{transform:translateX(20px)}
-
 </style>
 </head>
 <body>
 
-<!-- ════════════════════ LOGIN ════════════════════ -->
 <div id="loginScreen" style="position:fixed;inset:0;z-index:1000;background:var(--bg);display:flex;align-items:center;justify-content:center;padding:1rem; transition: opacity 0.4s ease;">
   <div style="background:var(--card-bg);border:1px solid var(--border);border-radius:1.75rem;padding:3rem 2.5rem;width:100%;max-width:400px;text-align:center;box-shadow:var(--shadow-md)">
     <div style="width:72px;height:72px;background:linear-gradient(135deg,#0ea5e9,#6366f1);border-radius:20px;display:flex;align-items:center;justify-content:center;margin:0 auto 1.5rem;box-shadow:0 10px 25px rgba(14,165,233,.4)">
@@ -240,10 +203,8 @@ body.dark .theme-toggle .knob{transform:translateX(20px)}
   </div>
 </div>
 
-<!-- ════════════════════ MAIN APP ════════════════════ -->
 <div id="mainApp" style="display:none;max-width:1600px;margin:0 auto;padding:1.5rem 1.5rem 5rem">
 
-  <!-- HEADER -->
   <header class="app-header">
     <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem;margin-bottom:1rem">
       <div style="display:flex;align-items:center;gap:1rem">
@@ -283,7 +244,6 @@ body.dark .theme-toggle .knob{transform:translateX(20px)}
     </div>
   </header>
 
-  <!-- ══ DASHBOARD (ÖZET) ══ -->
   <div id="view-dashboard" class="tab-content">
     <div class="grid-kpi" id="kpiRow">
       <div class="kpi-card" style="--accent:#0ea5e9"><i class="fas fa-share-square kpi-icon-bg"></i><div style="position:relative; z-index:2"><div style="font-size:.75rem;font-weight:800;color:var(--text3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:.6rem">Toplam Yönlendirme</div><div style="font-size:2.5rem;font-weight:800;color:var(--text);line-height:1" id="globalTotalRecords">0</div><div style="font-size:.8rem;color:var(--text3);margin-top:.4rem; font-weight:600">bu dönem</div></div></div>
@@ -313,7 +273,6 @@ body.dark .theme-toggle .knob{transform:translateX(20px)}
     </div>
   </div>
 
-  <!-- ══ ENTRY (MÜŞTERİ KAYIT) ══ -->
   <div id="view-entry" class="tab-content active">
     <div class="card border-t-4 border-t-brand-500" style="border-top: 4px solid var(--sys-blue);">
       <div class="sec-header">
@@ -324,7 +283,6 @@ body.dark .theme-toggle .knob{transform:translateX(20px)}
         </div>
       </div>
 
-      <!-- AKILLI METİN ÇÖZÜMLEYİCİ -->
       <div style="padding:1.5rem 1.5rem 0 1.5rem;">
         <div style="background:var(--surface2); border:1px solid var(--border); border-radius:1rem; padding:1.25rem;">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.75rem;">
@@ -350,7 +308,6 @@ body.dark .theme-toggle .knob{transform:translateX(20px)}
     </div>
   </div>
 
-  <!-- ══ CATEGORY ══ -->
   <div id="view-category" class="tab-content">
     <div class="grid-kpi" id="catKpiRow">
       <div class="kpi-card" style="--accent:var(--sys-blue)"><div style="font-size:.75rem;font-weight:800;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:.6rem">En Yüksek Hacim</div><div style="font-size:1.5rem;font-weight:800;color:var(--text);line-height:1.2;margin-bottom:.3rem" id="ck-topHacim">—</div><div style="font-size:.95rem;color:var(--sys-blue);font-weight:700" id="ck-topHacimVal">0 kayıt</div></div>
@@ -384,7 +341,6 @@ body.dark .theme-toggle .knob{transform:translateX(20px)}
     </div>
   </div>
 
-  <!-- ══ PERFORMANCE ══ -->
   <div id="view-performance" class="tab-content">
     <div class="card" style="padding:2rem 1.5rem;margin-bottom:1.5rem;overflow:visible; background: var(--surface2);">
       <div style="text-align:center;margin-bottom:2rem">
@@ -404,7 +360,6 @@ body.dark .theme-toggle .knob{transform:translateX(20px)}
     <div id="branchStatsBody"><div style="display:flex;justify-content:center;padding:4rem"><div class="loader"></div></div></div>
   </div>
 
-  <!-- ══ SALES ══ -->
   <div id="view-sales" class="tab-content">
     <div class="card" style="display:flex;flex-direction:column;min-height:600px; border-top:4px solid var(--sys-green);">
       <div class="sec-header" style="justify-content:space-between; background:var(--surface2)">
@@ -442,7 +397,6 @@ body.dark .theme-toggle .knob{transform:translateX(20px)}
     </div>
   </div>
 
-  <!-- ══ GELİŞMİŞ RAPOR (AI) ══ -->
   <div id="view-report" class="tab-content">
     <div class="card" style="margin-bottom:1.5rem; border-top:4px solid var(--sys-purple);">
       <div class="sec-header">
@@ -514,7 +468,6 @@ body.dark .theme-toggle .knob{transform:translateX(20px)}
     </div>
   </div>
 
-  <!-- ══ LOGLAR (ZAMAN ÇİZELGESİ) ══ -->
   <div id="view-log" class="tab-content">
     <div class="card" style="margin-bottom:1.5rem; border-top:4px solid var(--sys-blue);">
       <div class="sec-header" style="background:var(--surface2); justify-content:space-between; align-items:center;">
@@ -528,7 +481,6 @@ body.dark .theme-toggle .knob{transform:translateX(20px)}
         <button class="btn btn-ghost btn-sm" onclick="triggerManualLog()" id="btnManualLog"><i class="fas fa-camera mr-2" style="color:var(--sys-blue)"></i> Şimdi Manuel Kayıt Al</button>
       </div>
       
-      <!-- KAYIP DEDEKTÖRÜ (GİZLİ, GEREKTİĞİNDE AÇILIR) -->
       <div id="lossDetectorAlert" style="display:none; padding:1.25rem 1.5rem; background:rgba(239, 68, 68, 0.1); border-bottom:1px solid rgba(239, 68, 68, 0.2); align-items:center; justify-content:space-between; gap:1rem; flex-wrap:wrap;">
          <div style="display:flex; align-items:center; gap:1rem;">
             <div style="width:40px; height:40px; border-radius:50%; background:var(--sys-red); color:#fff; display:flex; align-items:center; justify-content:center; font-size:1.2rem; flex-shrink:0; box-shadow:0 4px 10px rgba(239, 68, 68, 0.4);"><i class="fas fa-exclamation-triangle"></i></div>
@@ -556,7 +508,7 @@ body.dark .theme-toggle .knob{transform:translateX(20px)}
           </div>
         </div>
         <div style="grid-column:1/-1; font-size:0.8rem; color:var(--text3); font-weight:600; padding-top:0.5rem; border-top:1px dashed var(--border);">
-            <i class="fas fa-info-circle mr-1"></i> Global ciroyu ve tüm şubelerin <b>güncel kümülatif rakamlarını</b> aşağıda görebilirsiniz. <b>Detaylı hareket geçmişi (zaman çizelgesi) için ilgili şubenin üzerine tıklayın.</b>
+            <i class="fas fa-info-circle mr-1"></i> Tarih seçtiğinizde üstteki özet kutusunda <b>seçili tarihteki net ciro artışı</b> hesaplanır. Aşağıdaki şube kartlarında ise hem <b>seçili dönem net ciro artışı</b> hem de şubenin <b>aylık kümülatif toplam cirosu</b> gösterilir.
         </div>
       </div>
     </div>
@@ -565,7 +517,6 @@ body.dark .theme-toggle .knob{transform:translateX(20px)}
     </div>
   </div>
 
-  <!-- ══ DIŞA AKTAR / RAPOR ══ -->
   <div id="view-export" class="tab-content">
     <div class="card no-print" style="margin-bottom:1.5rem; border-top:4px solid #10b981;">
       <div class="sec-header" style="background:var(--surface2);">
@@ -580,13 +531,9 @@ body.dark .theme-toggle .knob{transform:translateX(20px)}
         <div><label class="inp-label">Bitiş Dönemi</label><select id="expEndDate" class="inp" style="min-width:180px;"></select></div>
         <button class="btn btn-primary" onclick="renderExportReport()" style="min-width:180px;"><i class="fas fa-magic mr-2"></i> Raporu Hazırla</button>
       </div>
-      <div style="padding:1rem 1.5rem; font-size:0.8rem; color:var(--text3); font-weight:600;">
-         <i class="fas fa-lightbulb text-yellow-500 mr-1"></i> <b>İpucu:</b> Seçtiğiniz tarih aralığı 1 aydan uzunsa, raporun içinde otomatik olarak "Aylar Arası Büyüme Trendi" grafiği oluşturulacaktır.
-      </div>
     </div>
     
     <div id="exportContentArea" style="display:none; background:#fff; color:#000; padding:2.5rem; border-radius:1rem;" class="card print-break-avoid">
-       <!-- BU KISIM PDF'TE GÖRÜNMEYECEK (class="no-print" ile) -->
        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:2rem;" class="no-print">
           <div>
             <h2 style="font-size:1.3rem; font-weight:800; color:var(--text); margin-bottom:4px;">Rapor Önizlemesi</h2>
@@ -598,16 +545,12 @@ body.dark .theme-toggle .knob{transform:translateX(20px)}
           </div>
        </div>
        
-       <!-- YAZDIRILACAK ALAN -->
-       <div id="exportPrintableArea">
-          <!-- Rapor İçeriği JS ile dolacak -->
-       </div>
+       <div id="exportPrintableArea"></div>
     </div>
   </div>
 
-</div><!-- /mainApp -->
+</div>
 
-<!-- CİRO LOG TIMELINE MODAL -->
 <div id="logBranchModal" class="modal-bg">
   <div class="modal-content" style="background:var(--card-bg);border:1px solid var(--border);border-radius:1.5rem;width:100%;max-width:600px;max-height:90vh;box-shadow:var(--shadow-md); display:flex; flex-direction:column;">
     <div style="padding:1.25rem 1.5rem;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;background:var(--surface2); border-radius:1.5rem 1.5rem 0 0; flex-shrink:0;">
@@ -617,12 +560,10 @@ body.dark .theme-toggle .knob{transform:translateX(20px)}
       </div>
       <button onclick="document.getElementById('logBranchModal').classList.remove('show')" class="btn btn-icon"><i class="fas fa-times"></i></button>
     </div>
-    <div id="modalLogTimeline" style="padding:1.5rem; overflow-y:auto; flex:1; display:flex; flex-direction:column; gap:1rem;">
-    </div>
+    <div id="modalLogTimeline" style="padding:1.5rem; overflow-y:auto; flex:1; display:flex; flex-direction:column; gap:1rem;"></div>
   </div>
 </div>
 
-<!-- BRANCH DETAIL MODAL -->
 <div id="branchDetailModal" class="modal-bg">
   <div class="modal-content" style="background:var(--card-bg);border:1px solid var(--border);border-radius:1.5rem;width:100%;max-width:540px;max-height:90vh;overflow-y:auto;box-shadow:var(--shadow-md)">
     <div style="padding:1.25rem 1.5rem;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;background:var(--surface2);position:sticky;top:0;z-index:10">
@@ -646,7 +587,6 @@ body.dark .theme-toggle .knob{transform:translateX(20px)}
   </div>
 </div>
 
-<!-- ÖZEL HATA / UYARI MODALI -->
 <div id="warningModal" class="modal-bg" style="z-index: 9999;">
   <div class="modal-content" style="background:var(--card-bg);border:2px solid var(--sys-red);border-radius:1.5rem;width:100%;max-width:480px;text-align:center;box-shadow:var(--shadow-md); padding:2rem;">
     <div style="width:64px;height:64px;background:rgba(239, 68, 68, 0.1);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 1.2rem;" id="warningIconBg">
@@ -661,7 +601,6 @@ body.dark .theme-toggle .knob{transform:translateX(20px)}
   </div>
 </div>
 
-<!-- TOAST BİLDİRİMİ -->
 <div id="successToast" class="toast"><i class="fas fa-check-circle" style="font-size:1.2rem"></i> <span id="toastMsg"></span></div>
 
 <script>
@@ -712,45 +651,6 @@ function showWarning(title, message) {
     if(altBtn) altBtn.style.display = 'none';
 
     document.querySelector('#warningModal .modal-content').style.borderColor = 'var(--sys-red)';
-    document.getElementById('warningModal').classList.add('show');
-}
-
-function showDuplicatePrompt(title, message, onTamamCb, onSatisEkleCb) {
-    document.getElementById('warningTitle').textContent = title;
-    document.getElementById('warningTitle').style.color = 'var(--sys-orange)';
-    document.getElementById('warningIcon').className = 'fas fa-user-tag';
-    document.getElementById('warningIcon').style.color = 'var(--sys-orange)';
-    document.getElementById('warningIconBg').style.background = 'rgba(245, 158, 11, 0.1)';
-    document.getElementById('warningMessage').textContent = message;
-
-    var mainBtn = document.getElementById('warningBtn');
-    var altBtn = document.getElementById('warningAltBtn');
-
-    mainBtn.textContent = 'Tamam';
-    mainBtn.className = 'btn btn-ghost';
-    mainBtn.style.background = 'var(--surface2)';
-    mainBtn.style.color = 'var(--text)';
-    mainBtn.style.border = '1px solid var(--border)';
-
-    altBtn.style.display = 'inline-flex';
-    altBtn.textContent = 'Satış Ekle';
-
-    var newMain = mainBtn.cloneNode(true);
-    var newAlt = altBtn.cloneNode(true);
-    mainBtn.parentNode.replaceChild(newMain, mainBtn);
-    altBtn.parentNode.replaceChild(newAlt, altBtn);
-
-    newMain.onclick = function() {
-        document.getElementById('warningModal').classList.remove('show');
-        if (onTamamCb) onTamamCb();
-    };
-
-    newAlt.onclick = function() {
-        document.getElementById('warningModal').classList.remove('show');
-        if (onSatisEkleCb) onSatisEkleCb();
-    };
-
-    document.querySelector('#warningModal .modal-content').style.borderColor = 'var(--sys-orange)';
     document.getElementById('warningModal').classList.add('show');
 }
 
@@ -826,20 +726,38 @@ function isRecordSale(r) {
 function parseAnyDate(dStr) {
     if (!dStr) return 0;
     var str = String(dStr).trim();
-    var trRegex = /^(\d{1,2})\.(\d{1,2})\.(\d{4})(?:\s+(\d{1,2}:\d{1,2}))?/;
+    
+    var trRegex = /^(\d{1,2})\.(\d{1,2})\.(\d{4})(?:\s+(\d{1,2}):(\d{1,2}))?/;
     var match = str.match(trRegex);
     if (match) {
-        var dd = match[1].padStart(2, '0');
-        var mm = match[2].padStart(2, '0');
-        var yyyy = match[3];
-        var time = match[4] || '00:00';
-        var isoStr = yyyy + '-' + mm + '-' + dd + 'T' + time + ':00';
-        var d2 = new Date(isoStr);
+        var dd = parseInt(match[1], 10);
+        var mm = parseInt(match[2], 10) - 1;
+        var yyyy = parseInt(match[3], 10);
+        var hh = match[4] ? parseInt(match[4], 10) : 0;
+        var min = match[5] ? parseInt(match[5], 10) : 0;
+        var d2 = new Date(yyyy, mm, dd, hh, min, 0);
         if (!isNaN(d2.getTime())) return d2.getTime();
     }
+    
+    var isoRegex = /^(\d{4})-(\d{1,2})-(\d{1,2})(?:[T\s](\d{1,2}):(\d{1,2}))?/;
+    var isoMatch = str.match(isoRegex);
+    if (isoMatch) {
+        var yyyy = parseInt(isoMatch[1], 10);
+        var mm = parseInt(isoMatch[2], 10) - 1;
+        var dd = parseInt(isoMatch[3], 10);
+        var hh = isoMatch[4] ? parseInt(isoMatch[4], 10) : 0;
+        var min = isoMatch[5] ? parseInt(isoMatch[5], 10) : 0;
+        var dIso = new Date(yyyy, mm, dd, hh, min, 0);
+        if (!isNaN(dIso.getTime())) return dIso.getTime();
+    }
+    
     var d = new Date(str);
     if (!isNaN(d.getTime())) return d.getTime();
     return 0;
+}
+
+function parseLogDate(timeStr) {
+    return parseAnyDate(timeStr);
 }
 
 function doLogin(){
@@ -985,9 +903,7 @@ function updateKPIsFromGlobal(globalData){
   document.getElementById('globalTotalAranan').textContent = globalData.totalAranan;
   document.getElementById('globalTotalSales').textContent = globalData.totalSalesCount;
   document.getElementById('globalTotalRevenue').textContent = fmt(globalData.totalRevenue);
-  
   document.getElementById('globalAvgBasket').textContent = fmt(avg);
-  
   document.getElementById('globalTopVolCat').textContent = globalData.topVolCat || '-';
   document.getElementById('globalTopVolCount').textContent = (globalData.topVolCount || 0) + ' SATIŞ';
 
@@ -1138,7 +1054,6 @@ function renderCategoryAnalytics(){
         var max = isRev ? maxRev : maxVol;
         var pct = max > 0 ? Math.round((val / max) * 100) : 0;
         var color = COLORS[i % COLORS.length];
-        
         var displayVal = isRev ? fmt(val) : val;
         var suffix = isRev ? '' : '<span style="font-weight:800;color:var(--text3);font-size:0.7rem;margin-left:4px;">ADET</span>';
 
@@ -1296,9 +1211,9 @@ function renderSalesGrid() {
         c.innerHTML = '<div style="text-align:center;color:var(--text3);padding:3rem;grid-column:1/-1; font-weight:600;">Bu kriterlere uygun satış bulunamadı.</div>';
         return;
     }
-    var fmt=function(n){return '\u20ba'+new Intl.NumberFormat('tr-TR',{maximumFractionDigits:0}).format(n||0);};
+    var fmt=function(n){return '₺'+new Intl.NumberFormat('tr-TR',{maximumFractionDigits:0}).format(n||0);};
     c.innerHTML=currentData.map(function(s){
-        var clean=(s.branch||'').replace(/ \u015eubesi/gi,'');
+        var clean=(s.branch||'').replace(/ Şubesi/gi,'');
         var ds='';
         var t = parseAnyDate(s.timestamp || s.date);
         if (t > 0) {
@@ -1464,7 +1379,7 @@ async function fetchAdvancedReport() {
             } else if (isTrendPositive) {
                 aiExplanation = `Son <b>${monthlyData.length} aylık</b> periyotta tespit edilen <b>yükseliş ivmesi</b> baz alınmıştır. Formül, yönlendirme hacminin ve dönüşüm oranlarının mevcut stabiliteyi koruyacağını varsayarak büyümenin devam edeceğini öngörmektedir.`;
             } else {
-                aiExplanation = `Son dönemdeki <b>yatay veya düşüş trendi</b> baz alınarak muhafazakar bir tahmin üretilmiştir. Ciroyu korumak veya hedeflerin üzerine çıkmak için dönüşüm oranlarını (satış kapatma kabiliyetini) iyileştirici aksiyonlar alınması sistem tarafından önerilir.`;
+                aiExplanation = `Son dönemdeki <b>yatay veya düşüş trendi</b> baz alınarak muhafazakar bir tahmin üretilmiştir. Ciroyu korumak veya hedeflerin üzerine çıkmak için dönüşüm oranlarını iyileştirici aksiyonlar alınması sistem tarafından önerilir.`;
             }
 
             document.getElementById('aiPredictionContainer').innerHTML = `
@@ -1502,27 +1417,6 @@ async function fetchAdvancedReport() {
     }
 }
 
-function parseLogDate(timeStr) {
-    if (!timeStr) return 0;
-    var str = String(timeStr).trim();
-    if (str.indexOf('.') > -1) {
-        var parts = str.split(' ');
-        var dParts = parts[0].split('.');
-        var time = parts[1] || '00:00';
-        if (dParts.length === 3) {
-            var dd = dParts[0].padStart(2, '0');
-            var mm = dParts[1].padStart(2, '0');
-            var yyyy = dParts[2];
-            var isoStr = yyyy + '-' + mm + '-' + dd + 'T' + time + ':00';
-            var d = new Date(isoStr);
-            if (!isNaN(d.getTime())) return d.getTime();
-        }
-    }
-    var fallback = new Date(str);
-    if (!isNaN(fallback.getTime())) return fallback.getTime();
-    return 0; 
-}
-
 function acknowledgeLoss() {
     if (allSnapLogs && allSnapLogs.length > 0) {
         var latest = allSnapLogs[allSnapLogs.length - 1];
@@ -1552,24 +1446,17 @@ function renderCiroLogs() {
     
     var requestedStartTime = 0;
     if (startVal) {
-        if (!startTimeVal) {
-            let d = new Date(startVal + 'T00:00:00');
-            d.setMinutes(d.getMinutes() - 1); 
-            requestedStartTime = d.getTime();
-        } else {
-            requestedStartTime = new Date(startVal + 'T' + startTimeVal + ':00').getTime();
-        }
+        var sTime = startTimeVal || '00:00';
+        requestedStartTime = parseAnyDate(startVal + ' ' + sTime);
     }
     
     var requestedEndTime = Infinity;
     if (endVal) {
-        if (!endTimeVal) {
-            requestedEndTime = new Date(endVal + 'T23:59:59').getTime();
-        } else {
-            requestedEndTime = new Date(endVal + 'T' + endTimeVal + ':59').getTime();
-        }
+        var eTime = endTimeVal || '23:59';
+        requestedEndTime = parseAnyDate(endVal + ' ' + eTime) + 59999;
     }
 
+    // Seçilen aralığa giren tüm loglar
     var validLogs = [];
     for (var j = 0; j < allSnapLogs.length; j++) {
         var lt = parseLogDate(allSnapLogs[j].t);
@@ -1578,21 +1465,21 @@ function renderCiroLogs() {
         }
     }
 
-    if (validLogs.length === 0) {
+    var isFilterActive = (startVal !== '' || endVal !== '');
+
+    if (isFilterActive && validLogs.length === 0 && allSnapLogs.length > 0) {
         var noLogHtml = `
         <div style="background:var(--surface); border:1px dashed var(--border); border-radius:1rem; padding:3rem; text-align:center; margin-bottom:1.5rem;">
             <i class="fas fa-search" style="font-size:3rem; color:var(--text3); opacity:0.5; margin-bottom:1rem;"></i>
             <div style="font-size:1.2rem; font-weight:800; color:var(--text); margin-bottom:0.5rem;">Seçili Tarihlerde Log Yok</div>
-            <div style="font-size:0.9rem; color:var(--text2); font-weight:600;">Bu tarih aralığına ait geçerli ciro logu (snapshot) bulunamadı. Lütfen daha yeni bir tarih seçiniz.</div>
+            <div style="font-size:0.9rem; color:var(--text2); font-weight:600;">Bu tarih aralığına ait geçerli ciro logu (snapshot) bulunamadı. Lütfen farklı bir tarih seçiniz.</div>
         </div>`;
         if (container.innerHTML !== noLogHtml) container.innerHTML = noLogHtml;
         return;
     }
 
     var fmt = function(n) { return '₺' + new Intl.NumberFormat('tr-TR',{maximumFractionDigits:0}).format(n||0); };
-
     var miniReportHtml = '';
-    var isFilterActive = (startVal !== '' || endVal !== '');
 
     if (isFilterActive) {
         let firstSystemLogTime = parseLogDate(allSnapLogs[0].t);
@@ -1601,12 +1488,27 @@ function renderCiroLogs() {
              warningBanner = `<div style="background:rgba(245, 158, 11, 0.1); border-left:4px solid var(--sys-orange); padding:12px 15px; border-radius:8px; font-size:0.8rem; font-weight:600; color:var(--text); margin-bottom:1rem; display:flex; align-items:center; gap:8px;"><i class="fas fa-exclamation-circle text-orange-500 text-lg"></i> <div><b>Bilgi:</b> Sistemin hafızasına çekilen en eski log <b>${allSnapLogs[0].t}</b> tarihlidir. Rapor zorunlu olarak bu tarihten itibaren hesaplanmıştır.</div></div>`;
         }
 
+        // Seçilen tarihten önceki son kapanış logunu başlangıç çizgisi (baseline) yap
         let startLog = validLogs[0];
+        if (requestedStartTime > 0) {
+            let prevLogBeforeStart = null;
+            for (let i = allSnapLogs.length - 1; i >= 0; i--) {
+                let lt = parseLogDate(allSnapLogs[i].t);
+                if (lt < requestedStartTime) {
+                    prevLogBeforeStart = allSnapLogs[i];
+                    break;
+                }
+            }
+            if (prevLogBeforeStart) {
+                startLog = prevLogBeforeStart;
+            }
+        }
+
         let endLog = validLogs[validLogs.length - 1];
         let actualStartStr = startLog.t;
         let actualEndStr = endLog.t;
 
-        let dateTitleStr = `Seçilen Tarih Aralığı Özeti (${actualStartStr} \u2013 ${actualEndStr} Arası)`;
+        let dateTitleStr = `Seçilen Tarih Aralığı Özeti (${actualStartStr} – ${actualEndStr} Arası)`;
 
         let startLogTime = parseLogDate(startLog.t);
         let endLogTime = parseLogDate(endLog.t);
@@ -1618,9 +1520,32 @@ function renderCiroLogs() {
 
         let rangeSalesRecords = rangeRecords.filter(r => isRecordSale(r));
         let actualSalesCount = rangeSalesRecords.length;
-        let actualSalesRevenue = rangeSalesRecords.reduce((sum, r) => sum + parseTurkishFloat(r.amount), 0);
 
-        let netRevenue = actualSalesRevenue > 0 ? actualSalesRevenue : Math.max(0, endLog.g - startLog.g);
+        // Şube bazlı ciro artışlarını hesapla
+        let branchDeltas = [];
+        let totalBranchDeltaSum = 0;
+        for (let i = 0; i < branchNamesData.length; i++) {
+            let bName = branchNamesData[i].replace(/ Şubesi/gi, '');
+            let bEndVal = (endLog && endLog.b && endLog.b[i] !== undefined) ? endLog.b[i] : 0;
+            let bStartVal = (startLog && startLog.b && startLog.b[i] !== undefined) ? startLog.b[i] : 0;
+            let bSnapDiff = bEndVal - bStartVal;
+            let bSalesRev = rangeSalesRecords.filter(r => (r.branch || '').includes(branchNamesData[i])).reduce((sum, r) => sum + parseTurkishFloat(r.amount), 0);
+            
+            let diff = Math.max(0, bSnapDiff);
+            if (diff === 0 && bSalesRev > 0) {
+                diff = bSalesRev;
+            }
+
+            branchDeltas.push({ name: bName, rev: diff });
+            totalBranchDeltaSum += diff;
+        }
+
+        branchDeltas.sort((a,b) => b.rev - a.rev);
+        let topBranches = branchDeltas.slice(0, 5);
+
+        // Genel ciro artışını şube toplamları ve log farkı ile tam senkronize et
+        let snapNetRev = Math.max(0, endLog.g - startLog.g);
+        let netRevenue = Math.max(totalBranchDeltaSum, snapNetRev);
 
         let duration = endLogTime - startLogTime;
         if (duration <= 0) duration = 86400000; 
@@ -1655,19 +1580,8 @@ function renderCiroLogs() {
             pctChangeHtml = `<span style="color:var(--text3);">Önceki dönem artışı: ₺0</span>`;
         }
 
-        let branchDeltas = [];
-        for (let i = 0; i < branchNamesData.length; i++) {
-            let bName = branchNamesData[i].replace(/ Şubesi/gi, '');
-            let bSalesRev = rangeSalesRecords.filter(r => (r.branch || '').includes(branchNamesData[i])).reduce((sum, r) => sum + parseTurkishFloat(r.amount), 0);
-            let bSnapDiff = endLog.b[i] - startLog.b[i];
-            let diff = bSalesRev > 0 ? bSalesRev : Math.max(0, bSnapDiff);
-            branchDeltas.push({ name: bName, rev: diff });
-        }
-        branchDeltas.sort((a,b) => b.rev - a.rev);
-        let topBranches = branchDeltas.slice(0, 5);
-
         let topBranchesHtml = '<div style="margin-top:1.5rem; border-top:1px dashed var(--border); padding-top:1.25rem; grid-column:1/-1;">';
-        topBranchesHtml += '<div style="font-weight:800; margin-bottom:1rem; color:var(--text); font-size:0.95rem;"><i class="fas fa-trophy mr-2" style="color:var(--sys-orange)"></i> Seçili Tarihlerde Ciro Büyümesi En Yüksek 5 Şube <span style="font-size:0.75rem; color:var(--text3); font-weight:600;">(Geçmiş kayıtlara yapılan güncellemeler dahildir)</span></div>';
+        topBranchesHtml += '<div style="font-weight:800; margin-bottom:1rem; color:var(--text); font-size:0.95rem;"><i class="fas fa-trophy mr-2" style="color:var(--sys-orange)"></i> Seçili Tarihlerde Ciro Büyümesi En Yüksek 5 Şube <span style="font-size:0.75rem; color:var(--text3); font-weight:600;">(Tüm güncelleme ve satışlar dahildir)</span></div>';
 
         if (topBranches.length > 0 && topBranches[0].rev > 0) {
             topBranchesHtml += '<div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:1rem;">';
@@ -1691,16 +1605,18 @@ function renderCiroLogs() {
         }
         topBranchesHtml += '</div>';
 
+        // Müşteri Trendi Hesabı: Gerçek ürün kategorilerine öncelik ver
         let rCats = {};
-        rangeSalesRecords.forEach(r => {
+        rangeRecords.forEach(r => {
             let c = r.category || 'Diğer';
             rCats[c] = (rCats[c] || 0) + 1;
         });
 
         let topCat = 'Veri Yok';
         let topCatCount = 0;
+        // Limit Öğren ve Genel Ürün Bilgisi haricindeki gerçek ürün kategorilerine öncelik ver
         Object.keys(rCats).forEach(k => {
-            if (k !== 'Diğer' && k !== 'GENEL ÜRÜN BİLGİSİ' && rCats[k] > topCatCount) { 
+            if (k !== 'Diğer' && k !== 'GENEL ÜRÜN BİLGİSİ' && k !== 'LİMİT ÖĞREN' && rCats[k] > topCatCount) { 
                 topCatCount = rCats[k]; 
                 topCat = k; 
             }
@@ -1708,6 +1624,7 @@ function renderCiroLogs() {
         
         if (topCat === 'Veri Yok') {
             if (rCats['GENEL ÜRÜN BİLGİSİ'] > 0) { topCat = 'Genel Ürün Bilgisi'; topCatCount = rCats['GENEL ÜRÜN BİLGİSİ']; }
+            else if (rCats['LİMİT ÖĞREN'] > 0) { topCat = 'Limit Sorgulama'; topCatCount = rCats['LİMİT ÖĞREN']; }
             else if (rCats['Diğer'] > 0) { topCat = 'Diğer Kategoriler'; topCatCount = rCats['Diğer']; }
         }
 
@@ -1718,8 +1635,13 @@ function renderCiroLogs() {
            if(amt > 0) { totalRevForAvg += amt; totalSalesForAvg++; }
         });
         var avgBasket = totalSalesForAvg > 0 ? Math.round(totalRevForAvg / totalSalesForAvg) : 0;
-        var displaySalesCount = actualSalesCount > 0 ? actualSalesCount : (avgBasket > 0 ? Math.max(0, Math.round(netRevenue / avgBasket)) : 0);
-        var displaySalesCaption = actualSalesCount > 0 ? "(Geçerli döneme ait gerçekleşen satış adedi)" : "(Net Ciro / Ort. Sepet Tutarı)";
+        
+        // Satış sayısı: Günlük net ciroyu ortalama sepet tutarına oranlayarak geçmiş kayıtlardan dönen satış adedini de hesaba kat
+        var estimatedSalesCount = avgBasket > 0 ? Math.round(netRevenue / avgBasket) : 0;
+        var displaySalesCount = Math.max(actualSalesCount, estimatedSalesCount);
+        var displaySalesCaption = actualSalesCount > 0 && actualSalesCount === displaySalesCount 
+            ? "(Seçili tarihteki gerçekleşen satış adedi)" 
+            : "(Geçmiş ve yeni kayıtlardan toplam işlem)";
 
         miniReportHtml = warningBanner + `
         <div style="background:var(--surface-glass); border:1px solid var(--border); border-left:4px solid var(--sys-purple); border-radius:1.5rem; padding:1.5rem; margin-bottom:1.5rem; box-shadow:var(--shadow-md); animation: fadeIn 0.4s ease; backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);">
@@ -1729,19 +1651,19 @@ function renderCiroLogs() {
             
             <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:1.25rem;">
                 <div>
-                    <div style="font-size:0.75rem; font-weight:800; color:var(--text3); text-transform:uppercase; margin-bottom:6px;">DÖNEM TOPLAM CİROSU</div>
-                    <div style="font-size:1.8rem; font-weight:800; color:var(--text); font-family:monospace; line-height:1.2;">${fmt(netRevenue)}</div>
+                    <div style="font-size:0.75rem; font-weight:800; color:var(--text3); text-transform:uppercase; margin-bottom:6px;">SEÇİLİ DÖNEM NET CİRO ARTIŞI</div>
+                    <div style="font-size:1.8rem; font-weight:800; color:var(--sys-green); font-family:monospace; line-height:1.2;">+${fmt(netRevenue)}</div>
                     <div style="font-size:0.75rem; font-weight:700; margin-top:4px;">${pctChangeHtml} <span style="color:var(--text3); font-weight:600;">(Önceki eşdeğer döneme göre)</span></div>
                 </div>
                 <div>
                     <div style="font-size:0.75rem; font-weight:800; color:var(--text3); text-transform:uppercase; margin-bottom:6px;">SATIŞ / İŞLEM ADEDİ</div>
-                    <div style="font-size:1.8rem; font-weight:800; color:var(--sys-green); font-family:monospace; line-height:1.2;">${displaySalesCount}</div>
+                    <div style="font-size:1.8rem; font-weight:800; color:var(--text); font-family:monospace; line-height:1.2;">${displaySalesCount}</div>
                     <div style="font-size:0.7rem; font-weight:600; color:var(--text3); margin-top:4px;">${displaySalesCaption}</div>
                 </div>
                 <div>
                     <div style="font-size:0.75rem; font-weight:800; color:var(--text3); text-transform:uppercase; margin-bottom:6px;" title="Bu tarihler arasında sisteme yeni girilmiş müşterilerden gelen satışların en yoğun olduğu kategori.">YENİ MÜŞTERİ TRENDİ <i class="fas fa-info-circle text-xs opacity-70"></i></div>
                     <div style="font-size:1.4rem; font-weight:800; color:var(--sys-orange); line-height:1.2; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${topCat}</div>
-                    <div style="font-size:0.8rem; font-weight:800; color:var(--text3); margin-top:4px;">${topCatCount > 0 ? topCatCount + ' <span style="font-size:0.7rem; font-weight:600;">YENİ KAYIT SATIŞI</span>' : 'Yeni Kayıt Yok'}</div>
+                    <div style="font-size:0.8rem; font-weight:800; color:var(--text3); margin-top:4px;">${topCatCount > 0 ? topCatCount + ' <span style="font-size:0.7rem; font-weight:600;">KAYIT / TALEP</span>' : 'Kayıt Yok'}</div>
                 </div>
             </div>
             
@@ -1749,7 +1671,7 @@ function renderCiroLogs() {
         </div>`;
     }
 
-    var latestLog = validLogs[validLogs.length - 1];
+    var latestLog = validLogs.length > 0 ? validLogs[validLogs.length - 1] : allSnapLogs[allSnapLogs.length - 1];
     var latestDateStr = latestLog.t.split(' ')[0]; 
 
     var yesterdayLog = null;
@@ -1820,7 +1742,7 @@ function renderCiroLogs() {
     ${miniReportHtml}
     <div style="background:linear-gradient(135deg, var(--sys-blue), #0284c7); border-radius:1.5rem; padding:2rem; margin-bottom:1.5rem; color:#fff; display:grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap:1.5rem; box-shadow:0 10px 25px -5px rgba(14,165,233,0.4);">
         <div>
-            <div style="font-size:0.85rem; font-weight:800; text-transform:uppercase; letter-spacing:0.1em; opacity:0.9; margin-bottom:0.5rem;">TÜM ŞUBELER TOPLAM (KÜMÜLATİF)</div>
+            <div style="font-size:0.85rem; font-weight:800; text-transform:uppercase; letter-spacing:0.1em; opacity:0.9; margin-bottom:0.5rem;">TÜM ŞUBELER AY SONU KÜMÜLATİF TOPLAM</div>
             <div style="font-size:3rem; font-weight:800; line-height:1; font-family:monospace; letter-spacing:-1px;">${fmt(currentG)}</div>
             ${yestHtml}
         </div>
@@ -1842,6 +1764,7 @@ function renderCiroLogs() {
 
     var branchGrid = '<div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(280px, 1fr)); gap:1.25rem;">';
     
+    // Şube Kartlarında Net Ciro Katkısı ve Kümülatif Ciro Net Ayrıştırılmıştır
     for (let i = 0; i < branchNamesData.length; i++) {
         let bName = branchNamesData[i].replace(/ Şubesi/gi, '');
         let currentVal = latestLog.b[i] || 0;
@@ -1852,20 +1775,23 @@ function renderCiroLogs() {
         let deltaHtml = '';
         if (yesterdayLog) {
             if (delta > 0) {
-                deltaHtml = `<div style="display:flex; align-items:center; gap:6px; margin-top:0.5rem;"><span style="background:rgba(16,185,129,0.1); color:var(--sys-green); padding:4px 8px; border-radius:6px; font-weight:800; font-size:0.8rem; font-family:monospace;"><i class="fas fa-arrow-up mr-1"></i> +${fmt(delta)}</span><span style="background:rgba(16,185,129,0.1); color:var(--sys-green); padding:4px 8px; border-radius:6px; font-weight:800; font-size:0.8rem;">%${deltaPct.toFixed(1)}</span></div>`;
+                deltaHtml = `<div style="display:flex; align-items:center; gap:6px; margin-top:0.5rem;"><span style="background:rgba(16,185,129,0.1); color:var(--sys-green); padding:4px 8px; border-radius:6px; font-weight:800; font-size:0.8rem; font-family:monospace;"><i class="fas fa-arrow-up mr-1"></i> +${fmt(delta)} Net Günlük Artış</span></div>`;
             } else if (delta < 0) {
-                deltaHtml = `<div style="display:flex; align-items:center; gap:6px; margin-top:0.5rem;"><span style="background:rgba(239,68,68,0.1); color:var(--sys-red); padding:4px 8px; border-radius:6px; font-weight:800; font-size:0.8rem; font-family:monospace;"><i class="fas fa-arrow-down mr-1"></i> ${fmt(delta)}</span><span style="background:rgba(239,68,68,0.1); color:var(--sys-red); padding:4px 8px; border-radius:6px; font-weight:800; font-size:0.8rem;">%${Math.abs(deltaPct).toFixed(1)}</span></div>`;
+                deltaHtml = `<div style="display:flex; align-items:center; gap:6px; margin-top:0.5rem;"><span style="background:rgba(239,68,68,0.1); color:var(--sys-red); padding:4px 8px; border-radius:6px; font-weight:800; font-size:0.8rem; font-family:monospace;"><i class="fas fa-arrow-down mr-1"></i> ${fmt(delta)} Düşüş</span></div>`;
             } else {
-                deltaHtml = `<div style="margin-top:0.5rem; color:var(--text3); font-weight:800; font-size:0.8rem; padding:4px 0;">Düne Göre Değişim Yok</div>`;
+                deltaHtml = `<div style="margin-top:0.5rem; color:var(--text3); font-weight:700; font-size:0.8rem; padding:4px 0;">Düne Göre Net Değişim Yok</div>`;
             }
         } else {
-             deltaHtml = `<div style="margin-top:0.5rem; color:var(--text3); font-weight:800; font-size:0.8rem; padding:4px 0;">Önceki gün verisi yok</div>`;
+             deltaHtml = `<div style="margin-top:0.5rem; color:var(--text3); font-weight:700; font-size:0.8rem; padding:4px 0;">Önceki gün verisi yok</div>`;
         }
 
         branchGrid += `
         <div class="card" style="padding:1.5rem; cursor:pointer; transition:transform 0.2s;" onclick="openLogModal(${i}, '${bName}')" onmouseover="this.style.transform='translateY(-4px)'; this.style.borderColor='var(--sys-blue)';" onmouseout="this.style.transform='translateY(0)'; this.style.borderColor='var(--border)';">
-            <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:1rem;">
-                <div style="font-weight:800; color:var(--text); font-size:1.1rem;">${bName}</div>
+            <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:0.75rem;">
+                <div>
+                    <div style="font-weight:800; color:var(--text); font-size:1.1rem;">${bName}</div>
+                    <div style="font-size:0.7rem; font-weight:700; color:var(--text3); text-transform:uppercase;">AYLIK KÜMÜLATİF TOPLAM</div>
+                </div>
                 <div style="width:32px; height:32px; border-radius:8px; background:var(--surface2); display:flex; justify-content:center; align-items:center; color:var(--sys-blue);"><i class="fas fa-search"></i></div>
             </div>
             <div style="font-size:1.6rem; font-weight:800; color:var(--sys-blue); font-family:monospace; line-height:1; letter-spacing:-0.5px;">${fmt(currentVal)}</div>
@@ -1896,7 +1822,6 @@ function openLogModal(branchIndex, branchName) {
     var logsChronological = allSnapLogs.slice();
     var changeEvents = [];
 
-    // Tekrarlayan durağan logları eleyip sadece GERÇEK ciro değişim anlarını bul
     for (var i = 0; i < logsChronological.length; i++) {
         var currentLog = logsChronological[i];
         var currentVal = currentLog.b[branchIndex] || 0;
@@ -1912,7 +1837,6 @@ function openLogModal(branchIndex, branchName) {
             var prevVal = logsChronological[i - 1].b[branchIndex] || 0;
             var diff = currentVal - prevVal;
             
-            // Yalnızca bakiye farkı 0'dan farklı olan anları geçmiş kaydı olarak al
             if (Math.abs(diff) > 0.01) {
                 changeEvents.push({
                     t: currentLog.t,
@@ -1921,7 +1845,6 @@ function openLogModal(branchIndex, branchName) {
                     isInitial: false
                 });
             } else if (i === logsChronological.length - 1 && changeEvents.length > 0) {
-                // Son log anının zamanını güncelle
                 changeEvents[changeEvents.length - 1].latestT = currentLog.t;
             }
         }
@@ -2137,7 +2060,7 @@ async function renderExportReport() {
         }
 
         var gConv = gCalls > 0 ? ((gSales / gCalls) * 100).toFixed(1) : 0;
-        var periodString = startVal === endVal ? startVal : (startVal + ' \u2013 ' + endVal);
+        var periodString = startVal === endVal ? startVal : (startVal + ' – ' + endVal);
 
         window.currentExportData = {
             period: periodString,
@@ -2593,72 +2516,6 @@ function applySmartParsing() {
         else product = "GENEL ÜRÜN BİLGİSİ";
     }
 
-    if (phone) {
-        var compContact = getCompareNum(phone);
-        if (compContact.length >= 7) {
-            var exists = allRecordsData.find(function(r){ return getCompareNum(r.contact) === compContact; });
-            if(exists) { 
-                var isSale = isRecordSale(exists);
-                var statusText = isSale ? 'Satış Gerçekleşti (₺' + new Intl.NumberFormat('tr-TR').format(parseTurkishFloat(exists.amount)) + ')' : 'Müşteri Kaydı / Yönlendirme';
-                var customerNoText = exists.customerNo ? '\n• Müşteri No: ' + exists.customerNo : '';
-                
-                var msg = 'Çözümlenen numaraya (' + phone + ') ait kayıt bulunmaktadır.\n\n' +
-                          '• Müşteri Adı: ' + (exists.name || 'Belirtilmemiş') + customerNoText + '\n' +
-                          '• Şube: ' + (exists.branch || 'Belirtilmemiş') + '\n' +
-                          '• Ürün: ' + (exists.product || 'Belirtilmemiş') + '\n' +
-                          '• Durum: ' + statusText;
-
-                showDuplicatePrompt(
-                    'Mükerrer Müşteri Tespit Edildi!',
-                    msg,
-                    function onTamam() {
-                        document.getElementById('smartParserInput').value = "";
-                    },
-                    function onSatisEkle() {
-                        addInputRow();
-                        var rows = document.querySelectorAll('#inputContainer > .entry-card');
-                        var targetRow = rows[rows.length - 1];
-
-                        targetRow.querySelector('.inp-contact').value = phone;
-                        if (exists.name) targetRow.querySelector('.inp-name').value = exists.name;
-                        var cNo = targetRow.querySelector('.inp-customerno');
-                        if (cNo && exists.customerNo) cNo.value = exists.customerNo;
-
-                        if (exists.branch) {
-                            var selB = targetRow.querySelector('.inp-branch');
-                            for(var i=0; i<selB.options.length; i++) {
-                                if(selB.options[i].value === exists.branch) { selB.selectedIndex = i; break; }
-                            }
-                        }
-                        if (exists.media || media) {
-                            var selM = targetRow.querySelector('.inp-media');
-                            var mVal = exists.media || media;
-                            for(var j=0; j<selM.options.length; j++) {
-                                if(selM.options[j].value === mVal) { selM.selectedIndex = j; break; }
-                            }
-                        }
-                        if (exists.category) {
-                            var selC = targetRow.querySelector('.inp-category');
-                            for(var k=0; k<selC.options.length; k++) {
-                                if(selC.options[k].value === exists.category) { selC.selectedIndex = k; break; }
-                            }
-                        }
-                        if (exists.product) targetRow.querySelector('.inp-product').value = exists.product;
-
-                        document.getElementById('smartParserInput').value = "";
-                        var amountInp = targetRow.querySelector('.inp-amount');
-                        if (amountInp) {
-                            amountInp.focus();
-                            amountInp.style.boxShadow = '0 0 0 4px rgba(16, 185, 129, 0.35)';
-                            setTimeout(function() { amountInp.style.boxShadow = ''; }, 2500);
-                        }
-                    }
-                );
-                return; 
-            }
-        }
-    }
-
     addInputRow();
     var rows = document.querySelectorAll('#inputContainer > .entry-card');
     var targetRow = rows[rows.length - 1];
@@ -2690,86 +2547,7 @@ function applySmartParsing() {
     if(product) targetRow.querySelector('.inp-product').value = product;
 
     document.getElementById('smartParserInput').value = "";
-    showToast('Metin başarıyla çözümlendi, lütfen eksik alanları doldurunuz.');
-}
-
-function checkDuplicatePhone(inputEl) {
-    var rawContact = inputEl.value;
-    var contact = rawContact.replace(/^0+/, ''); 
-    var compContact = getCompareNum(contact);
-
-    if (compContact.length >= 7) {
-        var exists = allRecordsData.find(function(r){
-            return getCompareNum(r.contact) === compContact;
-        });
-        
-        if(exists) {
-            var isSale = isRecordSale(exists);
-            var statusText = isSale ? 'Satış Gerçekleşti (₺' + new Intl.NumberFormat('tr-TR').format(parseTurkishFloat(exists.amount)) + ')' : 'Müşteri Kaydı / Yönlendirme';
-            var customerNoText = exists.customerNo ? '\n• Müşteri No: ' + exists.customerNo : '';
-            
-            var msg = 'Girdiğiniz numaraya (' + rawContact + ') ait kayıt bulunmaktadır.\n\n' +
-                      '• Müşteri Adı: ' + (exists.name || 'Belirtilmemiş') + customerNoText + '\n' +
-                      '• Şube: ' + (exists.branch || 'Belirtilmemiş') + '\n' +
-                      '• Ürün: ' + (exists.product || 'Belirtilmemiş') + '\n' +
-                      '• Durum: ' + statusText;
-
-            showDuplicatePrompt(
-                'Mükerrer Müşteri Tespit Edildi!',
-                msg,
-                function onTamam() {
-                    inputEl.value = '';
-                },
-                function onSatisEkle() {
-                    var targetRow = inputEl.closest('.entry-card');
-                    if (exists.name) targetRow.querySelector('.inp-name').value = exists.name;
-                    var cNo = targetRow.querySelector('.inp-customerno');
-                    if (cNo && exists.customerNo) cNo.value = exists.customerNo;
-
-                    if (exists.branch) {
-                        var selB = targetRow.querySelector('.inp-branch');
-                        for(var i=0; i<selB.options.length; i++) {
-                            if(selB.options[i].value === exists.branch) { selB.selectedIndex = i; break; }
-                        }
-                    }
-                    if (exists.media) {
-                        var selM = targetRow.querySelector('.inp-media');
-                        for(var j=0; j<selM.options.length; j++) {
-                            if(selM.options[j].value === exists.media) { selM.selectedIndex = j; break; }
-                        }
-                    }
-                    if (exists.category) {
-                        var selC = targetRow.querySelector('.inp-category');
-                        for(var k=0; k<selC.options.length; k++) {
-                            if(selC.options[k].value === exists.category) { selC.selectedIndex = k; break; }
-                        }
-                    }
-                    if (exists.product) targetRow.querySelector('.inp-product').value = exists.product;
-
-                    var amountInp = targetRow.querySelector('.inp-amount');
-                    if (amountInp) {
-                        amountInp.focus();
-                        amountInp.style.boxShadow = '0 0 0 4px rgba(16, 185, 129, 0.35)';
-                        setTimeout(function() { amountInp.style.boxShadow = ''; }, 2500);
-                    }
-                }
-            );
-            return;
-        }
-
-        var allContacts = document.querySelectorAll('.inp-contact');
-        var matchCount = 0;
-        allContacts.forEach(function(el) {
-            var loopContact = el.value.replace(/^0+/, '');
-            if (getCompareNum(loopContact) === compContact) matchCount++;
-        });
-        if (matchCount > 1) {
-            showWarning('Spam Engeli', 'Bu numarayı aynı formda birden fazla kez girdiniz!');
-            inputEl.value = ''; 
-            inputEl.closest('.entry-card').classList.add('error');
-            setTimeout(() => inputEl.closest('.entry-card').classList.remove('error'), 600);
-        }
-    }
+    showToast('Metin başarıyla çözümlendi.');
 }
 
 function addInputRow(){
@@ -2781,7 +2559,7 @@ function addInputRow(){
     +'<div><label class="inp-label">Tarih & Saat</label><input type="datetime-local" class="inp" value="'+getTodayDT()+'"></div>'
     +'<div><label class="inp-label" style="color:var(--sys-blue)">Şube <span style="color:var(--sys-red)">*</span></label><select class="inp inp-branch">'+bOpts+'</select></div>'
     +'<div><label class="inp-label" style="color:var(--sys-blue)">Müşteri Adı Soyadı <span style="color:var(--sys-red)">*</span></label><input type="text" class="inp inp-name" placeholder="Örn: Ahmet Yılmaz"></div>'
-    +'<div><label class="inp-label">İletişim Numarası</label><input type="text" class="inp inp-contact" placeholder="5XX..." oninput="if(this.value.length>=7) checkDuplicatePhone(this)"></div>'
+    +'<div><label class="inp-label">İletişim Numarası</label><input type="text" class="inp inp-contact" placeholder="5XX..."></div>'
     +'<div><label class="inp-label">Müşteri No (F Sütunu)</label><input type="text" class="inp inp-customerno" placeholder="Opsiyonel"></div>'
     +'<div><label class="inp-label" style="color:var(--sys-blue)">Geliş Medyası <span style="color:var(--sys-red)">*</span></label><select class="inp inp-media"><option value="" disabled selected>Seçiniz...</option><option value="Instagram">Instagram</option><option value="Whatsapp">Whatsapp</option><option value="Facebook">Facebook</option><option value="Çağrı">Çağrı</option><option value="Web Sitesi Form">Web Sitesi Form</option><option value="SMS LİNK">SMS LİNK</option></select></div>'
     +'</div>'
@@ -2798,7 +2576,6 @@ async function submitAllRows(){
   var rows=document.querySelectorAll('#inputContainer > .entry-card');
   var data=[];
   var hasEmptyError=false;
-  var currentSubmissions=[];
 
   for(var i=0; i<rows.length; i++){
     var row = rows[i];
@@ -2815,7 +2592,6 @@ async function submitAllRows(){
     if(!branch||!name||!media){hasEmptyError=true; continue;}
     
     var contact = rawContact.replace(/^0+/, '');
-    var compContact = getCompareNum(contact);
 
     data.push({
       date:dv.replace('T',' '),
@@ -2846,11 +2622,6 @@ async function submitAllRows(){
       document.getElementById('inputContainer').innerHTML='';
       addInputRow();
       refreshData();
-    }else if(result.status==='warning'){
-        showWarning('Kısmi Başarı', result.message);
-        document.getElementById('inputContainer').innerHTML='';
-        addInputRow();
-        refreshData();
     }else{
       showWarning('Hata', result.message);
     }
