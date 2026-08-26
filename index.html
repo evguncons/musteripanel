@@ -2807,10 +2807,11 @@ function applySmartParsing() {
     }
 
     let cleanProdText = prodText
-        .replace(/telefon\s*\d+/gi, '')
-        .replace(/mağaza\s*[^\n]+/gi, '')
-        .replace(/e-posta\s*[^\n]+/gi, '')
-        .replace(/tc kimlik\s*\d+/gi, '');
+        .replace(/\btelefon\s*\d+/gi, '')
+        .replace(/\bmağaza\s+[a-zçğıöşü\s]+\(\d+\)/gi, '')
+        .replace(/\bmağaza\s+[a-zçğıöşü\s]+/gi, '')
+        .replace(/\be-posta\s*\S+/gi, '')
+        .replace(/\btc\s*kimlik\s*\d+/gi, '');
 
     if (!matchedRule) {
         for (let rule of categoryRules) {
@@ -2882,6 +2883,33 @@ function applySmartParsing() {
             }
 
             product = parts.join(" ");
+        }
+    }
+
+    if (!category && product) {
+        let pLow = product.toLocaleLowerCase('tr-TR');
+        if (pLow.includes('bisiklet') || pLow.includes('moped') || pLow.includes('scooter') || pLow.includes('skuter') || pLow.includes('motor') || pLow.includes('araba') || pLow.includes('volta') || pLow.includes('kuba') || pLow.includes('rks') || pLow.includes('arora') || pLow.includes('yuki') || pLow.includes('kanuni') || pLow.includes('mondial') || pLow.includes('kral') || pLow.includes('apex') || pLow.includes('ev1') || pLow.includes('vsm') || pLow.includes('vs7') || pLow.includes('se-')) {
+            category = "Elektrikli-Benzinli Araç";
+        } else if (pLow.includes('telefon') || pLow.includes('iphone') || pLow.includes('samsung') || pLow.includes('xiaomi') || pLow.includes('redmi') || pLow.includes('poco') || pLow.includes('tablet') || pLow.includes('ipad') || pLow.includes('laptop') || pLow.includes('bilgisayar') || pLow.includes('tv') || pLow.includes('televizyon') || pLow.includes('playstation') || pLow.includes('ps5') || pLow.includes('ps4') || pLow.includes('kulaklık') || pLow.includes('saat')) {
+            category = "Elektronik";
+        } else if (pLow.includes('çamaşır') || pLow.includes('bulaşık') || pLow.includes('kurutma') || pLow.includes('buzdolabı') || pLow.includes('dondurucu') || pLow.includes('fırın') || pLow.includes('ankastre') || pLow.includes('ocak') || pLow.includes('klima') || pLow.includes('kombi')) {
+            category = "Beyaz Eşya";
+        } else if (pLow.includes('süpürge') || pLow.includes('airfryer') || pLow.includes('fritöz') || pLow.includes('kahve') || pLow.includes('çay') || pLow.includes('tost') || pLow.includes('blender') || pLow.includes('robotu') || pLow.includes('ütü') || pLow.includes('dyson') || pLow.includes('roborock')) {
+            category = "Elektrikli Ev Aletleri";
+        } else if (pLow.includes('koltuk') || pLow.includes('köşe') || pLow.includes('oturma') || pLow.includes('masa') || pLow.includes('sandalye') || pLow.includes('gardırop') || pLow.includes('dolap') || pLow.includes('kanepe') || pLow.includes('ünite')) {
+            category = "Mobilya";
+        } else if (pLow.includes('baza') || pLow.includes('yatak') || pLow.includes('başlık') || pLow.includes('karyola') || pLow.includes('somya') || pLow.includes('bambi') || pLow.includes('yataş')) {
+            category = "Baza+Yatak+Başlık";
+        } else if (pLow.includes('bebek') || pLow.includes('puset') || pLow.includes('beşik') || pLow.includes('akülü')) {
+            category = "Bebek ve Çocuk";
+        } else if (pLow.includes('tencere') || pLow.includes('tava') || pLow.includes('çatal') || pLow.includes('bıçak') || pLow.includes('porselen') || pLow.includes('bardak') || pLow.includes('züccaciye') || pLow.includes('karaca')) {
+            category = "Züccaciye";
+        } else if (pLow.includes('halı') || pLow.includes('yolluk') || pLow.includes('kilim')) {
+            category = "Halı";
+        } else if (pLow.includes('nevresim') || pLow.includes('uyku') || pLow.includes('battaniye') || pLow.includes('yorgan') || pLow.includes('yastık') || pLow.includes('perde')) {
+            category = "Tekstil";
+        } else if (pLow.includes('ayakkabı') || pLow.includes('bot') || pLow.includes('terlik') || pLow.includes('sneaker') || pLow.includes('nike') || pLow.includes('adidas')) {
+            category = "Ayakkabı";
         }
     }
 
