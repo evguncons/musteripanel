@@ -2919,10 +2919,14 @@ function applySmartParsing() {
         else product = "GENEL ÜRÜN BİLGİSİ";
     }
 
-    product = product
-        .replace(/^(?:merhaba|slm|selam|iyi|günler|akşamlar|istiyorum|bilgi|almak|fiyatı|fiyatlar|nedir|ne|kadar|var|mı|yok|mu|elden|taksitle|\s)+/gi, '')
-        .trim();
-    if (!product || product.length < 3) product = matchedKeyword ? matchedKeyword.toUpperCase() : category;
+    if (explicitProduct && explicitProduct.length >= 3) {
+        product = explicitProduct;
+    } else {
+        product = product
+            .replace(/^(?:merhaba|slm|selam|iyi|günler|akşamlar|istiyorum|bilgi|almak|fiyatı|fiyatlar|nedir|ne|kadar|var|mı|yok|mu|elden|taksitle|\s)+/gi, '')
+            .trim();
+        if (!product || product.length < 3) product = matchedKeyword ? matchedKeyword.toUpperCase() : category;
+    }
 
     if (phone) {
         var compContact = getCompareNum(phone);
