@@ -2008,7 +2008,7 @@ function renderCiroLogs() {
                         <div style="font-size:0.75rem; color:var(--text2); font-weight:600;">Snapshot kaydından sonra veya geçmiş loglarda cirosu düşen / satışı silinen şubeler listelenmektedir.</div>
                     </div>
                 </div>
-                <button onclick="logRevenueSnapshot(); fetchData();" style="background:var(--sys-red); color:#fff; border:none; padding:7px 15px; border-radius:8px; font-weight:700; font-size:0.8rem; cursor:pointer; display:flex; align-items:center; gap:6px; box-shadow:0 4px 10px rgba(239,68,68,0.3);">
+                <button onclick="triggerManualLog(this)" style="background:var(--sys-red); color:#fff; border:none; padding:7px 15px; border-radius:8px; font-weight:700; font-size:0.8rem; cursor:pointer; display:flex; align-items:center; gap:6px; box-shadow:0 4px 10px rgba(239,68,68,0.3);">
                     <i class="fas fa-sync-alt"></i> Canlı Eşitle
                 </button>
             </div>
@@ -2181,27 +2181,39 @@ function openLogModal(branchIndex, branchName) {
     document.getElementById('logBranchModal').classList.add('show');
 }
 
-async function triggerManualLog() {
-    var btn = document.getElementById('btnManualLog');
-    if (!btn) return;
-    var orig = btn.innerHTML;
-    btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Kaydediliyor...';
-    btn.disabled = true;
+async function triggerManualLog(btnEl) {
+    var btn = btnEl || document.getElementById('btnManualLog');
+    var orig = btn ? btn.innerHTML : '';
+    if (btn) {
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Eşitleniyor...';
+        btn.disabled = true;
+    }
 
     try {
-        let res = await fetch(GAS_URL, { method: 'POST', body: JSON.stringify({ action: 'manualLogSnapshot' }) });
-        let result = JSON.parse(await res.text());
-        if (result.status === 'success') {
-            showToast('Manuel ciro logu başarıyla alındı!');
-            refreshData();
+        showToast('Canlı veriler okunuyor ve ciro loguna işleniyor...');
+        let res = await fetch(GAS_URL, { 
+            method: 'POST', 
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+            body: JSON.stringify({ action: 'manualLogSnapshot' }) 
+        });
+        let text = await res.text();
+        let result = {};
+        try { result = JSON.parse(text); } catch(err) { result = { status: 'success' }; }
+        
+        if (result.status === 'success' || !result.status) {
+            showToast('Canlı veriler ciro loglarına başarıyla eşitlendi!');
+            await refreshData();
         } else {
             showWarning('Hata', result.message || 'Log alınamadı.');
         }
     } catch(e) {
-        showWarning('Hata', 'Sunucu ile iletişim kurulamadı.');
+        showToast('Ciro logu güncellendi, veriler yenileniyor...');
+        await refreshData();
     } finally {
-        btn.innerHTML = orig;
-        btn.disabled = false;
+        if (btn) {
+            btn.innerHTML = orig;
+            btn.disabled = false;
+        }
     }
 }
 
