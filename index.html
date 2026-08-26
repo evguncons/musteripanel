@@ -2575,15 +2575,31 @@ function applySmartParsing() {
         { priority: 10, key: "gemlik", branch: "İnegöl Şubesi" },
         { priority: 10, key: "düzce", branch: "Düzce Şubesi" },
         { priority: 10, key: "duzce", branch: "Düzce Şubesi" },
-        { priority: 10, key: "hendek", branch: "Düzce Şubesi" },
         { priority: 10, key: "gölyaka", branch: "Düzce Şubesi" },
         { priority: 10, key: "akçakoca", branch: "Düzce Şubesi" },
+        { priority: 10, key: "sakarya", branch: "İzmit Şubesi" },
+        { priority: 10, key: "adapazarı", branch: "İzmit Şubesi" },
+        { priority: 10, key: "adapazari", branch: "İzmit Şubesi" },
+        { priority: 10, key: "serdivan", branch: "İzmit Şubesi" },
+        { priority: 10, key: "hendek", branch: "İzmit Şubesi" },
+        { priority: 10, key: "akyazı", branch: "İzmit Şubesi" },
+        { priority: 10, key: "akyazi", branch: "İzmit Şubesi" },
+        { priority: 10, key: "sapanca", branch: "İzmit Şubesi" },
+        { priority: 10, key: "karasu", branch: "İzmit Şubesi" },
+        { priority: 10, key: "arifiye", branch: "İzmit Şubesi" },
+        { priority: 10, key: "erenler", branch: "İzmit Şubesi" },
+        { priority: 10, key: "pamukova", branch: "İzmit Şubesi" },
+        { priority: 10, key: "geyve", branch: "İzmit Şubesi" },
+        { priority: 10, key: "ferizli", branch: "İzmit Şubesi" },
+        { priority: 10, key: "kaynarca", branch: "İzmit Şubesi" },
+        { priority: 10, key: "kocaali", branch: "İzmit Şubesi" },
         { priority: 10, key: "izmit", branch: "İzmit Şubesi" },
         { priority: 10, key: "i̇zmit", branch: "İzmit Şubesi" },
         { priority: 10, key: "kartepe", branch: "İzmit Şubesi" },
         { priority: 10, key: "yahyakaptan", branch: "İzmit Şubesi" },
         { priority: 1, key: "bursa", branch: "İnegöl Şubesi" },
-        { priority: 1, key: "kocaeli", branch: "İzmit Şubesi" }
+        { priority: 1, key: "kocaeli", branch: "İzmit Şubesi" },
+        { priority: 1, key: "sakarya", branch: "İzmit Şubesi" }
     ];
 
     let searchSpace = (flatText + " " + rawText).toLocaleLowerCase('tr-TR');
@@ -2642,8 +2658,8 @@ function applySmartParsing() {
         return p;
     }
 
-    // 1. Check for Meta / Facebook / Instagram Ad Product Header (e.g. 🛵 **Volta PS4 Benzinli Scooter Hedef AVM'de stoklarda!**)
-    let adMatch = cleanText.match(/(?:🛵|🚲|🚗|📱|📺|🛋️|🛏️)?\s*\*{0,2}([A-Za-z0-9çğıöşüÇĞIÖŞÜ\s\-]{3,50}?)\s*(?:Hedef\s*AVM[\'’]?d?e?\s*stoklarda|şimdi\s*Hedef\s*AVM|fiyatları\s*ve\s*elden\s*taksit|[\'’]ı\s*Hedef\s*AVM[\'’]de\s*inceleyebilirsiniz)/i);
+    // 1. Check for Meta / Facebook / Instagram Ad Product Header (e.g. 🛵 **Volta PS4 Benzinli Scooter Hedef AVM'de stoklarda!**, 🎮 SONY PlayStation 5 Hedef AVM'de **Elden Taksit Fırsatı**)
+    let adMatch = cleanText.match(/(?:🎮|🛵|🚲|🚗|📱|📺|🛋️|🛏️)?\s*\*{0,2}([A-Za-z0-9çğıöşüÇĞIÖŞÜ\s\-]{3,50}?)\s*(?:Hedef\s*AVM[\'’]?d?e?\s*stoklarda|şimdi\s*Hedef\s*AVM|fiyatları\s*ve\s*elden\s*taksit|[\'’]ı\s*Hedef\s*AVM[\'’]de\s*inceleyebilirsiniz|Hedef\s*AVM[\'’]?d?e?\s*\*\*Elden\s*Taksit|düğün\s*paketlerimizde\s*\+\d+\s*taksit)/i);
     if (!adMatch && (cleanText.toLowerCase().includes("düğün paket") || rawText.includes("#DüğünPaketi") || rawText.includes("#mobilyapaketi"))) {
         explicitProduct = "Düğün Paketi";
     } else if (adMatch && adMatch[1]) {
