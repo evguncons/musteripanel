@@ -2613,25 +2613,55 @@ function applySmartParsing() {
 
     // --- ENHANCED PRODUCT & CATEGORY PARSING ENGINE ---
     let explicitProduct = "";
+    let extractedAmount = "";
+
     if (isWebForm) {
-        let formProdMatch = flatText.match(/(?:Tutar|Fiyat)\s*(.*?)(?=\s*(?:Tutar|Fiyat|$))/i);
-        if(formProdMatch && formProdMatch[1]) explicitProduct = formProdMatch[1].trim();
+        let sepetIdx = lines.findIndex(l => {
+            let lowerL = l.toLowerCase();
+            return lowerL === 'sepet' || lowerL === 'ürün' || lowerL === 'sku' || lowerL === 'tutar';
+        });
+
+        if (sepetIdx !== -1) {
+            for (let i = sepetIdx; i < lines.length; i++) {
+                let l = lines[i].trim();
+                let lowerL = l.toLowerCase();
+                if (lowerL === 'sepet' || lowerL === 'ürün' || lowerL === 'sku' || lowerL === 'adet' || lowerL === 'taksit' || lowerL === 'tutar' || lowerL === 'bildirildi' || lowerL === 'müşteri') {
+                    continue;
+                }
+                if (!explicitProduct && l.length > 2 && !l.match(/^\d{8,}$/) && !l.match(/^\d+$/) && !l.match(/^\d+\s*ay$/i) && !l.includes('TL')) {
+                    explicitProduct = l;
+                }
+                if (l.includes('TL') || l.match(/\b\d{1,3}(?:\.\d{3})*,\d{2}\b/)) {
+                    let numOnly = l.replace(/[^\d,]/g, '');
+                    if (numOnly.includes(',00')) numOnly = numOnly.replace(',00', '').replace(/\./g, '');
+                    else numOnly = numOnly.replace(/\D/g, '');
+                    if (numOnly.length >= 3) extractedAmount = numOnly;
+                }
+            }
+        }
     }
-    if (!explicitProduct) {
-        let formProdMatch = flatText.match(/(?:Ürün(?:SKU)?AdetTaksitTutar|Ürün Adı|İlgilendiği Ürün|Sepet|Model)\s*[:\-]?\s*(.*?)(?=\s*(?:Tutar|Fiyat|$))/i);
-        if (!formProdMatch) formProdMatch = flatText.match(/(?:Ürün)\s*[:\-]\s*(.*?)(?=\s*(?:Tutar|Fiyat|$))/i);
-        if (formProdMatch && formProdMatch[1]) explicitProduct = formProdMatch[1].replace(/^[-\s:]+/g, '').trim();
-    }
+
     if (!explicitProduct) {
         let lineProdMatch = rawText.match(/(?:Ürün Adı|İlgilendiği Ürün)\s*[:\-]?\s*([^\n]+)/i);
         if (!lineProdMatch) lineProdMatch = rawText.match(/(?:Ürün)\s*[:\-]\s*([^\n]+)/i);
         if (lineProdMatch) explicitProduct = lineProdMatch[1].trim();
     }
+
     if (explicitProduct) {
-        product = explicitProduct.replace(/^(?:Adet|Taksit|Tutar|SKU|Ürün|Sepet|\s)+/gi, '').trim();
-        product = product.replace(/^(?:AdetTaksitTutar)\s*/gi, '').trim(); 
-        let bcMatch = product.match(/(.*?)\s+\d{8,}$/);
-        if (bcMatch) product = bcMatch[1].trim();
+        if (explicitProduct.includes('\t')) {
+            let parts = explicitProduct.split('\t').map(p => p.trim()).filter(p => p.length > 0);
+            explicitProduct = parts[0];
+        }
+        
+        explicitProduct = explicitProduct
+            .replace(/\t+/g, ' ')
+            .replace(/\b\d{8,}\b.*/g, '')
+            .replace(/\b\d+\s*ay\b.*/gi, '')
+            .replace(/\b\d{1,3}(?:\.\d{3})*(?:,\d{2})?\s*TL\b.*/gi, '')
+            .replace(/^(?:Adet|Taksit|Tutar|SKU|Ürün|Sepet|\s)+/gi, '')
+            .trim();
+
+        product = explicitProduct;
     }
 
     let prodText = (product ? product + " " : "") + lowerClean;
@@ -2940,6 +2970,7 @@ function applySmartParsing() {
     }
     
     if(product) targetRow.querySelector('.inp-product').value = product;
+    if(extractedAmount && targetRow.querySelector('.inp-amount')) targetRow.querySelector('.inp-amount').value = extractedAmount;
 
     document.getElementById('smartParserInput').value = "";
     showToast('Metin başarıyla çözümlendi.');
