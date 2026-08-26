@@ -2395,6 +2395,10 @@ function applySmartParsing() {
     if(!rawText.trim()) return;
 
     var cleanText = rawText
+        .replace(/\[Detayları\s*gör\]\([^\)]*\)/gi, "")
+        .replace(/\[Bu\s*konuşmayı\s*ata\]\([^\)]*\)/gi, "")
+        .replace(/\[[^\]]*\]\([^\)]*\)/g, "")
+        .replace(/#[a-zA-Z0-9çğıöşüÇĞIÖŞÜ]+/g, "")
         .replace(/Bu konuşmayı ata/gi, "")
         .replace(/Bu,?\s*bir reklama yanıttı?r?\.?/gi, "")
         .replace(/Detayları gör/gi, "")
@@ -2623,15 +2627,26 @@ function applySmartParsing() {
         }
         p = p
             .replace(/\t+/g, ' ')
+            .replace(/\[.*?\]\(.*?\)/g, '')
+            .replace(/#[a-zA-Z0-9çğıöşüÇĞIÖŞÜ]+/g, '')
             .replace(/\b\d{8,}\b.*/g, '')
             .replace(/\b\d+\s*ay\b.*/gi, '')
             .replace(/\b\d{1,3}(?:\.\d{3})*(?:,\d{2})?\s*TL\b.*/gi, '')
-            .replace(/^(?:Adet|Taksit|Tutar|SKU|Ürün|Sepet|\s)+/gi, '')
+            .replace(/^(?:Adet|Taksit|Tutar|SKU|Ürün|Sepet|Detayları\s*gör|Bu\s*konuşmayı\s*ata|\s)+/gi, '')
             .trim();
         return p;
     }
 
-    if (isWebForm) {
+    // 1. Check for Meta / Facebook / Instagram Ad Product Header (e.g. 🛵 **Volta PS4 Benzinli Scooter Hedef AVM'de stoklarda!**)
+    let adMatch = cleanText.match(/(?:🛵|🚲|🚗|📱|📺|🛋️|🛏️)?\s*\*{0,2}([A-Za-z0-9çğıöşüÇĞIÖŞÜ\s\-]{3,50}?)\s*(?:Hedef\s*AVM[\'’]?d?e?\s*stoklarda|şimdi\s*Hedef\s*AVM|fiyatları\s*ve\s*elden\s*taksit|[\'’]ı\s*Hedef\s*AVM[\'’]de\s*inceleyebilirsiniz)/i);
+    if (adMatch && adMatch[1]) {
+        let adP = cleanExtractedProductString(adMatch[1].replace(/\*/g, ''));
+        if (adP && adP.length >= 3) {
+            explicitProduct = adP;
+        }
+    }
+
+    if (!explicitProduct && isWebForm) {
         let HEADER_WORDS = ["sepet", "ürün", "urun", "sku", "adet", "taksit", "tutar", "toplam", "bildirildi", "müşteri", "musteri", "yeni", "müşteri bilgisi", "sepet ürün sku adet taksit tutar"];
         for (let i = 0; i < lines.length; i++) {
             let l = lines[i].trim();
@@ -2664,13 +2679,13 @@ function applySmartParsing() {
     }
 
     if (!explicitProduct) {
-        let m = rawText.match(/(?:Sepet|Ürün|SKU|Adet|Taksit|Tutar)\s*[:\-]?\s*([A-Za-z0-9çğıöşüÇĞIÖŞÜ\s\'\"\-\/\.]{4,100}?)(?:\t|\n|\b\d{8,}\b|\b\d+\s*ay\b|\b\d{1,3}(?:\.\d{3})*,\d{2}\s*TL\b|$)/i);
+        let m = cleanText.match(/(?:Sepet|Ürün|SKU|Adet|Taksit|Tutar)\s*[:\-]?\s*([A-Za-z0-9çğıöşüÇĞIÖŞÜ\s\'\"\-\/\.]{4,100}?)(?:\t|\n|\b\d{8,}\b|\b\d+\s*ay\b|\b\d{1,3}(?:\.\d{3})*,\d{2}\s*TL\b|$)/i);
         if (m) explicitProduct = cleanExtractedProductString(m[1]);
     }
 
     if (!explicitProduct) {
-        let lineProdMatch = rawText.match(/(?:Ürün Adı|İlgilendiği Ürün)\s*[:\-]?\s*([^\n]+)/i);
-        if (!lineProdMatch) lineProdMatch = rawText.match(/(?:Ürün)\s*[:\-]\s*([^\n]+)/i);
+        let lineProdMatch = cleanText.match(/(?:Ürün Adı|İlgilendiği Ürün)\s*[:\-]?\s*([^\n]+)/i);
+        if (!lineProdMatch) lineProdMatch = cleanText.match(/(?:Ürün)\s*[:\-]\s*([^\n]+)/i);
         if (lineProdMatch) explicitProduct = cleanExtractedProductString(lineProdMatch[1]);
     }
 
