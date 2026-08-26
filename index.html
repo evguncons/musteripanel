@@ -2489,9 +2489,17 @@ function applySmartParsing() {
 
     if(isWebForm) media = "Web Sitesi Form";
 
-    var phoneMatch = cleanText.match(/(?:0|90|\+90)?\s*5\d{2}[-\s]?\d{3}[-\s]?\d{2}[-\s]?\d{2}/);
+    var phoneMatch = rawText.match(/(?:\+?90\s*|0\s*)?5\d{2}[\s\.\-_/]?\d{3}[\s\.\-_/]?\d{2}[\s\.\-_/]?\d{2}\b/);
     if (!phoneMatch) {
-        phoneMatch = flatText.match(/(?:0|90|\+90)?5\d{9}/);
+        phoneMatch = rawText.match(/(?:\+?90\s*|0\s*)?5\d{2}[\s\.\-_/]?\d{3}[\s\.\-_/]?\d{4}\b/);
+    }
+    if (!phoneMatch) {
+        phoneMatch = rawText.match(/\b5\d{9}\b/);
+    }
+    if (!phoneMatch) {
+        let allDigits = rawText.replace(/\D/g, '');
+        let dMatch = allDigits.match(/(?:90)?(5\d{9})/);
+        if (dMatch) phoneMatch = [dMatch[1]];
     }
     
     if (phoneMatch) {
@@ -2572,6 +2580,11 @@ function applySmartParsing() {
         { priority: 10, key: "çubuklu", branch: "Paşabahçe Şubesi" },
         { priority: 10, key: "inegöl", branch: "İnegöl Şubesi" },
         { priority: 10, key: "inegol", branch: "İnegöl Şubesi" },
+        { priority: 10, key: "yenişehir", branch: "İnegöl Şubesi" },
+        { priority: 10, key: "yenisehir", branch: "İnegöl Şubesi" },
+        { priority: 10, key: "orhangazi", branch: "İnegöl Şubesi" },
+        { priority: 10, key: "iznik", branch: "İnegöl Şubesi" },
+        { priority: 10, key: "i̇znik", branch: "İnegöl Şubesi" },
         { priority: 10, key: "gemlik", branch: "İnegöl Şubesi" },
         { priority: 10, key: "düzce", branch: "Düzce Şubesi" },
         { priority: 10, key: "duzce", branch: "Düzce Şubesi" },
