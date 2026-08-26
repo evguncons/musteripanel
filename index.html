@@ -654,6 +654,124 @@ function showWarning(title, message) {
     document.getElementById('warningModal').classList.add('show');
 }
 
+function showDuplicatePrompt(title, message, onTamamCb, onSatisEkleCb) {
+    document.getElementById('warningTitle').textContent = title;
+    document.getElementById('warningTitle').style.color = 'var(--sys-orange)';
+    document.getElementById('warningIcon').className = 'fas fa-user-tag';
+    document.getElementById('warningIcon').style.color = 'var(--sys-orange)';
+    document.getElementById('warningIconBg').style.background = 'rgba(245, 158, 11, 0.1)';
+    document.getElementById('warningMessage').textContent = message;
+
+    var mainBtn = document.getElementById('warningBtn');
+    var altBtn = document.getElementById('warningAltBtn');
+
+    mainBtn.textContent = 'Tamam';
+    mainBtn.className = 'btn btn-ghost';
+    mainBtn.style.background = 'var(--surface2)';
+    mainBtn.style.color = 'var(--text)';
+    mainBtn.style.border = '1px solid var(--border)';
+
+    altBtn.style.display = 'inline-flex';
+    altBtn.textContent = 'Satış Ekle';
+
+    var newMain = mainBtn.cloneNode(true);
+    var newAlt = altBtn.cloneNode(true);
+    mainBtn.parentNode.replaceChild(newMain, mainBtn);
+    altBtn.parentNode.replaceChild(newAlt, altBtn);
+
+    newMain.onclick = function() {
+        document.getElementById('warningModal').classList.remove('show');
+        if (onTamamCb) onTamamCb();
+    };
+
+    newAlt.onclick = function() {
+        document.getElementById('warningModal').classList.remove('show');
+        if (onSatisEkleCb) onSatisEkleCb();
+    };
+
+    document.querySelector('#warningModal .modal-content').style.borderColor = 'var(--sys-orange)';
+    document.getElementById('warningModal').classList.add('show');
+}
+
+function checkDuplicatePhone(inputEl) {
+    var rawContact = inputEl.value;
+    var contact = rawContact.replace(/^0+/, ''); 
+    var compContact = getCompareNum(contact);
+
+    if (compContact.length >= 7) {
+        var exists = allRecordsData.find(function(r){
+            return getCompareNum(r.contact) === compContact;
+        });
+        
+        if(exists) {
+            var isSale = isRecordSale(exists);
+            var statusText = isSale ? 'Satış Gerçekleşti (₺' + new Intl.NumberFormat('tr-TR').format(parseTurkishFloat(exists.amount)) + ')' : 'Müşteri Kaydı / Yönlendirme';
+            var customerNoText = exists.customerNo ? '\n• Müşteri No: ' + exists.customerNo : '';
+            
+            var msg = 'Girdiğiniz numaraya (' + rawContact + ') ait kayıt bulunmaktadır.\n\n' +
+                      '• Müşteri Adı: ' + (exists.name || 'Belirtilmemiş') + customerNoText + '\n' +
+                      '• Şube: ' + (exists.branch || 'Belirtilmemiş') + '\n' +
+                      '• Ürün: ' + (exists.product || 'Belirtilmemiş') + '\n' +
+                      '• Durum: ' + statusText;
+
+            showDuplicatePrompt(
+                'Mükerrer Müşteri Tespit Edildi!',
+                msg,
+                function onTamam() {
+                    inputEl.value = '';
+                },
+                function onSatisEkle() {
+                    var targetRow = inputEl.closest('.entry-card');
+                    if (exists.name) targetRow.querySelector('.inp-name').value = exists.name;
+                    var cNo = targetRow.querySelector('.inp-customerno');
+                    if (cNo && exists.customerNo) cNo.value = exists.customerNo;
+
+                    if (exists.branch) {
+                        var selB = targetRow.querySelector('.inp-branch');
+                        for(var i=0; i<selB.options.length; i++) {
+                            if(selB.options[i].value === exists.branch) { selB.selectedIndex = i; break; }
+                        }
+                    }
+                    if (exists.media) {
+                        var selM = targetRow.querySelector('.inp-media');
+                        for(var j=0; j<selM.options.length; j++) {
+                            if(selM.options[j].value === exists.media) { selM.selectedIndex = j; break; }
+                        }
+                    }
+                    if (exists.category) {
+                        var selC = targetRow.querySelector('.inp-category');
+                        for(var k=0; k<selC.options.length; k++) {
+                            if(selC.options[k].value === exists.category) { selC.selectedIndex = k; break; }
+                        }
+                    }
+                    if (exists.product) targetRow.querySelector('.inp-product').value = exists.product;
+
+                    var amountInp = targetRow.querySelector('.inp-amount');
+                    if (amountInp) {
+                        amountInp.focus();
+                        amountInp.style.boxShadow = '0 0 0 4px rgba(16, 185, 129, 0.35)';
+                        setTimeout(function() { amountInp.style.boxShadow = ''; }, 2500);
+                    }
+                }
+            );
+            return;
+        }
+
+        var allContacts = document.querySelectorAll('.inp-contact');
+        var matchCount = 0;
+        allContacts.forEach(function(el) {
+            var loopContact = el.value.replace(/^0+/, '');
+            if (getCompareNum(loopContact) === compContact) matchCount++;
+        });
+        if (matchCount > 1) {
+            showWarning('Spam Engeli', 'Bu numarayı aynı formda birden fazla kez girdiniz!');
+            inputEl.value = ''; 
+            inputEl.closest('.entry-card').classList.add('error');
+            setTimeout(() => inputEl.closest('.entry-card').classList.remove('error'), 600);
+        }
+    }
+}
+
 function showToast(msg) {
     let t = document.getElementById('successToast');
     let tMsg = document.getElementById('toastMsg');
@@ -2516,6 +2634,72 @@ function applySmartParsing() {
         else product = "GENEL ÜRÜN BİLGİSİ";
     }
 
+    if (phone) {
+        var compContact = getCompareNum(phone);
+        if (compContact.length >= 7) {
+            var exists = allRecordsData.find(function(r){ return getCompareNum(r.contact) === compContact; });
+            if(exists) { 
+                var isSale = isRecordSale(exists);
+                var statusText = isSale ? 'Satış Gerçekleşti (₺' + new Intl.NumberFormat('tr-TR').format(parseTurkishFloat(exists.amount)) + ')' : 'Müşteri Kaydı / Yönlendirme';
+                var customerNoText = exists.customerNo ? '\n• Müşteri No: ' + exists.customerNo : '';
+                
+                var msg = 'Çözümlenen numaraya (' + phone + ') ait kayıt bulunmaktadır.\n\n' +
+                          '• Müşteri Adı: ' + (exists.name || 'Belirtilmemiş') + customerNoText + '\n' +
+                          '• Şube: ' + (exists.branch || 'Belirtilmemiş') + '\n' +
+                          '• Ürün: ' + (exists.product || 'Belirtilmemiş') + '\n' +
+                          '• Durum: ' + statusText;
+
+                showDuplicatePrompt(
+                    'Mükerrer Müşteri Tespit Edildi!',
+                    msg,
+                    function onTamam() {
+                        document.getElementById('smartParserInput').value = "";
+                    },
+                    function onSatisEkle() {
+                        addInputRow();
+                        var rows = document.querySelectorAll('#inputContainer > .entry-card');
+                        var targetRow = rows[rows.length - 1];
+
+                        targetRow.querySelector('.inp-contact').value = phone;
+                        if (exists.name) targetRow.querySelector('.inp-name').value = exists.name;
+                        var cNo = targetRow.querySelector('.inp-customerno');
+                        if (cNo && exists.customerNo) cNo.value = exists.customerNo;
+
+                        if (exists.branch) {
+                            var selB = targetRow.querySelector('.inp-branch');
+                            for(var i=0; i<selB.options.length; i++) {
+                                if(selB.options[i].value === exists.branch) { selB.selectedIndex = i; break; }
+                            }
+                        }
+                        if (exists.media || media) {
+                            var selM = targetRow.querySelector('.inp-media');
+                            var mVal = exists.media || media;
+                            for(var j=0; j<selM.options.length; j++) {
+                                if(selM.options[j].value === mVal) { selM.selectedIndex = j; break; }
+                            }
+                        }
+                        if (exists.category) {
+                            var selC = targetRow.querySelector('.inp-category');
+                            for(var k=0; k<selC.options.length; k++) {
+                                if(selC.options[k].value === exists.category) { selC.selectedIndex = k; break; }
+                            }
+                        }
+                        if (exists.product) targetRow.querySelector('.inp-product').value = exists.product;
+
+                        document.getElementById('smartParserInput').value = "";
+                        var amountInp = targetRow.querySelector('.inp-amount');
+                        if (amountInp) {
+                            amountInp.focus();
+                            amountInp.style.boxShadow = '0 0 0 4px rgba(16, 185, 129, 0.35)';
+                            setTimeout(function() { amountInp.style.boxShadow = ''; }, 2500);
+                        }
+                    }
+                );
+                return; 
+            }
+        }
+    }
+
     addInputRow();
     var rows = document.querySelectorAll('#inputContainer > .entry-card');
     var targetRow = rows[rows.length - 1];
@@ -2559,7 +2743,7 @@ function addInputRow(){
     +'<div><label class="inp-label">Tarih & Saat</label><input type="datetime-local" class="inp" value="'+getTodayDT()+'"></div>'
     +'<div><label class="inp-label" style="color:var(--sys-blue)">Şube <span style="color:var(--sys-red)">*</span></label><select class="inp inp-branch">'+bOpts+'</select></div>'
     +'<div><label class="inp-label" style="color:var(--sys-blue)">Müşteri Adı Soyadı <span style="color:var(--sys-red)">*</span></label><input type="text" class="inp inp-name" placeholder="Örn: Ahmet Yılmaz"></div>'
-    +'<div><label class="inp-label">İletişim Numarası</label><input type="text" class="inp inp-contact" placeholder="5XX..."></div>'
+    +'<div><label class="inp-label">İletişim Numarası</label><input type="text" class="inp inp-contact" placeholder="5XX..." oninput="if(this.value.length>=7) checkDuplicatePhone(this)" onblur="if(this.value.length>=7) checkDuplicatePhone(this)"></div>'
     +'<div><label class="inp-label">Müşteri No (F Sütunu)</label><input type="text" class="inp inp-customerno" placeholder="Opsiyonel"></div>'
     +'<div><label class="inp-label" style="color:var(--sys-blue)">Geliş Medyası <span style="color:var(--sys-red)">*</span></label><select class="inp inp-media"><option value="" disabled selected>Seçiniz...</option><option value="Instagram">Instagram</option><option value="Whatsapp">Whatsapp</option><option value="Facebook">Facebook</option><option value="Çağrı">Çağrı</option><option value="Web Sitesi Form">Web Sitesi Form</option><option value="SMS LİNK">SMS LİNK</option></select></div>'
     +'</div>'
@@ -2576,6 +2760,21 @@ async function submitAllRows(){
   var rows=document.querySelectorAll('#inputContainer > .entry-card');
   var data=[];
   var hasEmptyError=false;
+
+  var seenInBatch = {};
+  for(var k=0; k<rows.length; k++){
+    var rRow = rows[k];
+    var rContact = rRow.querySelector('.inp-contact').value.replace(/^0+/, '');
+    var compC = getCompareNum(rContact);
+    if(compC.length >= 7) {
+      if(seenInBatch[compC]) {
+        showWarning('Mükerrer Kayıt Engeli', 'Aynı telefon numarası (' + rContact + ') form içinde birden fazla kez eklendi.');
+        rRow.classList.add('error');
+        return;
+      }
+      seenInBatch[compC] = true;
+    }
+  }
 
   for(var i=0; i<rows.length; i++){
     var row = rows[i];
