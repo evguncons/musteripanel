@@ -2791,14 +2791,35 @@ function applySmartParsing() {
 
     let matchedRule = null;
     let matchedKeyword = "";
-
     let bestKeyLen = 0;
-    for (let rule of categoryRules) {
-        for (let kw of rule.keywords) {
-            if (prodText.includes(kw) && kw.length > bestKeyLen) {
-                bestKeyLen = kw.length;
-                matchedRule = rule;
-                matchedKeyword = kw;
+
+    let explicitLower = explicitProduct ? explicitProduct.toLocaleLowerCase('tr-TR') : "";
+    if (explicitLower) {
+        for (let rule of categoryRules) {
+            for (let kw of rule.keywords) {
+                if (explicitLower.includes(kw) && kw.length > bestKeyLen) {
+                    bestKeyLen = kw.length;
+                    matchedRule = rule;
+                    matchedKeyword = kw;
+                }
+            }
+        }
+    }
+
+    let cleanProdText = prodText
+        .replace(/telefon\s*\d+/gi, '')
+        .replace(/mağaza\s*[^\n]+/gi, '')
+        .replace(/e-posta\s*[^\n]+/gi, '')
+        .replace(/tc kimlik\s*\d+/gi, '');
+
+    if (!matchedRule) {
+        for (let rule of categoryRules) {
+            for (let kw of rule.keywords) {
+                if (cleanProdText.includes(kw) && kw.length > bestKeyLen) {
+                    bestKeyLen = kw.length;
+                    matchedRule = rule;
+                    matchedKeyword = kw;
+                }
             }
         }
     }
@@ -2839,7 +2860,8 @@ function applySmartParsing() {
                 extractedSpecs.push("Tek Kişilik");
             }
 
-            let modelMatch = rawText.match(/\b(1[3-6]\s*(?:pro\s*max|pro|plus|mini)?|s2[3-4]\s*(?:ultra|plus)?|ev1|vsm|vs7|vb[1-7]|ps5|ps4|v15)\b/i);
+            let searchForModel = explicitProduct || cleanProdText;
+            let modelMatch = searchForModel.match(/\b(1[3-6]\s*(?:pro\s*max|pro|plus|mini)?|s2[3-4]\s*(?:ultra|plus)?|ev1|vsm|vs7|vb[1-7]|ps5|ps4|v15)\b/i);
             if (modelMatch) extractedModel = modelMatch[1].toUpperCase();
 
             let parts = [];
