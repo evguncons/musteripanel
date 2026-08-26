@@ -2616,15 +2616,17 @@ function applySmartParsing() {
     let extractedAmount = "";
 
     if (isWebForm) {
+        let HEADER_WORDS = ["sepet", "ürün", "urun", "sku", "adet", "taksit", "tutar", "toplam", "bildirildi", "müşteri", "musteri", "yeni", "müşteri bilgisi"];
         for (let i = 0; i < lines.length; i++) {
             let l = lines[i].trim();
             let low = l.toLocaleLowerCase('tr-TR');
+            let cleanL = low.replace(/[^\w\sçğıöşü]/gi, '').trim();
             
-            if (low === 'sepet' || low === 'ürün' || low === 'sku' || low === 'adet' || low === 'taksit' || low === 'tutar' || low === 'toplam' || low === 'bildirildi' || low === 'müşteri' || low === 'yeni') {
+            if (HEADER_WORDS.includes(cleanL)) {
                 continue;
             }
             
-            if (!explicitProduct && i >= 4) {
+            if (!explicitProduct && i >= 3) {
                 let prevContext = lines.slice(Math.max(0, i - 10), i).map(x => x.toLocaleLowerCase('tr-TR')).join(' ');
                 if (prevContext.includes('sepet') || prevContext.includes('ürün') || prevContext.includes('tutar') || prevContext.includes('sku') || prevContext.includes('taksit')) {
                     if (l.length >= 3 && !l.match(/^\d+$/) && !l.match(/^\d{8,}$/) && !l.match(/^\d+\s*ay$/i) && !l.includes('TL') && !l.includes('@') && !l.includes('http')) {
@@ -2808,6 +2810,9 @@ function applySmartParsing() {
     }
 
     let cleanProdText = prodText
+        .replace(/talep\s*#?\s*\d+/gi, '')
+        .replace(/sipariş\s*#?\s*\d+/gi, '')
+        .replace(/\b\d{2}[\.\/]\d{2}[\.\/]\d{4}\s*\d{2}:\d{2}\b/gi, '')
         .replace(/\btelefon\s*\d+/gi, '')
         .replace(/\bmağaza\s+[a-zçğıöşü\s]+\(\d+\)/gi, '')
         .replace(/\bmağaza\s+[a-zçğıöşü\s]+/gi, '')
@@ -2939,9 +2944,9 @@ function applySmartParsing() {
                 var customerNoText = exists.customerNo ? '\n• Müşteri No: ' + exists.customerNo : '';
                 
                 var msg = 'Çözümlenen numaraya (' + phone + ') ait kayıt bulunmaktadır.\n\n' +
-                          '• Müşteri Adı: ' + (exists.name || 'Belirtilmemiş') + customerNoText + '\n' +
-                          '• Şube: ' + (exists.branch || 'Belirtilmemiş') + '\n' +
-                          '• Ürün: ' + (exists.product || 'Belirtilmemiş') + '\n' +
+                          '• Müşteri Adı: ' + (exists.name || name || 'Belirtilmemiş') + customerNoText + '\n' +
+                          '• Şube: ' + (branch || exists.branch || 'Belirtilmemiş') + '\n' +
+                          '• Ürün: ' + (product || exists.product || 'Belirtilmemiş') + '\n' +
                           '• Durum: ' + statusText;
 
                 showDuplicatePrompt(
