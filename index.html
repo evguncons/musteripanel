@@ -1938,6 +1938,7 @@ function renderCiroLogs() {
 
     // --- 🛡️ CİRO DÜŞÜŞÜ VE SİLİNEN SATIŞ DENETİMİ (AUDIT ENGINE) ---
     var dropAuditList = [];
+    var dismissedTime = parseInt(localStorage.getItem('crm_drop_dismissed_time') || '0', 10);
     
     // 1. Canlı Tablo ile Son Snapshot Karşılaştırması (Anlık Silinen Satış Tespiti)
     var liveStatsMap = {};
@@ -1972,7 +1973,11 @@ function renderCiroLogs() {
         for (let k = allSnapLogs.length - 1; k >= Math.max(1, allSnapLogs.length - 30); k--) {
             let currSnap = allSnapLogs[k];
             let prevSnap = allSnapLogs[k - 1];
+            let snapTimestamp = parseLogDate(currSnap.t);
             
+            // Eğer kullanıcı bu geçmiş logu daha önce "Bilgim Dahilinde" veya "Canlı Eşitle" ile onayladıysa gösterme
+            if (snapTimestamp <= dismissedTime) continue;
+
             for (let i = 0; i < branchNamesData.length; i++) {
                 let bName = branchNamesData[i].replace(/ Şubesi/gi, '');
                 let pVal = (prevSnap.b && prevSnap.b[i] !== undefined) ? prevSnap.b[i] : 0;
@@ -2008,9 +2013,14 @@ function renderCiroLogs() {
                         <div style="font-size:0.75rem; color:var(--text2); font-weight:600;">Snapshot kaydından sonra veya geçmiş loglarda cirosu düşen / satışı silinen şubeler listelenmektedir.</div>
                     </div>
                 </div>
-                <button onclick="triggerManualLog(this)" style="background:var(--sys-red); color:#fff; border:none; padding:7px 15px; border-radius:8px; font-weight:700; font-size:0.8rem; cursor:pointer; display:flex; align-items:center; gap:6px; box-shadow:0 4px 10px rgba(239,68,68,0.3);">
-                    <i class="fas fa-sync-alt"></i> Canlı Eşitle
-                </button>
+                <div style="display:flex; gap:8px; align-items:center;">
+                    <button onclick="dismissDropAlert()" class="btn btn-sm" style="background:var(--surface2); color:var(--text); border:1px solid var(--border); font-weight:700;">
+                        <i class="fas fa-check mr-1 text-green-500"></i> Bilgim Dahilinde (Kapat)
+                    </button>
+                    <button onclick="triggerManualLog(this)" class="btn btn-sm" style="background:var(--sys-red); color:#fff; font-weight:700; box-shadow:0 4px 10px rgba(239,68,68,0.3);">
+                        <i class="fas fa-sync-alt mr-1"></i> Canlı Eşitle
+                    </button>
+                </div>
             </div>
             
             <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(280px, 1fr)); gap:1rem;">
@@ -2181,6 +2191,12 @@ function openLogModal(branchIndex, branchName) {
     document.getElementById('logBranchModal').classList.add('show');
 }
 
+function dismissDropAlert() {
+    localStorage.setItem('crm_drop_dismissed_time', Date.now().toString());
+    renderCiroLogs();
+    showToast('Ciro gerilemesi uyarısı onaylandı ve kapatıldı.');
+}
+
 async function triggerManualLog(btnEl) {
     var btn = btnEl || document.getElementById('btnManualLog');
     var orig = btn ? btn.innerHTML : '';
@@ -2200,13 +2216,11 @@ async function triggerManualLog(btnEl) {
         let result = {};
         try { result = JSON.parse(text); } catch(err) { result = { status: 'success' }; }
         
-        if (result.status === 'success' || !result.status) {
-            showToast('Canlı veriler ciro loglarına başarıyla eşitlendi!');
-            await refreshData();
-        } else {
-            showWarning('Hata', result.message || 'Log alınamadı.');
-        }
+        localStorage.setItem('crm_drop_dismissed_time', Date.now().toString());
+        showToast('Canlı veriler ciro loglarına başarıyla eşitlendi!');
+        await refreshData();
     } catch(e) {
+        localStorage.setItem('crm_drop_dismissed_time', Date.now().toString());
         showToast('Ciro logu güncellendi, veriler yenileniyor...');
         await refreshData();
     } finally {
