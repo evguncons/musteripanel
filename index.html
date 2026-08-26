@@ -633,6 +633,53 @@ var allSnapLogs = [];
 var branchNamesData = []; 
 var memPeaks = JSON.parse(localStorage.getItem('crm_mem_peaks') || '{}');
 
+window.globalContactsMap = JSON.parse(localStorage.getItem('crm_global_contacts') || '{}');
+
+function registerGlobalContact(r) {
+    if (!r || !r.contact) return;
+    var comp = getCompareNum(r.contact);
+    if (comp && comp.length >= 7) {
+        var existing = window.globalContactsMap[comp];
+        var isSale = isRecordSale(r);
+        if (!existing || isSale || (!existing.customerNo && r.customerNo)) {
+            window.globalContactsMap[comp] = {
+                name: r.name || (existing ? existing.name : ''),
+                contact: r.contact || (existing ? existing.contact : ''),
+                customerNo: r.customerNo || (existing ? existing.customerNo : ''),
+                branch: r.branch || (existing ? existing.branch : ''),
+                product: r.product || (existing ? existing.product : ''),
+                category: r.category || (existing ? existing.category : ''),
+                media: r.media || (existing ? existing.media : ''),
+                amount: r.amount || (existing ? existing.amount : 0),
+                result: r.result || (existing ? existing.result : ''),
+                order: r.order || (existing ? existing.order : '')
+            };
+        }
+    }
+}
+
+function saveGlobalContactsCache() {
+    try {
+        localStorage.setItem('crm_global_contacts', JSON.stringify(window.globalContactsMap));
+    } catch(e) {}
+}
+
+function findExistingCustomerByPhone(phoneStr) {
+    if (!phoneStr) return null;
+    var compContact = getCompareNum(phoneStr);
+    if (!compContact || compContact.length < 7) return null;
+
+    var foundInRecords = allRecordsData.find(function(r) {
+        return getCompareNum(r.contact) === compContact;
+    });
+    if (foundInRecords) return foundInRecords;
+
+    var foundInCache = window.globalContactsMap[compContact];
+    if (foundInCache) return foundInCache;
+
+    return null;
+}
+
 function showWarning(title, message) {
     document.getElementById('warningTitle').textContent = title;
     document.getElementById('warningTitle').style.color = 'var(--text)';
@@ -695,13 +742,10 @@ function showDuplicatePrompt(title, message, onTamamCb, onSatisEkleCb) {
 
 function checkDuplicatePhone(inputEl) {
     var rawContact = inputEl.value;
-    var contact = rawContact.replace(/^0+/, ''); 
-    var compContact = getCompareNum(contact);
+    var compContact = getCompareNum(rawContact);
 
     if (compContact.length >= 7) {
-        var exists = allRecordsData.find(function(r){
-            return getCompareNum(r.contact) === compContact;
-        });
+        var exists = findExistingCustomerByPhone(rawContact);
         
         if(exists) {
             var isSale = isRecordSale(exists);
@@ -757,10 +801,10 @@ function checkDuplicatePhone(inputEl) {
             return;
         }
 
-        var allContacts = document.querySelectorAll('.inp-contact');
+        var allContacts = document.querySelectorAll('#inputContainer .inp-contact');
         var matchCount = 0;
         allContacts.forEach(function(el) {
-            var loopContact = el.value.replace(/^0+/, '');
+            var loopContact = el.value;
             if (getCompareNum(loopContact) === compContact) matchCount++;
         });
         if (matchCount > 1) {
@@ -830,8 +874,15 @@ function parseTurkishFloat(val) {
 }
 
 function getCompareNum(str) {
-    var s = String(str || '').replace(/\D/g, ''); 
-    return s.length >= 10 ? s.slice(-10) : s;
+    if (!str) return '';
+    var s = String(str).trim();
+    if (/[eE]/.test(s)) {
+        var num = Number(s);
+        if (!isNaN(num)) s = num.toFixed(0);
+    }
+    s = s.replace(/\D/g, '');
+    if (s.length >= 10) return s.slice(-10);
+    return s;
 }
 
 function isRecordSale(r) {
@@ -983,6 +1034,8 @@ async function fetchData(){
       allRecordsData=(data.records||[]).sort(function(a,b){
         return parseAnyDate(b.timestamp || b.date) - parseAnyDate(a.timestamp || a.date);
       });
+      allRecordsData.forEach(registerGlobalContact);
+      saveGlobalContactsCache();
       
       branchStatsData = (data.stats || []).sort((a,b) => b.totalRevenue - a.totalRevenue);
       updateKPIsFromGlobal(data.global);
@@ -2901,7 +2954,7 @@ function addInputRow(){
     +'<div><label class="inp-label">Tarih & Saat</label><input type="datetime-local" class="inp" value="'+getTodayDT()+'"></div>'
     +'<div><label class="inp-label" style="color:var(--sys-blue)">Şube <span style="color:var(--sys-red)">*</span></label><select class="inp inp-branch">'+bOpts+'</select></div>'
     +'<div><label class="inp-label" style="color:var(--sys-blue)">Müşteri Adı Soyadı <span style="color:var(--sys-red)">*</span></label><input type="text" class="inp inp-name" placeholder="Örn: Ahmet Yılmaz"></div>'
-    +'<div><label class="inp-label">İletişim Numarası</label><input type="text" class="inp inp-contact" placeholder="5XX..." oninput="if(this.value.length>=7) checkDuplicatePhone(this)" onblur="if(this.value.length>=7) checkDuplicatePhone(this)"></div>'
+    +'<div><label class="inp-label">İletişim Numarası</label><input type="text" class="inp inp-contact" placeholder="5XX..." oninput="if(this.value.replace(/\D/g,\'\').length>=10) checkDuplicatePhone(this)" onblur="if(this.value.replace(/\D/g,\'\').length>=7) checkDuplicatePhone(this)"></div>'
     +'<div><label class="inp-label">Müşteri No (F Sütunu)</label><input type="text" class="inp inp-customerno" placeholder="Opsiyonel"></div>'
     +'<div><label class="inp-label" style="color:var(--sys-blue)">Geliş Medyası <span style="color:var(--sys-red)">*</span></label><select class="inp inp-media"><option value="" disabled selected>Seçiniz...</option><option value="Instagram">Instagram</option><option value="Whatsapp">Whatsapp</option><option value="Facebook">Facebook</option><option value="Çağrı">Çağrı</option><option value="Web Sitesi Form">Web Sitesi Form</option><option value="SMS LİNK">SMS LİNK</option></select></div>'
     +'</div>'
@@ -2975,6 +3028,8 @@ async function submitAllRows(){
     var res=await fetch(GAS_URL,{method:'POST',body:JSON.stringify({action:'addCustomersBulk',data:data})});
     var result=JSON.parse(await res.text());
     if(result.status==='success'){
+      data.forEach(registerGlobalContact);
+      saveGlobalContactsCache();
       showToast('Tüm kayıtlar başarıyla eklendi!');
       document.getElementById('inputContainer').innerHTML='';
       addInputRow();
