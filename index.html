@@ -2721,12 +2721,13 @@ function applySmartParsing() {
         {
             category: "Elektrikli-Benzinli Araç",
             keywords: [
-                "elektrikli bisiklet", "e-bike", "ebike", "e-bisiklet", "elektrikli motor", "motorlu bisiklet",
+                "motosiklet", "motorsiklet", "motor", "elektrikli bisiklet", "e-bike", "ebike", "e-bisiklet", "elektrikli motor", "motorlu bisiklet",
                 "üç tekerlekli", "3 tekerlekli", "benzinli motor", "moped", "scooter", "skuter", "atv", "utv",
                 "elektrikli araba", "elektrikli araç", "triportör", "ehliyetsiz motor", "plakasız motor",
+                "50cc", "125cc", "150cc", "250cc",
                 "volta", "kuba", "rks", "arora", "yuki", "kanuni", "mondial", "kral", "apex", "segway", "tvs", "hero", "sym", "vespa", "vsm", "vs7", "ev1", "se-03", "se-"
             ],
-            canonical: "Elektrikli Bisiklet / Motor",
+            canonical: "Motosiklet / Motor",
             brands: ["volta", "kuba", "rks", "arora", "yuki", "kanuni", "mondial", "kral", "apex", "segway", "tvs", "hero", "sym", "vespa"]
         },
         {
@@ -2844,11 +2845,20 @@ function applySmartParsing() {
     let matchedKeyword = "";
     let bestKeyLen = 0;
 
+    function checkKeywordMatch(kw, text) {
+        if (!kw || !text) return false;
+        if (kw.length <= 5 || !kw.includes(' ')) {
+            let rx = new RegExp("(?:^|[^a-zçğıöşü0-9])" + kw.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + "(?:$|[^a-zçğıöşü0-9])", "i");
+            return rx.test(text);
+        }
+        return text.includes(kw);
+    }
+
     let explicitLower = explicitProduct ? explicitProduct.toLocaleLowerCase('tr-TR') : "";
     if (explicitLower) {
         for (let rule of categoryRules) {
             for (let kw of rule.keywords) {
-                if (explicitLower.includes(kw) && kw.length > bestKeyLen) {
+                if (checkKeywordMatch(kw, explicitLower) && kw.length > bestKeyLen) {
                     bestKeyLen = kw.length;
                     matchedRule = rule;
                     matchedKeyword = kw;
@@ -2870,7 +2880,7 @@ function applySmartParsing() {
     if (!matchedRule) {
         for (let rule of categoryRules) {
             for (let kw of rule.keywords) {
-                if (cleanProdText.includes(kw) && kw.length > bestKeyLen) {
+                if (checkKeywordMatch(kw, cleanProdText) && kw.length > bestKeyLen) {
                     bestKeyLen = kw.length;
                     matchedRule = rule;
                     matchedKeyword = kw;
@@ -2888,7 +2898,8 @@ function applySmartParsing() {
             let extractedModel = "";
 
             for (let b of matchedRule.brands) {
-                if (prodText.includes(b)) {
+                let bRx = new RegExp("(?:^|[^a-zçğıöşü0-9])" + b.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + "(?:$|[^a-zçğıöşü0-9])", "i");
+                if (bRx.test(cleanProdText)) {
                     extractedBrand = b.charAt(0).toUpperCase() + b.slice(1);
                     break;
                 }
