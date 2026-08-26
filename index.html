@@ -1936,8 +1936,106 @@ function renderCiroLogs() {
         </div>
     ` : `<div style="margin-top:8px; font-size:0.8rem; opacity:0.7; font-style:italic;"><i class="fas fa-history"></i> ${currentDay} ${TR_MONTHS[lastMonth-1]} tarihine ait geçmiş ciro logu bulunamadı.</div>`;
 
+    // --- 🛡️ CİRO DÜŞÜŞÜ VE SİLİNEN SATIŞ DENETİMİ (AUDIT ENGINE) ---
+    var dropAuditList = [];
+    
+    // 1. Canlı Tablo ile Son Snapshot Karşılaştırması (Anlık Silinen Satış Tespiti)
+    var liveStatsMap = {};
+    if (branchStatsData && branchStatsData.length > 0) {
+        branchStatsData.forEach(function(s) {
+            liveStatsMap[s.branch] = s.totalRevenue || 0;
+        });
+    }
+
+    for (let i = 0; i < branchNamesData.length; i++) {
+        let bFullName = branchNamesData[i];
+        let bName = bFullName.replace(/ Şubesi/gi, '');
+        let snapVal = (latestLog && latestLog.b && latestLog.b[i] !== undefined) ? latestLog.b[i] : 0;
+        let liveVal = liveStatsMap[bFullName] !== undefined ? liveStatsMap[bFullName] : snapVal;
+
+        if (snapVal > 0 && liveVal < snapVal) {
+            let diff = snapVal - liveVal;
+            dropAuditList.push({
+                type: 'live_drop',
+                branch: bName,
+                dropAmount: diff,
+                previousVal: snapVal,
+                currentVal: liveVal,
+                timeStr: 'Son Snapshot ➔ Canlı E-Tablo',
+                note: 'Tablodan satış silindi veya tutar düşürüldü'
+            });
+        }
+    }
+
+    // 2. Geçmiş Snapshotlar Arasındaki Ciro Gerilemeleri
+    if (allSnapLogs && allSnapLogs.length > 1) {
+        for (let k = allSnapLogs.length - 1; k >= Math.max(1, allSnapLogs.length - 30); k--) {
+            let currSnap = allSnapLogs[k];
+            let prevSnap = allSnapLogs[k - 1];
+            
+            for (let i = 0; i < branchNamesData.length; i++) {
+                let bName = branchNamesData[i].replace(/ Şubesi/gi, '');
+                let pVal = (prevSnap.b && prevSnap.b[i] !== undefined) ? prevSnap.b[i] : 0;
+                let cVal = (currSnap.b && currSnap.b[i] !== undefined) ? currSnap.b[i] : 0;
+                
+                if (pVal > 0 && cVal < pVal) {
+                    let diff = pVal - cVal;
+                    if (!dropAuditList.some(d => d.branch === bName && d.timeStr === currSnap.t)) {
+                        dropAuditList.push({
+                            type: 'snap_drop',
+                            branch: bName,
+                            dropAmount: diff,
+                            previousVal: pVal,
+                            currentVal: cVal,
+                            timeStr: currSnap.t,
+                            note: `${prevSnap.t} ➔ ${currSnap.t} aralığında ciro geriledi`
+                        });
+                    }
+                }
+            }
+        }
+    }
+
+    var auditHtml = '';
+    if (dropAuditList.length > 0) {
+        auditHtml = `
+        <div style="background:rgba(239, 68, 68, 0.07); border:1px solid rgba(239, 68, 68, 0.35); border-left:5px solid var(--sys-red); border-radius:1.25rem; padding:1.5rem; margin-bottom:1.5rem; animation:fadeIn 0.3s ease;">
+            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:1rem; border-bottom:1px solid rgba(239, 68, 68, 0.2); padding-bottom:0.75rem;">
+                <div style="display:flex; align-items:center; gap:10px;">
+                    <div style="width:36px; height:36px; border-radius:10px; background:rgba(239,68,68,0.2); color:var(--sys-red); display:flex; align-items:center; justify-content:center; font-size:1.2rem;"><i class="fas fa-shield-alt"></i></div>
+                    <div>
+                        <div style="font-size:1.05rem; font-weight:800; color:var(--sys-red);">🛡️ Ciro Gerilemesi ve Silinen Satış Tespiti (${dropAuditList.length} Olay)</div>
+                        <div style="font-size:0.75rem; color:var(--text2); font-weight:600;">Snapshot kaydından sonra veya geçmiş loglarda cirosu düşen / satışı silinen şubeler listelenmektedir.</div>
+                    </div>
+                </div>
+                <button onclick="logRevenueSnapshot(); fetchData();" style="background:var(--sys-red); color:#fff; border:none; padding:7px 15px; border-radius:8px; font-weight:700; font-size:0.8rem; cursor:pointer; display:flex; align-items:center; gap:6px; box-shadow:0 4px 10px rgba(239,68,68,0.3);">
+                    <i class="fas fa-sync-alt"></i> Canlı Eşitle
+                </button>
+            </div>
+            
+            <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(280px, 1fr)); gap:1rem;">
+                ${dropAuditList.map(function(d) {
+                    return `
+                    <div style="background:var(--surface); border:1px solid rgba(239, 68, 68, 0.3); border-radius:0.85rem; padding:1rem; display:flex; flex-direction:column; justify-content:space-between; box-shadow:var(--shadow-sm);">
+                        <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:0.5rem;">
+                            <span style="font-weight:800; color:var(--text); font-size:0.95rem;">${d.branch} Şubesi</span>
+                            <span style="background:rgba(239,68,68,0.15); color:var(--sys-red); padding:3px 8px; border-radius:6px; font-weight:800; font-size:0.85rem; font-family:monospace;"><i class="fas fa-arrow-down mr-1"></i> -${fmt(d.dropAmount)}</span>
+                        </div>
+                        <div style="font-size:0.8rem; color:var(--text2); margin-bottom:0.4rem;">
+                            <span>Önceki: <b style="font-family:monospace; color:var(--text);">${fmt(d.previousVal)}</b></span> ➔ <span>Son: <b style="font-family:monospace; color:var(--sys-red);">${fmt(d.currentVal)}</b></span>
+                        </div>
+                        <div style="font-size:0.72rem; color:var(--text3); font-weight:600; display:flex; align-items:center; gap:5px; border-top:1px dashed var(--border); padding-top:0.4rem; margin-top:0.2rem;">
+                            <i class="fas fa-exclamation-triangle text-xs text-red-500"></i> <span>${d.timeStr}</span> • <span>${d.note}</span>
+                        </div>
+                    </div>`;
+                }).join('')}
+            </div>
+        </div>`;
+    }
+
     var globalHtml = `
     ${miniReportHtml}
+    ${auditHtml}
     <div style="background:linear-gradient(135deg, var(--sys-blue), #0284c7); border-radius:1.5rem; padding:2rem; margin-bottom:1.5rem; color:#fff; display:grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap:1.5rem; box-shadow:0 10px 25px -5px rgba(14,165,233,0.4);">
         <div>
             <div style="font-size:0.85rem; font-weight:800; text-transform:uppercase; letter-spacing:0.1em; opacity:0.9; margin-bottom:0.5rem;">TÜM ŞUBELER AY SONU KÜMÜLATİF TOPLAM</div>
@@ -1975,7 +2073,7 @@ function renderCiroLogs() {
             if (delta > 0) {
                 deltaHtml = `<div style="display:flex; align-items:center; gap:6px; margin-top:0.5rem;"><span style="background:rgba(16,185,129,0.1); color:var(--sys-green); padding:4px 8px; border-radius:6px; font-weight:800; font-size:0.8rem; font-family:monospace;"><i class="fas fa-arrow-up mr-1"></i> +${fmt(delta)} Net Günlük Artış</span></div>`;
             } else if (delta < 0) {
-                deltaHtml = `<div style="display:flex; align-items:center; gap:6px; margin-top:0.5rem;"><span style="background:rgba(239,68,68,0.1); color:var(--sys-red); padding:4px 8px; border-radius:6px; font-weight:800; font-size:0.8rem; font-family:monospace;"><i class="fas fa-arrow-down mr-1"></i> ${fmt(delta)} Düşüş</span></div>`;
+                deltaHtml = `<div style="display:flex; align-items:center; gap:6px; margin-top:0.5rem;"><span style="background:rgba(239,68,68,0.1); color:var(--sys-red); padding:4px 8px; border-radius:6px; font-weight:800; font-size:0.8rem; font-family:monospace;"><i class="fas fa-arrow-down mr-1"></i> ${fmt(delta)} Düşüş / Silinme</span></div>`;
             } else {
                 deltaHtml = `<div style="margin-top:0.5rem; color:var(--text3); font-weight:700; font-size:0.8rem; padding:4px 0;">Düne Göre Net Değişim Yok</div>`;
             }
