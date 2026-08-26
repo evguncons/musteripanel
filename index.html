@@ -2616,27 +2616,28 @@ function applySmartParsing() {
     let extractedAmount = "";
 
     if (isWebForm) {
-        let sepetIdx = lines.findIndex(l => {
-            let lowerL = l.toLowerCase();
-            return lowerL === 'sepet' || lowerL === 'ürün' || lowerL === 'sku' || lowerL === 'tutar';
-        });
-
-        if (sepetIdx !== -1) {
-            for (let i = sepetIdx; i < lines.length; i++) {
-                let l = lines[i].trim();
-                let lowerL = l.toLowerCase();
-                if (lowerL === 'sepet' || lowerL === 'ürün' || lowerL === 'sku' || lowerL === 'adet' || lowerL === 'taksit' || lowerL === 'tutar' || lowerL === 'bildirildi' || lowerL === 'müşteri') {
-                    continue;
+        for (let i = 0; i < lines.length; i++) {
+            let l = lines[i].trim();
+            let low = l.toLocaleLowerCase('tr-TR');
+            
+            if (low === 'sepet' || low === 'ürün' || low === 'sku' || low === 'adet' || low === 'taksit' || low === 'tutar' || low === 'toplam' || low === 'bildirildi' || low === 'müşteri' || low === 'yeni') {
+                continue;
+            }
+            
+            if (!explicitProduct && i >= 4) {
+                let prevContext = lines.slice(Math.max(0, i - 10), i).map(x => x.toLocaleLowerCase('tr-TR')).join(' ');
+                if (prevContext.includes('sepet') || prevContext.includes('ürün') || prevContext.includes('tutar') || prevContext.includes('sku') || prevContext.includes('taksit')) {
+                    if (l.length >= 3 && !l.match(/^\d+$/) && !l.match(/^\d{8,}$/) && !l.match(/^\d+\s*ay$/i) && !l.includes('TL') && !l.includes('@') && !l.includes('http')) {
+                        explicitProduct = l;
+                    }
                 }
-                if (!explicitProduct && l.length > 2 && !l.match(/^\d{8,}$/) && !l.match(/^\d+$/) && !l.match(/^\d+\s*ay$/i) && !l.includes('TL')) {
-                    explicitProduct = l;
-                }
-                if (l.includes('TL') || l.match(/\b\d{1,3}(?:\.\d{3})*,\d{2}\b/)) {
-                    let numOnly = l.replace(/[^\d,]/g, '');
-                    if (numOnly.includes(',00')) numOnly = numOnly.replace(',00', '').replace(/\./g, '');
-                    else numOnly = numOnly.replace(/\D/g, '');
-                    if (numOnly.length >= 3) extractedAmount = numOnly;
-                }
+            }
+            
+            if (l.includes('TL') || l.match(/\b\d{1,3}(?:\.\d{3})*,\d{2}\b/)) {
+                let numOnly = l.replace(/[^\d,]/g, '');
+                if (numOnly.includes(',00')) numOnly = numOnly.replace(',00', '').replace(/\./g, '');
+                else numOnly = numOnly.replace(/\D/g, '');
+                if (numOnly.length >= 3) extractedAmount = numOnly;
             }
         }
     }
