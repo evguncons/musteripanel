@@ -2615,8 +2615,24 @@ function applySmartParsing() {
     let explicitProduct = "";
     let extractedAmount = "";
 
+    function cleanExtractedProductString(raw_p) {
+        if (!raw_p) return "";
+        let p = raw_p.trim();
+        if (p.includes('\t')) {
+            p = p.split('\t')[0].trim();
+        }
+        p = p
+            .replace(/\t+/g, ' ')
+            .replace(/\b\d{8,}\b.*/g, '')
+            .replace(/\b\d+\s*ay\b.*/gi, '')
+            .replace(/\b\d{1,3}(?:\.\d{3})*(?:,\d{2})?\s*TL\b.*/gi, '')
+            .replace(/^(?:Adet|Taksit|Tutar|SKU|Ürün|Sepet|\s)+/gi, '')
+            .trim();
+        return p;
+    }
+
     if (isWebForm) {
-        let HEADER_WORDS = ["sepet", "ürün", "urun", "sku", "adet", "taksit", "tutar", "toplam", "bildirildi", "müşteri", "musteri", "yeni", "müşteri bilgisi"];
+        let HEADER_WORDS = ["sepet", "ürün", "urun", "sku", "adet", "taksit", "tutar", "toplam", "bildirildi", "müşteri", "musteri", "yeni", "müşteri bilgisi", "sepet ürün sku adet taksit tutar"];
         for (let i = 0; i < lines.length; i++) {
             let l = lines[i].trim();
             let low = l.toLocaleLowerCase('tr-TR');
@@ -2626,11 +2642,14 @@ function applySmartParsing() {
                 continue;
             }
             
-            if (!explicitProduct && i >= 3) {
+            if (!explicitProduct && i >= 2) {
                 let prevContext = lines.slice(Math.max(0, i - 10), i).map(x => x.toLocaleLowerCase('tr-TR')).join(' ');
-                if (prevContext.includes('sepet') || prevContext.includes('ürün') || prevContext.includes('tutar') || prevContext.includes('sku') || prevContext.includes('taksit')) {
-                    if (l.length >= 3 && !l.match(/^\d+$/) && !l.match(/^\d{8,}$/) && !l.match(/^\d+\s*ay$/i) && !l.includes('TL') && !l.includes('@') && !l.includes('http')) {
-                        explicitProduct = l;
+                if (prevContext.includes('sepet') || prevContext.includes('ürün') || prevContext.includes('urun') || prevContext.includes('tutar') || prevContext.includes('sku') || prevContext.includes('taksit')) {
+                    if (!l.match(/^\d+$/) && !l.match(/^\d{8,}$/) && !l.match(/^\d+\s*ay$/i) && !l.match(/^\d{1,3}(?:\.\d{3})*(?:,\d{2})?\s*TL$/i) && !l.includes('@') && !l.includes('http')) {
+                        let candidate = cleanExtractedProductString(l);
+                        if (candidate && candidate.length >= 3) {
+                            explicitProduct = candidate;
+                        }
                     }
                 }
             }
@@ -2645,25 +2664,17 @@ function applySmartParsing() {
     }
 
     if (!explicitProduct) {
+        let m = rawText.match(/(?:Sepet|Ürün|SKU|Adet|Taksit|Tutar)\s*[:\-]?\s*([A-Za-z0-9çğıöşüÇĞIÖŞÜ\s\'\"\-\/\.]{4,100}?)(?:\t|\n|\b\d{8,}\b|\b\d+\s*ay\b|\b\d{1,3}(?:\.\d{3})*,\d{2}\s*TL\b|$)/i);
+        if (m) explicitProduct = cleanExtractedProductString(m[1]);
+    }
+
+    if (!explicitProduct) {
         let lineProdMatch = rawText.match(/(?:Ürün Adı|İlgilendiği Ürün)\s*[:\-]?\s*([^\n]+)/i);
         if (!lineProdMatch) lineProdMatch = rawText.match(/(?:Ürün)\s*[:\-]\s*([^\n]+)/i);
-        if (lineProdMatch) explicitProduct = lineProdMatch[1].trim();
+        if (lineProdMatch) explicitProduct = cleanExtractedProductString(lineProdMatch[1]);
     }
 
     if (explicitProduct) {
-        if (explicitProduct.includes('\t')) {
-            let parts = explicitProduct.split('\t').map(p => p.trim()).filter(p => p.length > 0);
-            explicitProduct = parts[0];
-        }
-        
-        explicitProduct = explicitProduct
-            .replace(/\t+/g, ' ')
-            .replace(/\b\d{8,}\b.*/g, '')
-            .replace(/\b\d+\s*ay\b.*/gi, '')
-            .replace(/\b\d{1,3}(?:\.\d{3})*(?:,\d{2})?\s*TL\b.*/gi, '')
-            .replace(/^(?:Adet|Taksit|Tutar|SKU|Ürün|Sepet|\s)+/gi, '')
-            .trim();
-
         product = explicitProduct;
     }
 
