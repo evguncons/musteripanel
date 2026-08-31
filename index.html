@@ -183,6 +183,58 @@ select.inp{appearance:none;line-height:1.5;background-image:url("data:image/svg+
 body:not(.dark) .theme-toggle{background:#cbd5e1}
 body.dark .theme-toggle{background:#0ea5e9}
 body.dark .theme-toggle .knob{transform:translateX(20px)}
+
+@media print {
+  @page {
+    size: A4 portrait;
+    margin: 8mm 10mm;
+  }
+  html, body {
+    background: #ffffff !important;
+    color: #0f172a !important;
+    font-size: 13px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    width: 100% !important;
+    min-height: 100% !important;
+    overflow: visible !important;
+  }
+  body * {
+    visibility: hidden !important;
+  }
+  .app-header, .no-print, nav, header, .sidebar, .btn, .modal-bg, #navTabs, select, input, .toast, .theme-toggle, #loginScreen {
+    display: none !important;
+  }
+  #exportContentArea, #exportContentArea *,
+  #aiReportExportArea, #aiReportExportArea * {
+    visibility: visible !important;
+  }
+  #exportContentArea, #aiReportExportArea {
+    display: block !important;
+    position: absolute !important;
+    left: 0 !important;
+    top: 0 !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 10px 15px !important;
+    background: #ffffff !important;
+    color: #0f172a !important;
+    border: none !important;
+    box-shadow: none !important;
+  }
+  .print-break-avoid {
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
+  }
+  table {
+    width: 100% !important;
+    border-collapse: collapse !important;
+  }
+  th, td {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+}
 </style>
 </head>
 <body>
@@ -444,27 +496,18 @@ body.dark .theme-toggle .knob{transform:translateX(20px)}
     </div>
     
     <div id="reportAnalyticsWrap" style="display:none; flex-direction:column; gap:1.5rem;">
-        <div class="card" style="overflow:hidden;">
-            <div class="sec-header" style="background:var(--surface2);">
-                <div style="font-size:1.1rem;font-weight:800;color:var(--text)">Aylar Arası İvme ve Gelişim</div>
+        <div class="card no-print" style="padding:1.25rem 1.75rem; background:var(--surface2); display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem;">
+            <div>
+                <div style="font-size:1.15rem; font-weight:800; color:var(--text);">AI Tahmin & Analiz Sonuçları</div>
+                <div style="font-size:0.8rem; font-weight:600; color:var(--text3);">Raporu kurumsal PDF olarak yazdırabilir veya Excel formatında indirebilirsiniz.</div>
             </div>
-            <div id="trendMonthsContainer" style="padding:1.5rem; display:grid; grid-template-columns:repeat(auto-fit, minmax(300px, 1fr)); gap:1.5rem; background:var(--surface);">
+            <div style="display:flex; gap:0.75rem; flex-wrap:wrap;">
+                <button class="btn" style="background:#10b981; color:#fff; font-weight:700;" onclick="exportAiToCSV()"><i class="fas fa-file-excel mr-1"></i> Excel İndir</button>
+                <button class="btn" style="background:#0f172a; color:#fff; font-weight:700;" onclick="printAiReport()"><i class="fas fa-file-pdf mr-1"></i> PDF Kaydet / Yazdır</button>
             </div>
         </div>
 
-        <div class="card" style="overflow:hidden; border:2px solid var(--sys-purple);">
-            <div class="sec-header" style="background:rgba(139, 92, 246, 0.05);">
-                <div style="display:flex; align-items:center; gap:10px;">
-                    <i class="fas fa-robot" style="color:var(--sys-purple); font-size:1.4rem;"></i>
-                    <div>
-                        <div style="font-size:1.1rem;font-weight:800;color:var(--text)">Gelecek Ay İçin Algoritma Tahmini</div>
-                        <div style="font-size:.75rem;font-weight:600;color:var(--text3)">Matematiksel regrasyon ve mevcut büyüme ivmesine dayalı beklentiler.</div>
-                    </div>
-                </div>
-            </div>
-            <div id="aiPredictionContainer" style="padding:1.5rem; background:var(--surface);">
-            </div>
-        </div>
+        <div id="aiReportExportArea" class="card print-break-avoid" style="background:#fff; color:#0f172a; padding:2.5rem; border-radius:1.25rem; box-shadow:var(--shadow-sm);"></div>
     </div>
   </div>
 
@@ -541,7 +584,7 @@ body.dark .theme-toggle .knob{transform:translateX(20px)}
           </div>
           <div style="display:flex; gap:0.75rem;">
               <button class="btn" style="background:#10b981; color:white;" onclick="exportToCSV()"><i class="fas fa-file-excel mr-1"></i> Excel İndir</button>
-              <button class="btn" style="background:#0f172a; color:white;" onclick="window.print()"><i class="fas fa-file-pdf mr-1"></i> PDF Kaydet / Yazdır</button>
+              <button class="btn" style="background:#0f172a; color:white;" onclick="printReport()"><i class="fas fa-file-pdf mr-1"></i> PDF Kaydet / Yazdır</button>
           </div>
        </div>
        
@@ -1449,169 +1492,321 @@ async function fetchAdvancedReport() {
     let eP = document.getElementById('reportEndPeriod').value;
     let cat = document.getElementById('reportCategory').value;
     
-    let btn = event.currentTarget;
-    let orig = btn.innerHTML;
-    btn.innerHTML = '<span class="loader" style="width:18px;height:18px;margin-right:8px;border-top-color:transparent;"></span> Analiz Ediliyor...';
-    btn.disabled = true;
+    let btn = document.querySelector('#view-report .btn-primary');
+    let orig = btn ? btn.innerHTML : '';
+    if (btn) {
+        btn.innerHTML = '<span class="loader" style="width:18px;height:18px;margin-right:8px;border-top-color:transparent;"></span> Analiz Ediliyor...';
+        btn.disabled = true;
+    }
 
     try {
-        let res = await fetch(GAS_URL, { method: 'POST', body: JSON.stringify({ action: 'getAdvancedReport', data: { startPeriod: sP, endPeriod: eP, category: cat } }) });
-        let result = JSON.parse(await res.text());
-
-        if (result.status === 'success') {
-            let monthlyData = result.monthlyData;
-            let fmt = function(n){ return '₺'+new Intl.NumberFormat('tr-TR',{maximumFractionDigits:0}).format(n||0); };
-            
-            let trendHtml = '';
-            let revArr = [], leadsArr = [], salesArr = [];
-            
-            if (monthlyData.length > 0) {
-                for (let i = 0; i < monthlyData.length; i++) {
-                    revArr.push(monthlyData[i].revenue);
-                    leadsArr.push(monthlyData[i].leads);
-                    salesArr.push(monthlyData[i].sales);
-                    
-                    let current = monthlyData[i];
-                    let prev = i > 0 ? monthlyData[i-1] : null;
-                    let growthHtml = '';
-                    let analysisHtml = '';
-                    
-                    if (prev && prev.revenue > 0) {
-                        let pct = ((current.revenue - prev.revenue) / prev.revenue) * 100;
-                        let color = pct >= 0 ? 'var(--sys-green)' : 'var(--sys-red)';
-                        let icon = pct >= 0 ? 'fa-arrow-up' : 'fa-arrow-down';
-                        growthHtml = `<div style="font-size:0.75rem; font-weight:800; color:${color}; padding:4px 8px; background:rgba(${pct >= 0 ? '16,185,129':'239,68,68'},0.1); border-radius:6px;"><i class="fas ${icon}"></i> %${Math.abs(pct).toFixed(1)}</div>`;
-                        
-                        let prevConv = prev.leads > 0 ? (prev.sales / prev.leads) : 0;
-                        let currConv = current.leads > 0 ? (current.sales / current.leads) : 0;
-                        let prevAvg = prev.sales > 0 ? (prev.revenue / prev.sales) : 0;
-                        let currAvg = current.sales > 0 ? (current.revenue / current.sales) : 0;
-
-                        let analysisText = "";
-                        if (pct >= 0) {
-                            let reasons = [];
-                            if (current.leads > prev.leads) reasons.push("yönlendirme artışı");
-                            if (currConv > prevConv) reasons.push("dönüşüm oranındaki yükseliş");
-                            if (currAvg > prevAvg) reasons.push("sepet tutarındaki artış");
-                            if(reasons.length > 0) analysisText = `Büyüme temel olarak <b>${reasons.join(" ve ")}</b> kaynaklıdır.`;
-                            else analysisText = "Genel ve istikrarlı bir büyüme gerçekleşmiştir.";
-                        } else {
-                            let reasons = [];
-                            if (current.leads < prev.leads) reasons.push("yönlendirme eksikliği");
-                            if (currConv < prevConv) reasons.push("dönüşüm oranındaki düşüş");
-                            if (currAvg < prevAvg) reasons.push("sepet tutarındaki gerileme");
-                            if(reasons.length > 0) analysisText = `Düşüş temel olarak <b>${reasons.join(" ve ")}</b> kaynaklıdır.`;
-                            else analysisText = "Genel performans daralması gözlemlenmiştir.";
-                        }
-                        analysisHtml = `<div style="font-size:0.75rem; color:var(--text3); margin-top:0.875rem; border-top:1px dashed var(--border); padding-top:0.75rem; line-height:1.4;"><i class="fas fa-lightbulb" style="color:var(--sys-orange); margin-right:4px;"></i> ${analysisText}</div>`;
-                    }
-
-                    trendHtml += `
-                    <div style="background:var(--card-bg); border:1px solid var(--border); border-radius:1rem; padding:1.25rem; box-shadow:var(--shadow-sm);">
-                        <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--border); padding-bottom:0.75rem; margin-bottom:0.75rem;">
-                            <div style="font-weight:800; color:var(--text); font-size:1.05rem;">${current.period}</div>
-                            ${growthHtml}
-                        </div>
-                        <div style="display:flex; justify-content:space-between; margin-bottom:0.5rem; align-items:center;">
-                            <span style="font-size:0.8rem; color:var(--text3); font-weight:700; text-transform:uppercase;">Yönlendirme</span>
-                            <span style="font-size:1rem; font-weight:800; color:var(--text); font-family:monospace;">${current.leads}</span>
-                        </div>
-                        <div style="display:flex; justify-content:space-between; margin-bottom:0.5rem; align-items:center;">
-                            <span style="font-size:0.8rem; color:var(--text3); font-weight:700; text-transform:uppercase;">Satış</span>
-                            <span style="font-size:1rem; font-weight:800; color:var(--sys-green); font-family:monospace;">${current.sales}</span>
-                        </div>
-                        <div style="display:flex; justify-content:space-between; align-items:center;">
-                            <span style="font-size:0.8rem; color:var(--text3); font-weight:700; text-transform:uppercase;">Ciro</span>
-                            <span style="font-size:1.1rem; font-weight:800; color:var(--sys-blue); font-family:monospace;">${fmt(current.revenue)}</span>
-                        </div>
-                        ${analysisHtml}
-                    </div>`;
-                }
-            } else {
-                trendHtml = '<div style="color:var(--text3); padding:2rem; text-align:center; font-weight:600; grid-column:1/-1;">Bu dönem için veri bulunamadı.</div>';
-            }
-            document.getElementById('trendMonthsContainer').innerHTML = trendHtml;
-
-            let n = revArr.length;
-            let predRev = 0, predLeads = 0, predSales = 0;
-            let nextMonthLabel = "Gelecek Ay";
-            
-            if (n > 1) {
-                let sumX = 0, sumY_rev = 0, sumY_leads = 0, sumY_sales = 0, sumXY_rev = 0, sumXY_leads = 0, sumXY_sales = 0, sumX2 = 0;
-                for (let i = 0; i < n; i++) {
-                    sumX += i; sumX2 += i * i;
-                    sumY_rev += revArr[i]; sumXY_rev += i * revArr[i];
-                    sumY_leads += leadsArr[i]; sumXY_leads += i * leadsArr[i];
-                    sumY_sales += salesArr[i]; sumXY_sales += i * salesArr[i];
-                }
-                
-                let slopeRev = (n * sumXY_rev - sumX * sumY_rev) / (n * sumX2 - sumX * sumX);
-                let interceptRev = (sumY_rev - slopeRev * sumX) / n;
-                predRev = Math.max(0, slopeRev * n + interceptRev);
-                
-                let slopeLeads = (n * sumXY_leads - sumX * sumY_leads) / (n * sumX2 - sumX * sumX);
-                let interceptLeads = (sumY_leads - slopeLeads * sumX) / n;
-                predLeads = Math.max(0, slopeLeads * n + interceptLeads);
-                
-                let slopeSales = (n * sumXY_sales - sumX * sumY_sales) / (n * sumX2 - sumX * sumX);
-                let interceptSales = (sumY_sales - slopeSales * sumX) / n;
-                predSales = Math.max(0, slopeSales * n + interceptSales);
-                
-                let lastDate = monthlyData[n-1].period.split(' ');
-                let lastMIdx = TR_MONTHS.indexOf(lastDate[0]);
-                let nextMIdx = (lastMIdx + 1) % 12;
-                let nextY = lastMIdx === 11 ? parseInt(lastDate[1]) + 1 : parseInt(lastDate[1]);
-                nextMonthLabel = TR_MONTHS[nextMIdx] + ' ' + nextY;
-            } else if (n === 1) {
-                predRev = revArr[0]; predLeads = leadsArr[0]; predSales = salesArr[0];
-            }
-            
-            predRev = Math.round(predRev); predLeads = Math.round(predLeads); predSales = Math.round(predSales);
-            let predConv = predLeads > 0 ? (predSales / predLeads * 100).toFixed(1) : 0;
-
-            let aiExplanation = "";
-            let isTrendPositive = predRev > (revArr[revArr.length - 1] || 0);
-            
-            if (monthlyData.length < 2) {
-                aiExplanation = "Tahminleme için yeterli geçmiş veri bulunamadı. Yapay zeka modeli (Doğrusal Regresyon) eğilim hesaplamak için en az 2 aylık veri ile daha tutarlı çalışır.";
-            } else if (isTrendPositive) {
-                aiExplanation = `Son <b>${monthlyData.length} aylık</b> periyotta tespit edilen <b>yükseliş ivmesi</b> baz alınmıştır. Formül, yönlendirme hacminin ve dönüşüm oranlarının mevcut stabiliteyi koruyacağını varsayarak büyümenin devam edeceğini öngörmektedir.`;
-            } else {
-                aiExplanation = `Son dönemdeki <b>yatay veya düşüş trendi</b> baz alınarak muhafazakar bir tahmin üretilmiştir. Ciroyu korumak veya hedeflerin üzerine çıkmak için dönüşüm oranlarını iyileştirici aksiyonlar alınması sistem tarafından önerilir.`;
-            }
-
-            document.getElementById('aiPredictionContainer').innerHTML = `
-                <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:1.5rem; margin-bottom:1.5rem;">
-                    <div style="background:var(--card-bg); border:1px solid var(--border); border-radius:1rem; padding:1.5rem; text-align:center; box-shadow:var(--shadow-sm);">
-                        <div style="font-size:0.75rem; font-weight:800; color:var(--text3); text-transform:uppercase; margin-bottom:0.5rem;">Tahmini Yönlendirme</div>
-                        <div style="font-size:2rem; font-weight:800; color:var(--text); line-height:1;">${predLeads}</div>
-                        <div style="font-size:0.75rem; color:var(--text3); font-weight:600; margin-top:0.4rem;">${nextMonthLabel} Beklentisi</div>
-                    </div>
-                    <div style="background:var(--card-bg); border:1px solid var(--border); border-radius:1rem; padding:1.5rem; text-align:center; box-shadow:var(--shadow-sm);">
-                        <div style="font-size:0.75rem; font-weight:800; color:var(--text3); text-transform:uppercase; margin-bottom:0.5rem;">Tahmini Satış</div>
-                        <div style="font-size:2rem; font-weight:800; color:var(--sys-green); line-height:1;">${predSales}</div>
-                        <div style="font-size:0.8rem; font-weight:700; color:var(--sys-orange); margin-top:0.4rem;">Tahmini Dönüşüm: %${predConv}</div>
-                    </div>
-                    <div style="background:var(--card-bg); border:1px solid var(--border); border-radius:1rem; padding:1.5rem; text-align:center; box-shadow:var(--shadow-sm); border-bottom:4px solid var(--sys-blue);">
-                        <div style="font-size:0.75rem; font-weight:800; color:var(--text3); text-transform:uppercase; margin-bottom:0.5rem;">Tahmini Ciro</div>
-                        <div style="font-size:2rem; font-weight:800; color:var(--sys-blue); font-family:monospace; line-height:1;">${fmt(predRev)}</div>
-                        <div style="font-size:0.75rem; color:var(--text3); font-weight:600; margin-top:0.4rem;">${nextMonthLabel} Beklentisi</div>
-                    </div>
-                </div>
-                
-                <div style="background:rgba(139, 92, 246, 0.05); border-left:4px solid var(--sys-purple); padding:1.25rem; border-radius:0 1rem 1rem 0; font-size:0.85rem; color:var(--text2); line-height:1.6;">
-                    <div style="font-weight:800; color:var(--text); margin-bottom:0.5rem; display:flex; align-items:center; gap:6px;"><i class="fas fa-brain text-purple-500"></i> Algoritma (AI) Yorumu</div>
-                    ${aiExplanation}
-                </div>
-            `;
-            
-            document.getElementById('reportAnalyticsWrap').style.display = 'flex';
+        function getM(str) { return TR_MONTHS.indexOf(str.split(' ')[0]); }
+        function getY(str) { return parseInt(str.split(' ')[1]); }
+        
+        var sM = getM(sP), sY = getY(sP);
+        var eM = getM(eP), eY = getY(eP);
+        
+        if (sY > eY || (sY === eY && sM > eM)) {
+            let tm=sM, ty=sY; sM=eM; sY=eY; eM=tm; eY=ty;
+            let tStr=sP; sP=eP; eP=tStr;
         }
+        
+        var targetSheets = [];
+        var cM = sM, cY = sY;
+        while(cY < eY || (cY === eY && cM <= eM)) {
+            targetSheets.push(TR_MONTHS[cM] + ' ' + cY);
+            cM++;
+            if(cM > 11) { cM = 0; cY++; }
+        }
+
+        var currentP = document.getElementById('currentPeriod').value;
+        var dataToUse = allRecordsData;
+        
+        var hasAllSheets = targetSheets.every(s => dataToUse.some(r => r.sheetName === s));
+        if (!hasAllSheets) {
+            try {
+                if (!window.cachedAllPeriodRecords) {
+                    let res = await fetch(GAS_URL+'?action=getDashboardData&period=all&t='+Date.now());
+                    let json = await res.json();
+                    if(json.records) window.cachedAllPeriodRecords = json.records;
+                }
+                if (window.cachedAllPeriodRecords) dataToUse = window.cachedAllPeriodRecords;
+            } catch(e) {}
+        }
+
+        let monthlyData = targetSheets.map(sh => ({ period: sh, leads: 0, calls: 0, sales: 0, revenue: 0 }));
+        let monthMap = {};
+        monthlyData.forEach(m => monthMap[m.period] = m);
+
+        let branchStatsMonthly = {};
+        BRANCHES.forEach(b => {
+            let clean = b.replace(/ Şubesi/gi, '');
+            branchStatsMonthly[clean] = { name: clean, rev: 0, sales: 0, leads: 0 };
+        });
+
+        dataToUse.forEach(r => {
+            let sh = r.sheetName;
+            if (!monthMap[sh]) return;
+
+            let rCat = String(r.category || 'Diğer').trim();
+            if (cat !== 'all' && rCat !== cat) return;
+
+            let mObj = monthMap[sh];
+            mObj.leads++;
+
+            let status = String(r.status || '').toLowerCase();
+            if (status.includes('arand')) mObj.calls++;
+
+            let amount = parseTurkishFloat(r.amount);
+            let isSale = isRecordSale(r);
+            if (isSale) {
+                mObj.sales++;
+                mObj.revenue += amount;
+
+                let bName = (r.branch || '').replace(/ Şubesi/gi, '');
+                if (branchStatsMonthly[bName]) {
+                    branchStatsMonthly[bName].sales++;
+                    branchStatsMonthly[bName].rev += amount;
+                }
+            }
+            let bName = (r.branch || '').replace(/ Şubesi/gi, '');
+            if (branchStatsMonthly[bName]) {
+                branchStatsMonthly[bName].leads++;
+            }
+        });
+
+        let fmt = function(n){ return '₺'+new Intl.NumberFormat('tr-TR',{maximumFractionDigits:0}).format(n||0); };
+        
+        let revArr = [], leadsArr = [], salesArr = [];
+        monthlyData.forEach(m => {
+            revArr.push(m.revenue);
+            leadsArr.push(m.leads);
+            salesArr.push(m.sales);
+        });
+
+        let n = revArr.length;
+        let predRev = 0, predLeads = 0, predSales = 0;
+        let nextMonthLabel = "Gelecek Ay";
+        
+        if (n > 1) {
+            let sumX = 0, sumY_rev = 0, sumY_leads = 0, sumY_sales = 0, sumXY_rev = 0, sumXY_leads = 0, sumXY_sales = 0, sumX2 = 0;
+            for (let i = 0; i < n; i++) {
+                sumX += i; sumX2 += i * i;
+                sumY_rev += revArr[i]; sumXY_rev += i * revArr[i];
+                sumY_leads += leadsArr[i]; sumXY_leads += i * leadsArr[i];
+                sumY_sales += salesArr[i]; sumXY_sales += i * salesArr[i];
+            }
+            
+            let slopeRev = (n * sumXY_rev - sumX * sumY_rev) / (n * sumX2 - sumX * sumX);
+            let interceptRev = (sumY_rev - slopeRev * sumX) / n;
+            predRev = Math.max(0, slopeRev * n + interceptRev);
+            
+            let slopeLeads = (n * sumXY_leads - sumX * sumY_leads) / (n * sumX2 - sumX * sumX);
+            let interceptLeads = (sumY_leads - slopeLeads * sumX) / n;
+            predLeads = Math.max(0, slopeLeads * n + interceptLeads);
+            
+            let slopeSales = (n * sumXY_sales - sumX * sumY_sales) / (n * sumX2 - sumX * sumX);
+            let interceptSales = (sumY_sales - slopeSales * sumX) / n;
+            predSales = Math.max(0, slopeSales * n + interceptSales);
+            
+            let lastDate = monthlyData[n-1].period.split(' ');
+            let lastMIdx = TR_MONTHS.indexOf(lastDate[0]);
+            let nextMIdx = (lastMIdx + 1) % 12;
+            let nextY = lastMIdx === 11 ? parseInt(lastDate[1]) + 1 : parseInt(lastDate[1]);
+            nextMonthLabel = TR_MONTHS[nextMIdx] + ' ' + nextY;
+        } else if (n === 1) {
+            predRev = revArr[0]; predLeads = leadsArr[0]; predSales = salesArr[0];
+        }
+        
+        predRev = Math.round(predRev); predLeads = Math.round(predLeads); predSales = Math.round(predSales);
+        let predConv = predLeads > 0 ? (predSales / predLeads * 100).toFixed(1) : 0;
+
+        let lastRev = revArr[revArr.length - 1] || 0;
+        let isTrendPositive = predRev >= lastRev;
+        let revDiffPct = lastRev > 0 ? (((predRev - lastRev) / lastRev) * 100).toFixed(1) : 0;
+        
+        let aiExplanation = "";
+        if (monthlyData.length < 2) {
+            aiExplanation = "Doğrusal regresyon tahminleme algoritması için en az 2 aylık veri seti tavsiye edilir. Tek aylık veri baz alınarak koruma trendi hesaplanmıştır.";
+        } else if (isTrendPositive) {
+            aiExplanation = `Seçili <b>${monthlyData.length} aylık</b> periyotta tespit edilen <b>%${Math.abs(revDiffPct)} büyüme ivmesi</b> doğrultusunda ${nextMonthLabel} dönemi için toplam cironun <b>${fmt(predRev)}</b> seviyesine ulaşması öngörülmektedir. Müşteri yönlendirme hacmi ve dönüşüm oranlarının bu seviyede korunması hedeflerin yakalanmasını sağlayacaktır.`;
+        } else {
+            aiExplanation = `Son dönemdeki <b>%${Math.abs(revDiffPct)} daralma ivmesi</b> baz alınarak muhafazakar bir tahmin üretilmiştir (${nextMonthLabel}: ${fmt(predRev)}). Ciroyu yükseltmek ve büyüme bandına geçmek için arama-dönüşüm süreçlerinin ve sepet ortalamalarının yukarı çekilmesi önerilmektedir.`;
+        }
+
+        let trendCardsHtml = '';
+        monthlyData.forEach((current, i) => {
+            let prev = i > 0 ? monthlyData[i-1] : null;
+            let growthHtml = '';
+            let analysisHtml = '';
+            let convRate = current.leads > 0 ? ((current.sales / current.leads) * 100).toFixed(1) : 0;
+            let avgBasket = current.sales > 0 ? Math.round(current.revenue / current.sales) : 0;
+
+            if (prev && prev.revenue > 0) {
+                let pct = ((current.revenue - prev.revenue) / prev.revenue) * 100;
+                let color = pct >= 0 ? '#10b981' : '#ef4444';
+                let icon = pct >= 0 ? 'fa-arrow-up' : 'fa-arrow-down';
+                growthHtml = `<span style="font-size:0.9rem; font-weight:800; color:${color}; background:rgba(${pct>=0?'16,185,129':'239,68,68'},0.12); padding:6px 12px; border-radius:8px; display:inline-flex; align-items:center; gap:5px;"><i class="fas ${icon}"></i> %${Math.abs(pct).toFixed(1)} ${pct>=0?'Artış':'Düşüş'}</span>`;
+                
+                let prevConv = prev.leads > 0 ? (prev.sales / prev.leads) : 0;
+                let currConv = current.leads > 0 ? (current.sales / current.leads) : 0;
+                let prevAvg = prev.sales > 0 ? (prev.revenue / prev.sales) : 0;
+                let currAvg = current.sales > 0 ? (current.revenue / current.sales) : 0;
+
+                let reasons = [];
+                if (pct >= 0) {
+                    if (current.leads > prev.leads) reasons.push("yönlendirme artışı");
+                    if (currConv > prevConv) reasons.push("dönüşüm yükselişi");
+                    if (currAvg > prevAvg) reasons.push("sepet tutarı artışı");
+                    analysisHtml = `<div style="font-size:0.85rem; color:#475569; margin-top:1rem; border-top:1px dashed #cbd5e1; padding-top:0.75rem; line-height:1.5;"><i class="fas fa-lightbulb" style="color:#f59e0b; margin-right:6px;"></i> Büyüme faktörleri: <b>${reasons.length>0?reasons.join(", "):"Genel istikrarlı artış"}</b></div>`;
+                } else {
+                    if (current.leads < prev.leads) reasons.push("yönlendirme düşüşü");
+                    if (currConv < prevConv) reasons.push("dönüşüm gerilemesi");
+                    if (currAvg < prevAvg) reasons.push("sepet tutarı daralması");
+                    analysisHtml = `<div style="font-size:0.85rem; color:#475569; margin-top:1rem; border-top:1px dashed #cbd5e1; padding-top:0.75rem; line-height:1.5;"><i class="fas fa-exclamation-circle" style="color:#ef4444; margin-right:6px;"></i> Gerileme faktörleri: <b>${reasons.length>0?reasons.join(", "):"Performans daralması"}</b></div>`;
+                }
+            } else {
+                growthHtml = '<span style="font-size:0.85rem; font-weight:700; color:#64748b; background:#f1f5f9; padding:6px 12px; border-radius:8px;">Başlangıç Dönemi</span>';
+            }
+
+            trendCardsHtml += `
+            <div style="background:#ffffff; border:1px solid #e2e8f0; border-radius:1.25rem; padding:1.5rem; box-shadow:0 4px 12px rgba(0,0,0,0.03); display:flex; flex-direction:column; justify-content:space-between;" class="print-card print-break-avoid">
+                <div>
+                    <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #e2e8f0; padding-bottom:1rem; margin-bottom:1rem;">
+                        <div style="font-weight:800; color:#0f172a; font-size:1.25rem;">${current.period}</div>
+                        ${growthHtml}
+                    </div>
+                    
+                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.75rem; margin-bottom:1rem;">
+                        <div style="background:#f8fafc; padding:12px; border-radius:10px;">
+                            <div style="font-size:0.75rem; color:#64748b; font-weight:800; text-transform:uppercase;">Yönlendirme</div>
+                            <div style="font-size:1.3rem; font-weight:800; color:#0f172a; font-family:monospace; margin-top:2px;">${current.leads}</div>
+                        </div>
+                        <div style="background:#ecfdf5; padding:12px; border-radius:10px;">
+                            <div style="font-size:0.75rem; color:#047857; font-weight:800; text-transform:uppercase;">Satış Adedi</div>
+                            <div style="font-size:1.3rem; font-weight:800; color:#059669; font-family:monospace; margin-top:2px;">${current.sales} <span style="font-size:0.75rem;">(%${convRate})</span></div>
+                        </div>
+                    </div>
+
+                    <div style="background:#f0f9ff; padding:14px; border-radius:10px; margin-bottom:0.5rem;">
+                        <div style="font-size:0.75rem; color:#0284c7; font-weight:800; text-transform:uppercase;">Dönem Cirosu</div>
+                        <div style="font-size:1.8rem; font-weight:800; color:#0369a1; font-family:monospace; line-height:1.2; margin-top:4px;">${fmt(current.revenue)}</div>
+                        <div style="font-size:0.8rem; color:#0284c7; font-weight:600; margin-top:4px;">Ortalama Sepet: <b>${fmt(avgBasket)}</b></div>
+                    </div>
+                </div>
+                ${analysisHtml}
+            </div>`;
+        });
+
+        let bList = Object.values(branchStatsMonthly).sort((a,b) => b.rev - a.rev);
+        let bTableRows = bList.filter(b => b.leads > 0 || b.rev > 0).map(b => {
+            let conv = b.leads > 0 ? ((b.sales / b.leads) * 100).toFixed(1) : 0;
+            return `
+            <tr style="border-bottom:1px solid #e2e8f0;">
+                <td style="padding:14px; font-weight:800; color:#0f172a; font-size:1rem;">${b.name} Şubesi</td>
+                <td style="padding:14px; text-align:center; color:#334155; font-size:0.95rem; font-weight:600;">${b.leads}</td>
+                <td style="padding:14px; text-align:center; color:#059669; font-weight:800; font-size:1rem; font-family:monospace;">${b.sales}</td>
+                <td style="padding:14px; text-align:center; color:#64748b; font-weight:700; font-size:0.95rem;">%${conv}</td>
+                <td style="padding:14px; text-align:right; font-weight:800; color:#0284c7; font-family:monospace; font-size:1.1rem;">${fmt(b.rev)}</td>
+            </tr>`;
+        }).join('');
+
+        let periodLabel = sP === eP ? sP : `${sP} – ${eP}`;
+        let catLabel = cat === 'all' ? 'Tüm Kategoriler' : cat;
+
+        window.currentAiExportData = {
+            periodLabel: periodLabel,
+            catLabel: catLabel,
+            nextMonthLabel: nextMonthLabel,
+            predRev: predRev,
+            predSales: predSales,
+            predLeads: predLeads,
+            predConv: predConv,
+            aiExplanation: aiExplanation.replace(/<[^>]*>/g, ''),
+            monthlyData: monthlyData,
+            branchList: bList
+        };
+
+        document.getElementById('aiReportExportArea').innerHTML = `
+            <div style="text-align:center; margin-bottom:2rem; border-bottom:2px solid #e2e8f0; padding-bottom:1.5rem;">
+                <div style="font-size:1.75rem; font-weight:800; color:#0f172a; letter-spacing:-0.5px; margin-bottom:0.4rem;">HEDEF AVM • YAPAY ZEKA (AI) STRATEJİK TAHMİN RAPORU</div>
+                <div style="font-size:1rem; font-weight:800; color:#64748b; text-transform:uppercase; letter-spacing:0.08em;">Dönem: ${periodLabel} • Kategori: ${catLabel}</div>
+            </div>
+
+            <!-- 3 BÜYÜK KPI KARTI -->
+            <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(240px, 1fr)); gap:1.5rem; margin-bottom:2rem;">
+                <div style="background:#f0f9ff; border:1px solid #bae6fd; border-left:6px solid #0284c7; border-radius:1.25rem; padding:1.75rem; text-align:center; box-shadow:0 4px 12px rgba(2,132,199,0.08);" class="print-card print-break-avoid">
+                    <div style="font-size:0.85rem; font-weight:800; color:#0284c7; text-transform:uppercase; letter-spacing:0.06em; margin-bottom:0.5rem;">TAHMİNİ TOPLAM CİRO</div>
+                    <div style="font-size:2.4rem; font-weight:800; color:#0369a1; font-family:monospace; line-height:1.1;">${fmt(predRev)}</div>
+                    <div style="font-size:0.85rem; color:#0284c7; font-weight:700; margin-top:0.6rem;">${nextMonthLabel} Beklentisi</div>
+                </div>
+
+                <div style="background:#ecfdf5; border:1px solid #a7f3d0; border-left:6px solid #059669; border-radius:1.25rem; padding:1.75rem; text-align:center; box-shadow:0 4px 12px rgba(5,150,105,0.08);" class="print-card print-break-avoid">
+                    <div style="font-size:0.85rem; font-weight:800; color:#047857; text-transform:uppercase; letter-spacing:0.06em; margin-bottom:0.5rem;">TAHMİNİ SATIŞ ADEDİ</div>
+                    <div style="font-size:2.4rem; font-weight:800; color:#047857; font-family:monospace; line-height:1.1;">${predSales} <span style="font-size:1.1rem; font-weight:700;">adet</span></div>
+                    <div style="font-size:0.85rem; font-weight:700; color:#059669; margin-top:0.6rem;">Beklenen Dönüşüm: %${predConv}</div>
+                </div>
+
+                <div style="background:#f5f3ff; border:1px solid #ddd6fe; border-left:6px solid #7c3aed; border-radius:1.25rem; padding:1.75rem; text-align:center; box-shadow:0 4px 12px rgba(124,58,237,0.08);" class="print-card print-break-avoid">
+                    <div style="font-size:0.85rem; font-weight:800; color:#6d28d9; text-transform:uppercase; letter-spacing:0.06em; margin-bottom:0.5rem;">TAHMİNİ YÖNLENDİRME</div>
+                    <div style="font-size:2.4rem; font-weight:800; color:#6d28d9; font-family:monospace; line-height:1.1;">${predLeads} <span style="font-size:1.1rem; font-weight:700;">talep</span></div>
+                    <div style="font-size:0.85rem; color:#6d28d9; font-weight:700; margin-top:0.6rem;">${nextMonthLabel} Beklentisi</div>
+                </div>
+            </div>
+
+            <!-- AI STRATEJİK DEĞERLENDİRME -->
+            <div style="background:#faf5ff; border:1px solid #e9d5ff; border-left:6px solid #9333ea; padding:1.75rem; border-radius:1.25rem; font-size:1.05rem; color:#3b0764; line-height:1.7; margin-bottom:2.5rem; box-shadow:0 4px 12px rgba(147,51,234,0.05);" class="print-card print-break-avoid">
+                <div style="font-weight:800; color:#581c87; font-size:1.2rem; margin-bottom:0.75rem; display:flex; align-items:center; gap:8px;">
+                    <i class="fas fa-brain" style="color:#9333ea; font-size:1.4rem;"></i> Yapay Zeka (AI) Stratejik Analiz ve Büyüme Değerlendirmesi
+                </div>
+                ${aiExplanation}
+            </div>
+
+            <!-- AYLAR ARASI GELİŞİM KARTLARI -->
+            <div style="margin-bottom:2.5rem;">
+                <h3 style="font-size:1.3rem; font-weight:800; color:#0f172a; margin-bottom:1.25rem; display:flex; align-items:center; gap:8px;">
+                    <i class="fas fa-chart-line" style="color:#0ea5e9;"></i> Aylar Arası Trend & İvme Karşılaştırması
+                </h3>
+                <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(280px, 1fr)); gap:1.5rem;">
+                    ${trendCardsHtml}
+                </div>
+            </div>
+
+            <!-- ŞUBE DETAY TABLOSU -->
+            <div style="margin-bottom:2rem;" class="print-break-avoid">
+                <h3 style="font-size:1.3rem; font-weight:800; color:#0f172a; margin-bottom:1.25rem; display:flex; align-items:center; gap:8px;">
+                    <i class="fas fa-store" style="color:#10b981;"></i> Seçili Dönem Şube Katkı & Dağılım Matrisi
+                </h3>
+                <table style="width:100%; border-collapse:collapse; background:#ffffff; border-radius:12px; overflow:hidden; border:1px solid #e2e8f0;">
+                    <thead style="background:#f1f5f9;">
+                        <tr>
+                            <th style="padding:14px; font-weight:800; color:#334155; text-transform:uppercase; font-size:0.85rem; text-align:left; border-bottom:2px solid #cbd5e1;">Şube</th>
+                            <th style="padding:14px; font-weight:800; color:#334155; text-transform:uppercase; font-size:0.85rem; text-align:center; border-bottom:2px solid #cbd5e1;">Yönlendirme</th>
+                            <th style="padding:14px; font-weight:800; color:#334155; text-transform:uppercase; font-size:0.85rem; text-align:center; border-bottom:2px solid #cbd5e1;">Satış Adedi</th>
+                            <th style="padding:14px; font-weight:800; color:#334155; text-transform:uppercase; font-size:0.85rem; text-align:center; border-bottom:2px solid #cbd5e1;">Dönüşüm</th>
+                            <th style="padding:14px; font-weight:800; color:#334155; text-transform:uppercase; font-size:0.85rem; text-align:right; border-bottom:2px solid #cbd5e1;">Toplam Ciro</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${bTableRows}
+                    </tbody>
+                </table>
+            </div>
+
+            <div style="margin-top:3rem; font-size:0.8rem; color:#94a3b8; text-align:center; font-weight:600; border-top:1px solid #e2e8f0; padding-top:1rem;">
+                HEDEF AVM E-Ticaret CRM • Yapay Zeka Tahmin & Raporlama Modülü • Rapor Oluşturulma: ${new Date().toLocaleString('tr-TR')}
+            </div>
+        `;
+
+        document.getElementById('reportAnalyticsWrap').style.display = 'flex';
+        showToast('Yapay zeka analizi başarıyla tamamlandı.');
     } catch (e) {
-        showWarning('Hata', 'Rapor analiz edilirken bir sorun oluştu.');
+        showWarning('Hata', 'Rapor analiz edilirken bir sorun oluştu: ' + e.message);
     } finally {
-        btn.innerHTML = orig;
-        btn.disabled = false;
+        if (btn) {
+            btn.innerHTML = orig;
+            btn.disabled = false;
+        }
     }
 }
 
@@ -2464,13 +2659,14 @@ function exportToCSV() {
         return;
     }
     
-    var filename = `Hedef_AVM_Rapor_${data.startDate.replace(/\s+/g, '_')}-${data.endDate.replace(/\s+/g, '_')}.csv`;
+    var filename = `Hedef_AVM_Yonetim_Raporu_${data.startDate.replace(/\s+/g, '_')}-${data.endDate.replace(/\s+/g, '_')}.csv`;
 
     var csv = [];
     csv.push('\uFEFF'); 
     
     csv.push('HEDEF AVM SATIŞ & PERFORMANS RAPORU');
     csv.push(`Dönem:;"${data.period}"`);
+    csv.push(`Oluşturulma Tarihi:;"${new Date().toLocaleString('tr-TR')}"`);
     csv.push('');
     
     csv.push('GENEL TOPLAM BİLGİLERİ');
@@ -2500,9 +2696,6 @@ function exportToCSV() {
         }
         csv.push(row.join(";")); 
     }
-    
-    csv.push('');
-    csv.push(`Oluşturulma Tarihi:;"${new Date().toLocaleString('tr-TR')}"`);
 
     var csvFile = new Blob([csv.join("\n")], {type: "text/csv;charset=utf-8;"});
     var downloadLink = document.createElement("a");
@@ -2512,6 +2705,79 @@ function exportToCSV() {
     document.body.appendChild(downloadLink);
     downloadLink.click();
     document.body.removeChild(downloadLink);
+    showToast('Yönetim raporu Excel formatında indirildi.');
+}
+
+function printReport() {
+    var data = window.currentExportData;
+    if (!data) {
+        showWarning('Uyarı', 'Lütfen önce rapor oluşturun.');
+        return;
+    }
+    window.print();
+}
+
+function exportAiToCSV() {
+    var data = window.currentAiExportData;
+    if (!data) {
+        showWarning('Uyarı', 'Lütfen önce yapay zeka analizini çalıştırın.');
+        return;
+    }
+    
+    var filename = `Hedef_AVM_AI_Tahmin_Raporu_${data.periodLabel.replace(/\s+/g, '_')}.csv`;
+    var csv = [];
+    csv.push('\uFEFF');
+    
+    csv.push('HEDEF AVM YAPAY ZEKA (AI) STRATEJİK TAHMİN RAPORU');
+    csv.push(`Dönem:;"${data.periodLabel}"`);
+    csv.push(`Kategori:;"${data.catLabel}"`);
+    csv.push(`Oluşturulma Tarihi:;"${new Date().toLocaleString('tr-TR')}"`);
+    csv.push('');
+    
+    csv.push('GELECEK AY YAPAY ZEKA TAHMİNLERİ');
+    csv.push(`Tahmin Dönemi;Tahmini Ciro (TL);Tahmini Satış (Adet);Tahmini Yönlendirme;Tahmini Dönüşüm (%)`);
+    csv.push(`"${data.nextMonthLabel}";"${data.predRev}";"${data.predSales}";"${data.predLeads}";"%${data.predConv}"`);
+    csv.push('');
+
+    csv.push('YAPAY ZEKA DEĞERLENDİRMESİ');
+    csv.push(`"${data.aiExplanation.replace(/"/g, '""')}"`);
+    csv.push('');
+    
+    csv.push('AYLAR ARASI GELİŞİM VE PERFORMANS TABLOSU');
+    csv.push('Dönem;Yönlendirme;Aranan;Satış Adedi;Dönüşüm (%);Toplam Ciro (TL)');
+    data.monthlyData.forEach(function(m) {
+        var conv = m.leads > 0 ? ((m.sales / m.leads) * 100).toFixed(1) : '0';
+        csv.push(`"${m.period}";"${m.leads}";"${m.calls}";"${m.sales}";"%${conv}";"${m.revenue}"`);
+    });
+    csv.push('');
+
+    csv.push('ŞUBE BAZLI PERFORMANS VE KATKI MATRİSİ');
+    csv.push('Şube Adı;Yönlendirme;Satış;Dönüşüm (%);Toplam Ciro (TL)');
+    data.branchList.forEach(function(b) {
+        if (b.leads > 0 || b.rev > 0) {
+            var conv = b.leads > 0 ? ((b.sales / b.leads) * 100).toFixed(1) : '0';
+            csv.push(`"${b.name} Şubesi";"${b.leads}";"${b.sales}";"%${conv}";"${b.rev}"`);
+        }
+    });
+
+    var csvFile = new Blob([csv.join("\n")], {type: "text/csv;charset=utf-8;"});
+    var downloadLink = document.createElement("a");
+    downloadLink.download = filename;
+    downloadLink.href = window.URL.createObjectURL(csvFile);
+    downloadLink.style.display = "none";
+    document.body.appendChild(downloadLink);
+    downloadLink.click();
+    document.body.removeChild(downloadLink);
+    showToast('AI tahmin raporu Excel formatında indirildi.');
+}
+
+function printAiReport() {
+    var data = window.currentAiExportData;
+    if (!data) {
+        showWarning('Uyarı', 'Lütfen önce yapay zeka analizini çalıştırın.');
+        return;
+    }
+    window.print();
 }
 
 function applySmartParsing() {
