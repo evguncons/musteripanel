@@ -657,23 +657,7 @@ body.dark .theme-toggle .knob{transform:translateX(20px)}
     </div>
 
     <!-- Müşteri Özet & Geçmiş Bilgileri Kutusu -->
-    <div id="dupModalDetails" style="background:var(--surface2); border:1px solid var(--border); border-radius:1rem; padding:1.25rem; margin-bottom:1.25rem; font-size:0.9rem; line-height:1.6;">
-    </div>
-
-    <!-- Hızlı Satış Tutarı Giriş Alanı (Satış Ekle Seçildiğinde Açılır) -->
-    <div id="dupSaleInputArea" style="display:none; background:rgba(16, 185, 129, 0.08); border:1.5px dashed var(--sys-green); border-radius:1rem; padding:1.25rem; margin-bottom:1.25rem;">
-      <label class="inp-label" style="color:var(--sys-green); font-weight:800; font-size:0.85rem; margin-bottom:0.5rem; display:block;">
-        <i class="fas fa-tag mr-1"></i> Satış Tutarı (TL) <span style="color:var(--sys-red)">*</span>
-      </label>
-      <div style="display:flex; gap:0.75rem; align-items:center;">
-        <div style="position:relative; flex:1;">
-          <span style="position:absolute; left:12px; top:50%; transform:translateY(-50%); font-weight:800; color:var(--text3);">₺</span>
-          <input type="number" id="dupSaleAmountInp" class="inp" placeholder="Örn: 25000" min="1" step="any" style="padding-left:28px; font-weight:800; font-size:1.1rem; color:var(--sys-green);">
-        </div>
-        <button id="btnConfirmDirectSale" class="btn" style="background:linear-gradient(135deg, var(--sys-green), #059669); color:#fff; font-weight:800; height:44px; padding:0 1.25rem; border-radius:0.75rem; white-space:nowrap;">
-          <i class="fas fa-check mr-1"></i> Satışı Kaydet
-        </button>
-      </div>
+    <div id="dupModalDetails" style="background:var(--surface2); border:1px solid var(--border); border-radius:1rem; padding:1.25rem; margin-bottom:1.5rem; font-size:0.9rem; line-height:1.6;">
     </div>
 
     <!-- 3 SEÇENEK BUTONU: Mükerrer Ekle - Satış Ekle - Kapat -->
@@ -815,60 +799,122 @@ function showWarning(title, message) {
     document.getElementById('warningModal').classList.add('show');
 }
 
-async function saveSingleCustomerDirectly(customerData, btnEl) {
-    if (!customerData.branch || !customerData.name) {
-        showWarning('Eksik Bilgi', 'Şube veya müşteri adı eksik olduğu için doğrudan kaydedilemedi.');
-        return false;
+function fillCustomerIntoFormRow(customerData, isSaleMode, targetRowEl) {
+    var targetRow = targetRowEl;
+    if (!targetRow) {
+        addInputRow();
+        var rows = document.querySelectorAll('#inputContainer > .entry-card');
+        targetRow = rows[rows.length - 1];
     }
 
-    var origText = '';
-    if (btnEl) {
-        origText = btnEl.innerHTML;
-        btnEl.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> Kaydediliyor...';
-        btnEl.disabled = true;
+    if (!targetRow) return;
+
+    window.isAutoFillingDuplicate = true;
+
+    // Tarih & Saat
+    if (customerData.date) {
+        var dateInp = targetRow.querySelector('input[type="datetime-local"]');
+        if (dateInp) {
+            var t = parseAnyDate(customerData.date);
+            if (t > 0) {
+                var d = new Date(t);
+                var isoStr = new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+                dateInp.value = isoStr;
+            }
+        }
     }
 
-    try {
-        var payloadData = [{
-            date: customerData.date || getTodayDT().replace('T', ' '),
-            branch: customerData.branch,
-            name: customerData.name,
-            contact: customerData.contact ? String(customerData.contact).replace(/^0+/, '') : '',
-            customerNo: customerData.customerNo || '',
-            media: customerData.media || 'Instagram',
-            category: customerData.category || 'GENEL ÜRÜN BİLGİSİ',
-            product: customerData.product || 'GENEL ÜRÜN BİLGİSİ',
-            amount: customerData.amount ? String(customerData.amount) : ''
-        }];
+    // Şube
+    if (customerData.branch) {
+        var selB = targetRow.querySelector('.inp-branch');
+        if (selB) {
+            for (var i = 0; i < selB.options.length; i++) {
+                if (selB.options[i].value === customerData.branch || selB.options[i].value.replace(' Şubesi','').trim() === customerData.branch.replace(' Şubesi','').trim()) {
+                    selB.selectedIndex = i;
+                    break;
+                }
+            }
+        }
+    }
 
-        var res = await fetch(GAS_URL, {
-            method: 'POST',
-            body: JSON.stringify({ action: 'addCustomersBulk', data: payloadData })
-        });
-        var result = JSON.parse(await res.text());
+    // Müşteri Adı
+    var nameInp = targetRow.querySelector('.inp-name');
+    if (nameInp && customerData.name) {
+        nameInp.value = customerData.name;
+    }
 
-        if (result.status === 'success') {
-            payloadData.forEach(registerGlobalContact);
-            saveGlobalContactsCache();
-            showToast(customerData.amount ? '✓ Satış kaydı Google Sheets\'e başarıyla işlendi!' : '✓ Mükerrer müşteri yönlendirmesi Google Sheets\'e eklendi!');
-            refreshData();
-            return true;
+    // İletişim Numarası
+    var contactInp = targetRow.querySelector('.inp-contact');
+    if (contactInp && customerData.contact) {
+        contactInp.value = customerData.contact;
+    }
+
+    // Müşteri No
+    var cNoInp = targetRow.querySelector('.inp-customerno');
+    if (cNoInp) {
+        cNoInp.value = customerData.customerNo || '';
+    }
+
+    // Geliş Medyası
+    if (customerData.media) {
+        var selM = targetRow.querySelector('.inp-media');
+        if (selM) {
+            for (var j = 0; j < selM.options.length; j++) {
+                if (selM.options[j].value.toLowerCase() === customerData.media.toLowerCase()) {
+                    selM.selectedIndex = j;
+                    break;
+                }
+            }
+        }
+    }
+
+    // Kategori
+    if (customerData.category) {
+        var selC = targetRow.querySelector('.inp-category');
+        if (selC) {
+            for (var k = 0; k < selC.options.length; k++) {
+                if (selC.options[k].value === customerData.category) {
+                    selC.selectedIndex = k;
+                    break;
+                }
+            }
+        }
+    }
+
+    // Ürün
+    var prodInp = targetRow.querySelector('.inp-product');
+    if (prodInp && customerData.product) {
+        prodInp.value = customerData.product;
+    }
+
+    // Tutar (TL) & Vurgulama
+    var amountInp = targetRow.querySelector('.inp-amount');
+    if (amountInp) {
+        if (customerData.amount && isSaleMode) {
+            amountInp.value = customerData.amount;
+        }
+        if (isSaleMode) {
+            amountInp.focus();
+            amountInp.style.boxShadow = '0 0 0 4px rgba(16, 185, 129, 0.4)';
+            amountInp.style.borderColor = 'var(--sys-green)';
+            setTimeout(function() {
+                amountInp.style.boxShadow = '';
+                amountInp.style.borderColor = '';
+            }, 3000);
+            showToast('✓ Satış için bilgiler forma aktarıldı. Tutarı girip kaydedebilirsiniz.');
         } else {
-            showWarning('Hata', result.message || 'Google Sheets kaydı yapılamadı.');
-            return false;
-        }
-    } catch(err) {
-        showWarning('Bağlantı Hatası', 'Google Sheets ile iletişim kurulurken hata oluştu: ' + err.message);
-        return false;
-    } finally {
-        if (btnEl) {
-            btnEl.innerHTML = origText;
-            btnEl.disabled = false;
+            showToast('✓ Müşteri bilgileri forma aktarıldı. Düzenleyip kaydedebilirsiniz.');
         }
     }
+
+    targetRow.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+    setTimeout(function() {
+        window.isAutoFillingDuplicate = false;
+    }, 500);
 }
 
-function showDuplicatePrompt(phoneStr, pastRecords, customerDraftData, onKapatCb) {
+function showDuplicatePrompt(phoneStr, pastRecords, customerDraftData, targetRowEl, onKapatCb) {
     var modal = document.getElementById('duplicateCustomerModal');
     if (!modal) return;
 
@@ -945,17 +991,10 @@ function showDuplicatePrompt(phoneStr, pastRecords, customerDraftData, onKapatCb
     detailsHtml += `</div>`;
     document.getElementById('dupModalDetails').innerHTML = detailsHtml;
 
-    // Reset sale area
-    var saleArea = document.getElementById('dupSaleInputArea');
-    var saleInp = document.getElementById('dupSaleAmountInp');
-    if (saleArea) saleArea.style.display = 'none';
-    if (saleInp) saleInp.value = '';
-
-    // Action Data Builder
     customerDraftData = customerDraftData || {};
     var fullData = {
         branch: customerDraftData.branch || latest.branch || '',
-        name: customerDraftData.name || latest.name || 'Müşteri',
+        name: customerDraftData.name || latest.name || '',
         contact: phoneStr || latest.contact || '',
         customerNo: customerDraftData.customerNo || latest.customerNo || '',
         media: customerDraftData.media || latest.media || 'Instagram',
@@ -968,66 +1007,28 @@ function showDuplicatePrompt(phoneStr, pastRecords, customerDraftData, onKapatCb
     var btnAddAnyway = document.getElementById('btnDupAddAnyway');
     var btnAddSale = document.getElementById('btnDupAddSale');
     var btnDismiss = document.getElementById('btnDupDismiss');
-    var btnConfirmDirectSale = document.getElementById('btnConfirmDirectSale');
 
     var newAddAnyway = btnAddAnyway.cloneNode(true);
     var newAddSale = btnAddSale.cloneNode(true);
     var newDismiss = btnDismiss.cloneNode(true);
-    var newConfirmDirectSale = btnConfirmDirectSale.cloneNode(true);
 
     btnAddAnyway.parentNode.replaceChild(newAddAnyway, btnAddAnyway);
     btnAddSale.parentNode.replaceChild(newAddSale, btnAddSale);
     btnDismiss.parentNode.replaceChild(newDismiss, btnDismiss);
-    btnConfirmDirectSale.parentNode.replaceChild(newConfirmDirectSale, btnConfirmDirectSale);
 
-    newAddAnyway.onclick = async function() {
-        if (!fullData.branch) {
-            showWarning('Eksik Şube', 'Müşteri için şube bilgisi bulunamadı. Lütfen form üzerinden şube seçerek ekleyiniz.');
-            return;
-        }
-        var success = await saveSingleCustomerDirectly(fullData, newAddAnyway);
-        if (success) {
-            modal.classList.remove('show');
-            if (onKapatCb) onKapatCb();
-        }
+    newAddAnyway.onclick = function() {
+        modal.classList.remove('show');
+        fillCustomerIntoFormRow(fullData, false, targetRowEl);
+        var smartInp = document.getElementById('smartParserInput');
+        if (smartInp) smartInp.value = '';
     };
 
     newAddSale.onclick = function() {
-        if (saleArea) {
-            saleArea.style.display = 'block';
-            if (saleInp) {
-                saleInp.focus();
-                saleInp.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            }
-        }
+        modal.classList.remove('show');
+        fillCustomerIntoFormRow(fullData, true, targetRowEl);
+        var smartInp = document.getElementById('smartParserInput');
+        if (smartInp) smartInp.value = '';
     };
-
-    newConfirmDirectSale.onclick = async function() {
-        var amt = saleInp ? parseTurkishFloat(saleInp.value) : 0;
-        if (!amt || amt <= 0) {
-            showWarning('Eksik Tutar', 'Lütfen geçerli bir satış tutarı giriniz.');
-            if (saleInp) saleInp.focus();
-            return;
-        }
-        if (!fullData.branch) {
-            showWarning('Eksik Şube', 'Müşteri için şube bilgisi bulunamadı. Lütfen form üzerinden şube seçerek ekleyiniz.');
-            return;
-        }
-        fullData.amount = amt;
-        var success = await saveSingleCustomerDirectly(fullData, newConfirmDirectSale);
-        if (success) {
-            modal.classList.remove('show');
-            if (onKapatCb) onKapatCb();
-        }
-    };
-
-    if (saleInp) {
-        saleInp.onkeydown = function(e) {
-            if (e.key === 'Enter') {
-                newConfirmDirectSale.click();
-            }
-        };
-    }
 
     newDismiss.onclick = function() {
         modal.classList.remove('show');
@@ -1038,6 +1039,7 @@ function showDuplicatePrompt(phoneStr, pastRecords, customerDraftData, onKapatCb
 }
 
 function checkDuplicatePhone(inputEl) {
+    if (window.isAutoFillingDuplicate) return;
     var rawContact = inputEl.value;
     var compContact = getCompareNum(rawContact);
 
@@ -1061,6 +1063,7 @@ function checkDuplicatePhone(inputEl) {
                 rawContact,
                 pastRecords,
                 draftData,
+                targetRow,
                 function onKapat() {
                     inputEl.value = '';
                 }
@@ -3640,6 +3643,7 @@ function applySmartParsing() {
                     phone,
                     pastRecords,
                     draftData,
+                    null,
                     function onKapat() {
                         document.getElementById('smartParserInput').value = "";
                     }
