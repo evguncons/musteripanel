@@ -645,7 +645,7 @@ body.dark .theme-toggle .knob{transform:translateX(20px)}
 </div>
 
 <div id="duplicateCustomerModal" class="modal-bg" style="z-index: 9999;">
-  <div class="modal-content" style="background:var(--card-bg); border:2px solid var(--sys-orange); border-radius:1.5rem; width:100%; max-width:560px; text-align:left; box-shadow:var(--shadow-md); padding:1.75rem; max-height:90vh; overflow-y:auto;" id="dupModalBox">
+  <div class="modal-content" style="background:var(--card-bg); border:2px solid var(--sys-orange); border-radius:1.5rem; width:100%; max-width:580px; text-align:left; box-shadow:var(--shadow-md); padding:1.75rem; max-height:90vh; overflow-y:auto;" id="dupModalBox">
     <div style="display:flex; align-items:center; gap:12px; margin-bottom:1.25rem; border-bottom:1px solid var(--border); padding-bottom:1rem;">
       <div style="width:48px; height:48px; background:rgba(245, 158, 11, 0.15); border-radius:12px; display:flex; align-items:center; justify-content:center; flex-shrink:0;" id="dupModalIconBg">
         <i class="fas fa-user-clock" style="color:var(--sys-orange); font-size:1.5rem;" id="dupModalIcon"></i>
@@ -657,11 +657,27 @@ body.dark .theme-toggle .knob{transform:translateX(20px)}
     </div>
 
     <!-- Müşteri Özet & Geçmiş Bilgileri Kutusu -->
-    <div id="dupModalDetails" style="background:var(--surface2); border:1px solid var(--border); border-radius:1rem; padding:1.25rem; margin-bottom:1.5rem; font-size:0.9rem; line-height:1.6;">
+    <div id="dupModalDetails" style="background:var(--surface2); border:1px solid var(--border); border-radius:1rem; padding:1.25rem; margin-bottom:1.25rem; font-size:0.9rem; line-height:1.6;">
+    </div>
+
+    <!-- Hızlı Satış Tutarı Giriş Alanı (Satış Ekle Seçildiğinde Açılır) -->
+    <div id="dupSaleInputArea" style="display:none; background:rgba(16, 185, 129, 0.08); border:1.5px dashed var(--sys-green); border-radius:1rem; padding:1.25rem; margin-bottom:1.25rem;">
+      <label class="inp-label" style="color:var(--sys-green); font-weight:800; font-size:0.85rem; margin-bottom:0.5rem; display:block;">
+        <i class="fas fa-tag mr-1"></i> Satış Tutarı (TL) <span style="color:var(--sys-red)">*</span>
+      </label>
+      <div style="display:flex; gap:0.75rem; align-items:center;">
+        <div style="position:relative; flex:1;">
+          <span style="position:absolute; left:12px; top:50%; transform:translateY(-50%); font-weight:800; color:var(--text3);">₺</span>
+          <input type="number" id="dupSaleAmountInp" class="inp" placeholder="Örn: 25000" min="1" step="any" style="padding-left:28px; font-weight:800; font-size:1.1rem; color:var(--sys-green);">
+        </div>
+        <button id="btnConfirmDirectSale" class="btn" style="background:linear-gradient(135deg, var(--sys-green), #059669); color:#fff; font-weight:800; height:44px; padding:0 1.25rem; border-radius:0.75rem; white-space:nowrap;">
+          <i class="fas fa-check mr-1"></i> Satışı Kaydet
+        </button>
+      </div>
     </div>
 
     <!-- 3 SEÇENEK BUTONU: Mükerrer Ekle - Satış Ekle - Kapat -->
-    <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:0.75rem;">
+    <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:0.75rem;" id="dupModalActionButtons">
       <button id="btnDupAddAnyway" class="btn" style="background:linear-gradient(135deg, var(--sys-blue), #0284c7); color:#fff; font-weight:800; border-radius:0.85rem; height:46px; font-size:0.9rem;">
         <i class="fas fa-user-plus mr-1"></i> Mükerrer Ekle
       </button>
@@ -799,12 +815,66 @@ function showWarning(title, message) {
     document.getElementById('warningModal').classList.add('show');
 }
 
-function showDuplicatePrompt(phoneStr, pastRecords, onMukerrerEkleCb, onSatisEkleCb, onKapatCb) {
+async function saveSingleCustomerDirectly(customerData, btnEl) {
+    if (!customerData.branch || !customerData.name) {
+        showWarning('Eksik Bilgi', 'Şube veya müşteri adı eksik olduğu için doğrudan kaydedilemedi.');
+        return false;
+    }
+
+    var origText = '';
+    if (btnEl) {
+        origText = btnEl.innerHTML;
+        btnEl.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> Kaydediliyor...';
+        btnEl.disabled = true;
+    }
+
+    try {
+        var payloadData = [{
+            date: customerData.date || getTodayDT().replace('T', ' '),
+            branch: customerData.branch,
+            name: customerData.name,
+            contact: customerData.contact ? String(customerData.contact).replace(/^0+/, '') : '',
+            customerNo: customerData.customerNo || '',
+            media: customerData.media || 'Instagram',
+            category: customerData.category || 'GENEL ÜRÜN BİLGİSİ',
+            product: customerData.product || 'GENEL ÜRÜN BİLGİSİ',
+            amount: customerData.amount ? String(customerData.amount) : ''
+        }];
+
+        var res = await fetch(GAS_URL, {
+            method: 'POST',
+            body: JSON.stringify({ action: 'addCustomersBulk', data: payloadData })
+        });
+        var result = JSON.parse(await res.text());
+
+        if (result.status === 'success') {
+            payloadData.forEach(registerGlobalContact);
+            saveGlobalContactsCache();
+            showToast(customerData.amount ? '✓ Satış kaydı Google Sheets\'e başarıyla işlendi!' : '✓ Mükerrer müşteri yönlendirmesi Google Sheets\'e eklendi!');
+            refreshData();
+            return true;
+        } else {
+            showWarning('Hata', result.message || 'Google Sheets kaydı yapılamadı.');
+            return false;
+        }
+    } catch(err) {
+        showWarning('Bağlantı Hatası', 'Google Sheets ile iletişim kurulurken hata oluştu: ' + err.message);
+        return false;
+    } finally {
+        if (btnEl) {
+            btnEl.innerHTML = origText;
+            btnEl.disabled = false;
+        }
+    }
+}
+
+function showDuplicatePrompt(phoneStr, pastRecords, customerDraftData, onKapatCb) {
     var modal = document.getElementById('duplicateCustomerModal');
     if (!modal) return;
 
     var totalCount = pastRecords.length + 1;
     var hasSale = pastRecords.some(function(r) { return isRecordSale(r); });
+    var latest = pastRecords[0] || {};
 
     var iconBg = document.getElementById('dupModalIconBg');
     var icon = document.getElementById('dupModalIcon');
@@ -875,28 +945,89 @@ function showDuplicatePrompt(phoneStr, pastRecords, onMukerrerEkleCb, onSatisEkl
     detailsHtml += `</div>`;
     document.getElementById('dupModalDetails').innerHTML = detailsHtml;
 
+    // Reset sale area
+    var saleArea = document.getElementById('dupSaleInputArea');
+    var saleInp = document.getElementById('dupSaleAmountInp');
+    if (saleArea) saleArea.style.display = 'none';
+    if (saleInp) saleInp.value = '';
+
+    // Action Data Builder
+    customerDraftData = customerDraftData || {};
+    var fullData = {
+        branch: customerDraftData.branch || latest.branch || '',
+        name: customerDraftData.name || latest.name || 'Müşteri',
+        contact: phoneStr || latest.contact || '',
+        customerNo: customerDraftData.customerNo || latest.customerNo || '',
+        media: customerDraftData.media || latest.media || 'Instagram',
+        category: customerDraftData.category || latest.category || 'GENEL ÜRÜN BİLGİSİ',
+        product: customerDraftData.product || latest.product || 'GENEL ÜRÜN BİLGİSİ',
+        date: customerDraftData.date || getTodayDT().replace('T', ' ')
+    };
+
     // Button event handlers
     var btnAddAnyway = document.getElementById('btnDupAddAnyway');
     var btnAddSale = document.getElementById('btnDupAddSale');
     var btnDismiss = document.getElementById('btnDupDismiss');
+    var btnConfirmDirectSale = document.getElementById('btnConfirmDirectSale');
 
     var newAddAnyway = btnAddAnyway.cloneNode(true);
     var newAddSale = btnAddSale.cloneNode(true);
     var newDismiss = btnDismiss.cloneNode(true);
+    var newConfirmDirectSale = btnConfirmDirectSale.cloneNode(true);
 
     btnAddAnyway.parentNode.replaceChild(newAddAnyway, btnAddAnyway);
     btnAddSale.parentNode.replaceChild(newAddSale, btnAddSale);
     btnDismiss.parentNode.replaceChild(newDismiss, btnDismiss);
+    btnConfirmDirectSale.parentNode.replaceChild(newConfirmDirectSale, btnConfirmDirectSale);
 
-    newAddAnyway.onclick = function() {
-        modal.classList.remove('show');
-        if (onMukerrerEkleCb) onMukerrerEkleCb();
+    newAddAnyway.onclick = async function() {
+        if (!fullData.branch) {
+            showWarning('Eksik Şube', 'Müşteri için şube bilgisi bulunamadı. Lütfen form üzerinden şube seçerek ekleyiniz.');
+            return;
+        }
+        var success = await saveSingleCustomerDirectly(fullData, newAddAnyway);
+        if (success) {
+            modal.classList.remove('show');
+            if (onKapatCb) onKapatCb();
+        }
     };
 
     newAddSale.onclick = function() {
-        modal.classList.remove('show');
-        if (onSatisEkleCb) onSatisEkleCb();
+        if (saleArea) {
+            saleArea.style.display = 'block';
+            if (saleInp) {
+                saleInp.focus();
+                saleInp.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        }
     };
+
+    newConfirmDirectSale.onclick = async function() {
+        var amt = saleInp ? parseTurkishFloat(saleInp.value) : 0;
+        if (!amt || amt <= 0) {
+            showWarning('Eksik Tutar', 'Lütfen geçerli bir satış tutarı giriniz.');
+            if (saleInp) saleInp.focus();
+            return;
+        }
+        if (!fullData.branch) {
+            showWarning('Eksik Şube', 'Müşteri için şube bilgisi bulunamadı. Lütfen form üzerinden şube seçerek ekleyiniz.');
+            return;
+        }
+        fullData.amount = amt;
+        var success = await saveSingleCustomerDirectly(fullData, newConfirmDirectSale);
+        if (success) {
+            modal.classList.remove('show');
+            if (onKapatCb) onKapatCb();
+        }
+    };
+
+    if (saleInp) {
+        saleInp.onkeydown = function(e) {
+            if (e.key === 'Enter') {
+                newConfirmDirectSale.click();
+            }
+        };
+    }
 
     newDismiss.onclick = function() {
         modal.classList.remove('show');
@@ -914,56 +1045,22 @@ function checkDuplicatePhone(inputEl) {
         var pastRecords = getAllCustomerInteractionsByPhone(rawContact);
         
         if (pastRecords && pastRecords.length > 0) {
-            var latest = pastRecords[0];
             var targetRow = inputEl.closest('.entry-card');
+            var draftData = {
+                branch: targetRow ? targetRow.querySelector('.inp-branch').value : '',
+                name: targetRow ? targetRow.querySelector('.inp-name').value.trim() : '',
+                contact: rawContact,
+                customerNo: targetRow && targetRow.querySelector('.inp-customerno') ? targetRow.querySelector('.inp-customerno').value.trim() : '',
+                media: targetRow ? targetRow.querySelector('.inp-media').value : '',
+                category: targetRow ? targetRow.querySelector('.inp-category').value : '',
+                product: targetRow ? targetRow.querySelector('.inp-product').value.trim() : '',
+                date: targetRow && targetRow.querySelector('input[type="datetime-local"]') ? targetRow.querySelector('input[type="datetime-local"]').value.replace('T', ' ') : ''
+            };
 
             showDuplicatePrompt(
                 rawContact,
                 pastRecords,
-                function onMukerrerEkle() {
-                    if (targetRow) {
-                        var nameInp = targetRow.querySelector('.inp-name');
-                        if (nameInp && !nameInp.value && latest.name) nameInp.value = latest.name;
-                        var cNoInp = targetRow.querySelector('.inp-customerno');
-                        if (cNoInp && !cNoInp.value && latest.customerNo) cNoInp.value = latest.customerNo;
-                    }
-                    showToast('Müşteri mükerrer yönlendirme olarak kabul edildi.');
-                },
-                function onSatisEkle() {
-                    if (targetRow) {
-                        if (latest.name) targetRow.querySelector('.inp-name').value = latest.name;
-                        var cNo = targetRow.querySelector('.inp-customerno');
-                        if (cNo && latest.customerNo) cNo.value = latest.customerNo;
-
-                        if (latest.branch) {
-                            var selB = targetRow.querySelector('.inp-branch');
-                            for(var i=0; i<selB.options.length; i++) {
-                                if(selB.options[i].value === latest.branch) { selB.selectedIndex = i; break; }
-                            }
-                        }
-                        if (latest.media) {
-                            var selM = targetRow.querySelector('.inp-media');
-                            for(var j=0; j<selM.options.length; j++) {
-                                if(selM.options[j].value === latest.media) { selM.selectedIndex = j; break; }
-                            }
-                        }
-                        if (latest.category) {
-                            var selC = targetRow.querySelector('.inp-category');
-                            for(var k=0; k<selC.options.length; k++) {
-                                if(selC.options[k].value === latest.category) { selC.selectedIndex = k; break; }
-                            }
-                        }
-                        if (latest.product) targetRow.querySelector('.inp-product').value = latest.product;
-
-                        var amountInp = targetRow.querySelector('.inp-amount');
-                        if (amountInp) {
-                            amountInp.focus();
-                            amountInp.style.boxShadow = '0 0 0 4px rgba(16, 185, 129, 0.35)';
-                            setTimeout(function() { amountInp.style.boxShadow = ''; }, 2500);
-                        }
-                        showToast('Satış girişi için alanlar dolduruldu. Tutar giriniz.');
-                    }
-                },
+                draftData,
                 function onKapat() {
                     inputEl.value = '';
                 }
@@ -3528,95 +3625,21 @@ function applySmartParsing() {
         if (compContact.length >= 7) {
             var pastRecords = getAllCustomerInteractionsByPhone(phone);
             if (pastRecords && pastRecords.length > 0) { 
-                var latest = pastRecords[0];
+                var draftData = {
+                    branch: branch,
+                    name: name,
+                    contact: phone,
+                    customerNo: '',
+                    media: media || 'Instagram',
+                    category: category,
+                    product: product,
+                    date: getTodayDT().replace('T', ' ')
+                };
 
                 showDuplicatePrompt(
                     phone,
                     pastRecords,
-                    function onMukerrerEkle() {
-                        addInputRow();
-                        var rows = document.querySelectorAll('#inputContainer > .entry-card');
-                        var targetRow = rows[rows.length - 1];
-
-                        if (name || latest.name) targetRow.querySelector('.inp-name').value = name || latest.name;
-                        targetRow.querySelector('.inp-contact').value = phone;
-                        var cNo = targetRow.querySelector('.inp-customerno');
-                        if (cNo && latest.customerNo) cNo.value = latest.customerNo;
-
-                        var finalBranch = branch || latest.branch;
-                        if (finalBranch) {
-                            var selB = targetRow.querySelector('.inp-branch');
-                            for (var i = 0; i < selB.options.length; i++) {
-                                if (selB.options[i].value === finalBranch) { selB.selectedIndex = i; break; }
-                            }
-                        }
-
-                        var finalMedia = media || latest.media;
-                        if (finalMedia) {
-                            var selM = targetRow.querySelector('.inp-media');
-                            for (var j = 0; j < selM.options.length; j++) {
-                                if (selM.options[j].value === finalMedia) { selM.selectedIndex = j; break; }
-                            }
-                        }
-
-                        var finalCategory = category || latest.category;
-                        if (finalCategory) {
-                            var selC = targetRow.querySelector('.inp-category');
-                            for (var k = 0; k < selC.options.length; k++) {
-                                if (selC.options[k].value === finalCategory) { selC.selectedIndex = k; break; }
-                            }
-                        }
-
-                        if (product || latest.product) targetRow.querySelector('.inp-product').value = product || latest.product;
-
-                        document.getElementById('smartParserInput').value = "";
-                        showToast('Müşteri mükerrer yönlendirme olarak eklendi.');
-                    },
-                    function onSatisEkle() {
-                        addInputRow();
-                        var rows = document.querySelectorAll('#inputContainer > .entry-card');
-                        var targetRow = rows[rows.length - 1];
-
-                        if (latest.name || name) targetRow.querySelector('.inp-name').value = latest.name || name;
-                        targetRow.querySelector('.inp-contact').value = phone;
-                        var cNo = targetRow.querySelector('.inp-customerno');
-                        if (cNo && latest.customerNo) cNo.value = latest.customerNo;
-
-                        var finalBranch = branch || latest.branch;
-                        if (finalBranch) {
-                            var selB = targetRow.querySelector('.inp-branch');
-                            for (var i = 0; i < selB.options.length; i++) {
-                                if (selB.options[i].value === finalBranch) { selB.selectedIndex = i; break; }
-                            }
-                        }
-
-                        var finalMedia = media || latest.media;
-                        if (finalMedia) {
-                            var selM = targetRow.querySelector('.inp-media');
-                            for (var j = 0; j < selM.options.length; j++) {
-                                if (selM.options[j].value === finalMedia) { selM.selectedIndex = j; break; }
-                            }
-                        }
-
-                        var finalCategory = category || latest.category;
-                        if (finalCategory) {
-                            var selC = targetRow.querySelector('.inp-category');
-                            for (var k = 0; k < selC.options.length; k++) {
-                                if (selC.options[k].value === finalCategory) { selC.selectedIndex = k; break; }
-                            }
-                        }
-
-                        if (product || latest.product) targetRow.querySelector('.inp-product').value = product || latest.product;
-
-                        document.getElementById('smartParserInput').value = "";
-                        var amountInp = targetRow.querySelector('.inp-amount');
-                        if (amountInp) {
-                            amountInp.focus();
-                            amountInp.style.boxShadow = '0 0 0 4px rgba(16, 185, 129, 0.35)';
-                            setTimeout(function() { amountInp.style.boxShadow = ''; }, 2500);
-                        }
-                        showToast('Satış girişi için alanlar dolduruldu. Tutar giriniz.');
-                    },
+                    draftData,
                     function onKapat() {
                         document.getElementById('smartParserInput').value = "";
                     }
