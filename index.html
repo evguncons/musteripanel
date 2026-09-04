@@ -1338,17 +1338,24 @@ function populateSalesBranchFilter() {
     if(currVal) sel.value = currVal;
 }
 
+var isFetchingData = false;
+var fetchRetryTimeout = null;
+
 function refreshData(){
   var el=document.getElementById('lastUpdateTime');
   if(el) el.textContent=new Date().toLocaleTimeString('tr-TR',{hour:'2-digit',minute:'2-digit', second:'2-digit'});
-  fetchData();
+  if (fetchRetryTimeout) { clearTimeout(fetchRetryTimeout); fetchRetryTimeout = null; }
+  fetchData(true);
 }
 
-async function fetchData(){
+async function fetchData(isManualTrigger = false){
+  if(isFetchingData) return;
+  isFetchingData = true;
+
   var period=document.getElementById('currentPeriod')?document.getElementById('currentPeriod').value:'';
   
   const controller = typeof AbortController !== 'undefined' ? new AbortController() : null;
-  const timeoutId = controller ? setTimeout(() => controller.abort(), 25000) : null;
+  const timeoutId = controller ? setTimeout(() => controller.abort(), 60000) : null;
 
   try{
     var fetchOpts = { method: 'GET', redirect: 'follow' };
@@ -1359,6 +1366,10 @@ async function fetchData(){
 
     var data = await res.json();
     if(data && data.records){
+      if(fetchRetryTimeout){
+        clearTimeout(fetchRetryTimeout);
+        fetchRetryTimeout = null;
+      }
       allRecordsData=(data.records||[]).sort(function(a,b){
         return parseAnyDate(b.timestamp || b.date) - parseAnyDate(a.timestamp || a.date);
       });
@@ -1389,24 +1400,38 @@ async function fetchData(){
       var el=document.getElementById('lastUpdateTime');
       if(el) el.textContent=new Date().toLocaleTimeString('tr-TR',{hour:'2-digit',minute:'2-digit', second:'2-digit'});
     } else {
-      showEmptyOrErrorState((data && data.message) ? data.message : "Sunucudan veri dönmedi.");
+      handleFetchFailure((data && data.message) ? data.message : "Sunucudan veri dönmedi.");
     }
   }catch(e){
     if (timeoutId) clearTimeout(timeoutId);
     console.error("fetchData Hatası:", e);
-    var errText = (e && e.name === 'AbortError') ? 'Sunucu yanıtı 25 saniyeyi aştı (Zaman Aşımı).' : 'Veriler çekilirken bağlantı hatası oluştu.';
-    showEmptyOrErrorState(errText);
+    var errText = (e && e.name === 'AbortError') ? 'Sunucu yanıtı gecikti, otomatik yeniden deneniyor...' : 'Bağlantı kesintisi, otomatik yeniden bağlanılıyor...';
+    handleFetchFailure(errText);
+  } finally {
+    isFetchingData = false;
+  }
+}
+
+function handleFetchFailure(msg) {
+  if (allRecordsData.length === 0) {
+    showEmptyOrErrorState(msg + ' (Otomatik yeniden deneniyor...)');
+  }
+  if (!fetchRetryTimeout) {
+    fetchRetryTimeout = setTimeout(() => {
+      fetchRetryTimeout = null;
+      fetchData();
+    }, 4000);
   }
 }
 
 function showEmptyOrErrorState(msg) {
     var dashEl = document.getElementById('dashTopBranches');
     if (dashEl && allRecordsData.length === 0) {
-        dashEl.innerHTML = '<div style="text-align:center; padding:2rem; color:var(--sys-orange); font-weight:700;"><i class="fas fa-wifi mr-2"></i> ' + msg + ' <br><button onclick="refreshData()" class="btn btn-ghost btn-sm style="margin-top:0.75rem;"><i class="fas fa-sync-alt text-blue-500 mr-1"></i> Yeniden Dene</button></div>';
+        dashEl.innerHTML = '<div style="text-align:center; padding:2rem; color:var(--sys-orange); font-weight:700;"><i class="fas fa-spinner fa-spin mr-2"></i> ' + msg + ' <br><button onclick="refreshData()" class="btn btn-ghost btn-sm" style="margin-top:0.75rem;"><i class="fas fa-sync-alt text-blue-500 mr-1"></i> Şimdi Yenile</button></div>';
     }
     var perfEl = document.getElementById('branchStatsBody');
     if (perfEl && allRecordsData.length === 0) {
-        perfEl.innerHTML = '<div style="text-align:center; padding:3rem; color:var(--text3); font-weight:600;"><i class="fas fa-exclamation-triangle mr-2" style="color:var(--sys-red)"></i> ' + msg + '</div>';
+        perfEl.innerHTML = '<div style="text-align:center; padding:3rem; color:var(--text3); font-weight:600;"><i class="fas fa-sync-alt fa-spin mr-2" style="color:var(--sys-blue)"></i> ' + msg + '</div>';
     }
 }
 
