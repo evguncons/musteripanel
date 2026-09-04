@@ -1081,6 +1081,18 @@ function showDuplicatePrompt(phoneStr, pastRecords, customerDraftData, targetRow
 function checkDuplicatePhone(inputEl) {
     if (window.isAutoFillingDuplicate) return;
     var rawContact = inputEl.value;
+
+    if (isCompanyBlacklistPhone(rawContact)) {
+        showWarning('Şirket Numarası Engeli', '5349525687 şirket hattımızdır, müşteri iletişim numarası olarak eklenemez.');
+        inputEl.value = '';
+        var card = inputEl.closest('.entry-card');
+        if (card) {
+            card.classList.add('error');
+            setTimeout(() => card.classList.remove('error'), 800);
+        }
+        return;
+    }
+
     var compContact = getCompareNum(rawContact);
 
     if (compContact.length >= 7) {
@@ -1193,6 +1205,12 @@ function getCompareNum(str) {
     s = s.replace(/\D/g, '');
     if (s.length >= 10) return s.slice(-10);
     return s;
+}
+
+function isCompanyBlacklistPhone(str) {
+    if (!str) return false;
+    var cmp = getCompareNum(str);
+    return cmp === '5349525687';
 }
 
 function isRecordSale(r) {
@@ -3127,6 +3145,9 @@ function applySmartParsing() {
         .replace(/Üzüldük efendim,? ancak her başvuruyu mağazalarımızda tekrar değerlendirebiliriz\.?/gi, "")
         .replace(/[a-zA-ZçğıöşüÇĞIÖŞÜ]+,? elektrikli bisiklet alımı için limit durumunuzu mağazalarımızda tekrar değerlendirebiliriz\.?/gi, "")
         .replace(/Yardımcı olabilmemiz için \*\*il ilçe ve telefon numarası\*\* belirtirseniz mağazamız sizleri arayıp detaylı bilgi versinler\.?/gi, "")
+        .replace(/(?:\+?90\s*|0\s*)?534[\s\.\-_/]*952[\s\.\-_/]*56[\s\.\-_/]*87/gi, " ")
+        .replace(/(?:\+?90\s*|0\s*)?534[\s\.\-_/]*952[\s\.\-_/]*5687/gi, " ")
+        .replace(/\b5349525687\b/gi, " ")
         .replace(/\b\d{1,2}:\d{2}(?::\d{2})?\b/g, " ")
         .replace(/\[.*?\]\(.*?\)/g, " ")
         .replace(/#[a-zA-Z0-9çğıöşüÇĞIÖŞÜ]+/g, " ")
@@ -3149,23 +3170,32 @@ function applySmartParsing() {
 
     if(isWebForm) media = "Web Sitesi Form";
 
-    var phoneMatch = rawText.match(/(?:\+?90\s*|0\s*)?5\d{2}[\s\.\-_/]?\d{3}[\s\.\-_/]?\d{2}[\s\.\-_/]?\d{2}\b/);
-    if (!phoneMatch) {
-        phoneMatch = rawText.match(/(?:\+?90\s*|0\s*)?5\d{2}[\s\.\-_/]?\d{3}[\s\.\-_/]?\d{4}\b/);
+    // Müşteri numarasını ayıkla (5349525687 şirket hattını hariç tutarak gerçek müşteri numarasını bulur)
+    var allPhoneMatches = rawText.match(/(?:\+?90\s*|0\s*)?5\d{2}[\s\.\-_/]?\d{3}[\s\.\-_/]?\d{2}[\s\.\-_/]?\d{2}\b/g) || [];
+    var altPhoneMatches = rawText.match(/(?:\+?90\s*|0\s*)?5\d{2}[\s\.\-_/]?\d{3}[\s\.\-_/]?\d{4}\b/g) || [];
+    var rawDigitsMatches = rawText.match(/\b5\d{9}\b/g) || [];
+    var combinedCandidates = allPhoneMatches.concat(altPhoneMatches, rawDigitsMatches);
+
+    for (var i = 0; i < combinedCandidates.length; i++) {
+        var cleanP = combinedCandidates[i].replace(/\D/g, '');
+        if (cleanP.length === 12 && cleanP.startsWith('90')) cleanP = cleanP.substring(2);
+        else if (cleanP.length === 11 && cleanP.startsWith('0')) cleanP = cleanP.substring(1);
+        if (cleanP.length === 10 && !isCompanyBlacklistPhone(cleanP)) {
+            phone = cleanP;
+            break;
+        }
     }
-    if (!phoneMatch) {
-        phoneMatch = rawText.match(/\b5\d{9}\b/);
-    }
-    if (!phoneMatch) {
-        let allDigits = rawText.replace(/\D/g, '');
-        let dMatch = allDigits.match(/(?:90)?(5\d{9})/);
-        if (dMatch) phoneMatch = [dMatch[1]];
-    }
-    
-    if (phoneMatch) {
-        phone = phoneMatch[0].replace(/\D/g, '');
-        if(phone.length === 12 && phone.startsWith('90')) phone = phone.substring(2);
-        else if(phone.length === 11 && phone.startsWith('0')) phone = phone.substring(1);
+
+    if (!phone) {
+        var allDigits = rawText.replace(/\D/g, '');
+        var dMatches = allDigits.match(/(?:90)?(5\d{9})/g) || [];
+        for (var j = 0; j < dMatches.length; j++) {
+            var cleanP = dMatches[j].replace(/^90/, '');
+            if (cleanP.length === 10 && !isCompanyBlacklistPhone(cleanP)) {
+                phone = cleanP;
+                break;
+            }
+        }
     }
 
     if (isWebForm) {
@@ -3823,10 +3853,16 @@ async function submitAllRows(){
     var dv=row.querySelector('input[type="datetime-local"]').value;
     var amountVal=row.querySelector('.inp-amount') ? row.querySelector('.inp-amount').value : '';
 
+    var contact = rawContact.replace(/^0+/, '');
+
+    if (contact && isCompanyBlacklistPhone(contact)) {
+        showWarning('Şirket Numarası Engeli', '5349525687 şirket hattımızdır, müşteri iletişim numarası olarak kaydedilemez.');
+        row.classList.add('error');
+        return;
+    }
+
     row.classList.toggle('error',!branch||!name||!media);
     if(!branch||!name||!media){hasEmptyError=true; continue;}
-    
-    var contact = rawContact.replace(/^0+/, '');
 
     data.push({
       date:dv.replace('T',' '),
