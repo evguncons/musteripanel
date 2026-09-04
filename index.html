@@ -3067,7 +3067,11 @@ function printAiReport() {
 
 function applySmartParsing() {
     var rawText = document.getElementById('smartParserInput').value.normalize("NFKC");
-    if(!rawText.trim()) return;
+    if(!rawText.trim()) {
+        showWarning('Eksik Metin', 'Lütfen çözümlenecek müşteri mesajını veya metnini yapıştırınız.');
+        return;
+    }
+    var hasCompanyPhoneInText = /(?:\+?90\s*|0\s*)?534[\s\.\-_/]*952[\s\.\-_/]*56[\s\.\-_/]*87|5349525687/.test(rawText);
 
     var cleanText = rawText
         .replace(/\[Detayları\s*gör\]\([^\)]*\)/gi, "")
@@ -3797,7 +3801,27 @@ function applySmartParsing() {
     if(product) targetRow.querySelector('.inp-product').value = product;
 
     document.getElementById('smartParserInput').value = "";
-    showToast('Metin başarıyla çözümlendi.');
+
+    if (hasCompanyPhoneInText && !phone) {
+        showWarning('Şirket Numarası Engellendi', 'Metindeki numara (5349525687) şirket hattımız olduğu için müşteri numarası olarak alınmadı. Lütfen müşterinin kendi iletişim numarasını giriniz.');
+        var contactInp = targetRow.querySelector('.inp-contact');
+        if (contactInp) {
+            contactInp.focus();
+            contactInp.style.boxShadow = '0 0 0 4px rgba(239, 68, 68, 0.35)';
+            contactInp.style.borderColor = 'var(--sys-red)';
+            setTimeout(function() { contactInp.style.boxShadow = ''; contactInp.style.borderColor = ''; }, 3500);
+        }
+    } else if (!phone) {
+        showToast('⚠️ Müşteri numarası bulunamadı. Lütfen iletişim numarasını giriniz.');
+        var contactInp = targetRow.querySelector('.inp-contact');
+        if (contactInp) {
+            contactInp.focus();
+            contactInp.style.boxShadow = '0 0 0 4px rgba(245, 158, 11, 0.35)';
+            setTimeout(function() { contactInp.style.boxShadow = ''; }, 2500);
+        }
+    } else {
+        showToast('✓ Metin başarıyla çözümlendi.');
+    }
 }
 
 function addInputRow(){
