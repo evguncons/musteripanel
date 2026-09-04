@@ -738,6 +738,36 @@ function saveGlobalContactsCache() {
     } catch(e) {}
 }
 
+function getCurrentActivePeriod() {
+    var periodEl = document.getElementById('currentPeriod');
+    if (periodEl && periodEl.value) {
+        return periodEl.value.trim();
+    }
+    var n = new Date();
+    return (TR_MONTHS[n.getMonth()] + ' ' + n.getFullYear()).trim();
+}
+
+function isRecordInActiveMonth(r, targetPeriod) {
+    if (!r) return false;
+    var periodStr = (targetPeriod || getCurrentActivePeriod()).toLocaleLowerCase('tr-TR').trim();
+    
+    if (r.sheetName && r.sheetName.toLocaleLowerCase('tr-TR').trim() === periodStr) return true;
+    if (r.period && r.period.toLocaleLowerCase('tr-TR').trim() === periodStr) return true;
+
+    var dVal = r.date || r.timestamp;
+    if (dVal) {
+        var t = parseAnyDate(dVal);
+        if (t > 0) {
+            var d = new Date(t);
+            var mName = TR_MONTHS[d.getMonth()].toLocaleLowerCase('tr-TR');
+            var yr = d.getFullYear();
+            var recordPeriod = (mName + ' ' + yr).toLocaleLowerCase('tr-TR');
+            if (recordPeriod === periodStr) return true;
+        }
+    }
+    return false;
+}
+
 function findExistingCustomerByPhone(phoneStr) {
     if (!phoneStr) return null;
     var compContact = getCompareNum(phoneStr);
@@ -762,18 +792,13 @@ function getAllCustomerInteractionsByPhone(phoneStr) {
     var matches = [];
     if (allRecordsData && allRecordsData.length > 0) {
         matches = allRecordsData.filter(function(r) {
-            return getCompareNum(r.contact) === compContact;
+            return getCompareNum(r.contact) === compContact && isRecordInActiveMonth(r);
         });
     }
 
     matches.sort(function(a, b) {
         return parseAnyDate(b.timestamp || b.date) - parseAnyDate(a.timestamp || a.date);
     });
-
-    if (matches.length === 0) {
-        var cached = window.globalContactsMap[compContact];
-        if (cached) matches.push(cached);
-    }
 
     return matches;
 }
@@ -992,15 +1017,30 @@ function showDuplicatePrompt(phoneStr, pastRecords, customerDraftData, targetRow
     document.getElementById('dupModalDetails').innerHTML = detailsHtml;
 
     customerDraftData = customerDraftData || {};
-    var fullData = {
-        branch: customerDraftData.branch || latest.branch || '',
-        name: customerDraftData.name || latest.name || '',
+
+    // 1. Mükerrer Ekle: Ad soyad ve Şube seçimini öncelikle mevcut sheets satırından (latest) çeker
+    var mukerrerData = {
+        branch: latest.branch || customerDraftData.branch || '',
+        name: latest.name || customerDraftData.name || '',
         contact: phoneStr || latest.contact || '',
-        customerNo: customerDraftData.customerNo || latest.customerNo || '',
+        customerNo: latest.customerNo || customerDraftData.customerNo || '',
         media: customerDraftData.media || latest.media || 'Instagram',
         category: customerDraftData.category || latest.category || 'GENEL ÜRÜN BİLGİSİ',
         product: customerDraftData.product || latest.product || 'GENEL ÜRÜN BİLGİSİ',
         date: customerDraftData.date || getTodayDT().replace('T', ' ')
+    };
+
+    // 2. Satış Ekle: Müşterinin mevcut sheets satırındaki kayıtlı tüm bilgileri (Şube, Ad Soyad, Medya, Kategori, Ürün vb.) ile satıra aktarır
+    var satisData = {
+        branch: latest.branch || customerDraftData.branch || '',
+        name: latest.name || customerDraftData.name || '',
+        contact: latest.contact || phoneStr || '',
+        customerNo: latest.customerNo || customerDraftData.customerNo || '',
+        media: latest.media || customerDraftData.media || 'Instagram',
+        category: latest.category || customerDraftData.category || 'GENEL ÜRÜN BİLGİSİ',
+        product: latest.product || customerDraftData.product || 'GENEL ÜRÜN BİLGİSİ',
+        amount: '',
+        date: getTodayDT().replace('T', ' ')
     };
 
     // Button event handlers
@@ -1018,14 +1058,14 @@ function showDuplicatePrompt(phoneStr, pastRecords, customerDraftData, targetRow
 
     newAddAnyway.onclick = function() {
         modal.classList.remove('show');
-        fillCustomerIntoFormRow(fullData, false, targetRowEl);
+        fillCustomerIntoFormRow(mukerrerData, false, targetRowEl);
         var smartInp = document.getElementById('smartParserInput');
         if (smartInp) smartInp.value = '';
     };
 
     newAddSale.onclick = function() {
         modal.classList.remove('show');
-        fillCustomerIntoFormRow(fullData, true, targetRowEl);
+        fillCustomerIntoFormRow(satisData, true, targetRowEl);
         var smartInp = document.getElementById('smartParserInput');
         if (smartInp) smartInp.value = '';
     };
@@ -3087,6 +3127,9 @@ function applySmartParsing() {
         .replace(/Üzüldük efendim,? ancak her başvuruyu mağazalarımızda tekrar değerlendirebiliriz\.?/gi, "")
         .replace(/[a-zA-ZçğıöşüÇĞIÖŞÜ]+,? elektrikli bisiklet alımı için limit durumunuzu mağazalarımızda tekrar değerlendirebiliriz\.?/gi, "")
         .replace(/Yardımcı olabilmemiz için \*\*il ilçe ve telefon numarası\*\* belirtirseniz mağazamız sizleri arayıp detaylı bilgi versinler\.?/gi, "")
+        .replace(/\b\d{1,2}:\d{2}(?::\d{2})?\b/g, " ")
+        .replace(/\[.*?\]\(.*?\)/g, " ")
+        .replace(/#[a-zA-Z0-9çğıöşüÇĞIÖŞÜ]+/g, " ")
         .trim();
 
     var flatText = cleanText.replace(/\n/g, ' ');
@@ -3557,27 +3600,67 @@ function applySmartParsing() {
             }
 
             let searchForModel = explicitProduct || cleanProdText;
-            let modelMatch = searchForModel.match(/\b(1[3-6]\s*(?:pro\s*max|pro|plus|mini)?|s2[3-4]\s*(?:ultra|plus)?|ev1|vsm|vs7|vb[1-7]|ps5|ps4|v15)\b/i);
-            if (modelMatch) extractedModel = modelMatch[1].toUpperCase();
+            let lowSearch = searchForModel.toLocaleLowerCase('tr-TR');
 
-            let parts = [];
-            if (extractedBrand) parts.push(extractedBrand);
-            if (extractedModel) parts.push(extractedModel);
+            // Akıllı Telefon / Elektronik Kalıpları (15 telefon, 15 pro max, 14 pro, 13 telefon vb.)
+            let ipMatch = lowSearch.match(/\b(?:iphone\s*)?(1[1-6])\s*(pro\s*max|pro|plus|mini)?(?:\s*telefon)?\b/i);
+            if (ipMatch && !lowSearch.includes("koltuk") && !lowSearch.includes("baza") && !lowSearch.includes("yatak") && !lowSearch.includes("redmi") && !lowSearch.includes("note")) {
+                let ipNum = ipMatch[1];
+                let ipVar = ipMatch[2] ? (" " + ipMatch[2].split(/\s+/).map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')) : "";
+                category = "Elektronik";
+                product = "iPhone " + ipNum + ipVar;
+            } else if (lowSearch.includes("ps5") || lowSearch.includes("playstation 5")) {
+                category = "Elektronik";
+                product = "Sony PlayStation 5";
+            } else if ((lowSearch.includes("ps4") || lowSearch.includes("playstation 4")) && !lowSearch.includes("volta") && !lowSearch.includes("scooter")) {
+                category = "Elektronik";
+                product = "Sony PlayStation 4";
+            } else if (lowSearch.includes("volta") && (lowSearch.includes("ps4") || lowSearch.includes("scooter"))) {
+                category = "Elektrikli-Benzinli Araç";
+                product = "Volta PS4 Benzinli Scooter";
+            } else if (category === "Mobilya" || lowSearch.includes("koltuk") || lowSearch.includes("oturma") || lowSearch.includes("düğün")) {
+                // Mobilya kalıpları (13 koltuk takım, 13 koltuk takımı, chester, dublin vb.)
+                category = "Mobilya";
+                let furnModels = ["dublin", "hamilton", "lima", "londra", "paris", "talinn", "chester", "avangart", "köşe", "l koltuk"];
+                let foundModel = "";
+                for (let fm of furnModels) {
+                    if (lowSearch.includes(fm)) {
+                        foundModel = fm.charAt(0).toUpperCase() + fm.slice(1);
+                        break;
+                    }
+                }
+                if (lowSearch.includes("düğün") || lowSearch.includes("paket")) {
+                    product = foundModel ? (foundModel + " Düğün Paketi") : "Düğün Paketi";
+                } else if (lowSearch.includes("köşe") || lowSearch.includes("l koltuk")) {
+                    product = "Köşe Koltuk Takımı";
+                } else if (lowSearch.includes("yemek")) {
+                    product = foundModel ? (foundModel + " Yemek Odası Takımı") : "Yemek Odası Takımı";
+                } else {
+                    product = foundModel ? (foundModel + " Koltuk Takımı") : "Koltuk Takımı";
+                }
+            } else {
+                let modelMatch = searchForModel.match(/\b(1[3-6]\s*(?:pro\s*max|pro|plus|mini)?|s2[3-4]\s*(?:ultra|plus)?|ev1|vsm|vs7|vb[1-7]|ps5|ps4|v15)\b/i);
+                if (modelMatch) extractedModel = modelMatch[1].toUpperCase();
 
-            let mainTitle = matchedKeyword.split(/\s+/).map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
-            if (mainTitle.toLowerCase().includes("olumsuz") || category === "LİMİT ÖĞREN") {
-                mainTitle = "LİMİT SORGULAMA";
+                let parts = [];
+                if (extractedBrand) parts.push(extractedBrand);
+                if (extractedModel) parts.push(extractedModel);
+
+                let mainTitle = matchedKeyword.split(/\s+/).map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+                if (mainTitle.toLowerCase().includes("olumsuz") || category === "LİMİT ÖĞREN") {
+                    mainTitle = "LİMİT SORGULAMA";
+                }
+
+                if (!parts.some(p => p.toLowerCase().includes(mainTitle.toLowerCase()))) {
+                    parts.push(mainTitle);
+                }
+
+                if (extractedSpecs.length > 0) {
+                    parts.push(extractedSpecs.join(" "));
+                }
+
+                product = parts.join(" ");
             }
-
-            if (!parts.some(p => p.toLowerCase().includes(mainTitle.toLowerCase()))) {
-                parts.push(mainTitle);
-            }
-
-            if (extractedSpecs.length > 0) {
-                parts.push(extractedSpecs.join(" "));
-            }
-
-            product = parts.join(" ");
         }
     }
 
