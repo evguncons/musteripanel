@@ -3066,11 +3066,8 @@ function printAiReport() {
 }
 
 function applySmartParsing() {
-    var rawText = document.getElementById('smartParserInput').value.normalize("NFKC");
-    if(!rawText.trim()) {
-        showWarning('Eksik Metin', 'Lütfen çözümlenecek müşteri mesajını veya metnini yapıştırınız.');
-        return;
-    }
+    var rawText = (document.getElementById('smartParserInput').value || "").normalize("NFKC");
+    if(!rawText.trim()) return;
 
     var digitsOnly = rawText.trim().replace(/\D/g, '');
     if (digitsOnly === '5349525687' || digitsOnly === '05349525687' || digitsOnly === '905349525687' || isCompanyBlacklistPhone(rawText.trim())) {
@@ -3130,14 +3127,14 @@ function applySmartParsing() {
         .replace(/Hangi il ve ilçedeydiniz\?/gi, "")
         .replace(/İrtibat numaranızı iletirseniz en yakın mağazamız sizlere istediğiniz ürünün hem modellerini hem de elden taksitli fiyatlarını iletsin\.?/gi, "")
         .replace(/Volta EV1 fiyatları ve elden taksit seçenekleri hakkında mağazalarımız bilgi vermektedir efendim\.?/gi, "")
-        .replace(/İstanbul, Kocaeli, Bursa ve Düzce bölgelerinde şubelerimiz bulunuyor\.?/gi, "")
+        .replace(/İstanbul,?\s*Kocaeli,?\s*Bursa\s*ve\s*Düzce\s*bölgelerinde\s*şubelerimiz\s*(?:bulunuyor|bulunmaktadır)\.?/gi, "")
+        .replace(/İstanbul,?\s*Kocaeli,?\s*Bursa\s*ve\s*Düzce\s*illerinde[^\.\n]*/gi, "")
+        .replace(/Hizmet bölgelerimiz İstanbul,?\s*Kocaeli,?\s*Bursa\s*(?:ve\s*Düzce)?\s*illeridir\.?/gi, "")
+        .replace(/İstanbul,?\s*Kocaeli\s*ve\s*Bursa\s*illerinde\s*hizmet\s*(?:veriyoruz|vermekteyiz)[^\.\n]*/gi, "")
+        .replace(/İstanbul,?\s*Kocaeli\s*ve\s*Bursa\s*illerinde\s*elden\s*taksit\s*imkanımız\s*bulunmaktadır\.?/gi, "")
         .replace(/İl, ilçe ve telefon numarası belirtirseniz mağazamız sizleri arayıp bilgi versinler\.?/gi, "")
         .replace(/Ürün modelleri ve elden taksitli fiyatlar hakkında mağazalarımız bilgi vermektedir efendim\.?/gi, "")
         .replace(/Apple marka ürünler \(iPhone, iPad vb\.\) stoklarımızda bulunmamaktadır\.?/gi, "")
-        .replace(/İstanbul, Kocaeli ve Bursa illerinde hizmet vermekteyiz;? il ilçe ve telefon numarası belirtirseniz mağazamız sizleri arayıp detaylı bilgi versinler\.?/gi, "")
-        .replace(/İstanbul, Kocaeli ve Bursa illerinde hizmet veriyoruz;? il, ilçe ve telefon numarası belirtirseniz mağazamız sizleri arayıp bilgi versinler\.?/gi, "")
-        .replace(/Ürün fiyatları ve elden taksit seçenekleri hakkında mağazalarımız bilgi vermektedir\.?/gi, "")
-        .replace(/Hizmet bölgelerimiz İstanbul, Kocaeli ve Bursa illeridir\.?/gi, "")
         .replace(/[a-zA-ZçğıöşüÇĞIÖŞÜ\s]+ Avrupa yakasında olduğu için bu bölgede elden taksit imkanımız bulunmuyor\.?/gi, "")
         .replace(/Dilerseniz en yakın şubemiz olan Anadolu yakasındaki [a-zA-ZçğıöşüÇĞIÖŞÜ\s]+'nden veya www\.hedefavm\.com sitemizden online olarak alışveriş yapabilirsiniz\.?/gi, "")
         .replace(/ilçe,?\s*telefon\s*numarası\s*ve\s*ilgilendiğiniz\s*ürünü?\s*belirtirseniz[^\.\n]*/gi, "")
@@ -3250,44 +3247,12 @@ function applySmartParsing() {
     }
 
     const districtBranchMap = [
-        { priority: 10, key: "kavacık", branch: "Kavacık Şubesi" },
-        { priority: 10, key: "kavacik", branch: "Kavacık Şubesi" },
-        { priority: 10, key: "beykoz", branch: "Kavacık Şubesi" },
-        { priority: 10, key: "göksu", branch: "Kavacık Şubesi" },
-        { priority: 10, key: "derince", branch: "Derince Şubesi" },
-        { priority: 10, key: "gölcük", branch: "Gölcük Şubesi" },
-        { priority: 10, key: "golcuk", branch: "Gölcük Şubesi" },
-        { priority: 10, key: "başiskele", branch: "Gölcük Şubesi" },
-        { priority: 10, key: "karamürsel", branch: "Gölcük Şubesi" },
-        { priority: 10, key: "değirmendere", branch: "Gölcük Şubesi" },
-        { priority: 10, key: "körfez", branch: "Körfez Şubesi" },
-        { priority: 10, key: "korfez", branch: "Körfez Şubesi" },
-        { priority: 10, key: "yarımca", branch: "Körfez Şubesi" },
-        { priority: 10, key: "tütünçiftlik", branch: "Körfez Şubesi" },
-        { priority: 10, key: "çayırova", branch: "Çayırova Şubesi" },
-        { priority: 10, key: "cayirova", branch: "Çayırova Şubesi" },
-        { priority: 10, key: "darıca", branch: "Çayırova Şubesi" },
-        { priority: 10, key: "şekerpınar", branch: "Çayırova Şubesi" },
-        { priority: 10, key: "gebze", branch: "Gebze Şubesi" },
-        { priority: 10, key: "dilovası", branch: "Gebze Şubesi" },
-        { priority: 10, key: "çekmeköy", branch: "Çekmeköy Şubesi" },
-        { priority: 10, key: "cekmekoy", branch: "Çekmeköy Şubesi" },
-        { priority: 10, key: "şile", branch: "Çekmeköy Şubesi" },
-        { priority: 10, key: "sile", branch: "Çekmeköy Şubesi" },
-        { priority: 10, key: "kumbaba", branch: "Çekmeköy Şubesi" },
-        { priority: 10, key: "taşdelen", branch: "Çekmeköy Şubesi" },
-        { priority: 10, key: "tasdelen", branch: "Çekmeköy Şubesi" },
-        { priority: 10, key: "madenler", branch: "Çekmeköy Şubesi" },
-        { priority: 10, key: "sultanbeyli", branch: "Sultanbeyli Şubesi" },
-        { priority: 10, key: "pendik", branch: "Sultanbeyli Şubesi" },
-        { priority: 10, key: "kurtköy", branch: "Sultanbeyli Şubesi" },
-        { priority: 10, key: "yenidoğan", branch: "Yenidoğan Şubesi" },
-        { priority: 10, key: "yenidogan", branch: "Yenidoğan Şubesi" },
-        { priority: 10, key: "sarıgazi", branch: "Yenidoğan Şubesi" },
-        { priority: 10, key: "sancaktepe", branch: "Yenidoğan Şubesi" },
-        { priority: 10, key: "paşabahçe", branch: "Paşabahçe Şubesi" },
-        { priority: 10, key: "pasabahce", branch: "Paşabahçe Şubesi" },
-        { priority: 10, key: "çubuklu", branch: "Paşabahçe Şubesi" },
+        // İnegöl Şubesi (Bursa ve tüm Bursa ilçeleri)
+        { priority: 10, key: "yıldırım", branch: "İnegöl Şubesi" },
+        { priority: 10, key: "yildirim", branch: "İnegöl Şubesi" },
+        { priority: 10, key: "osmangazi", branch: "İnegöl Şubesi" },
+        { priority: 10, key: "nilüfer", branch: "İnegöl Şubesi" },
+        { priority: 10, key: "nilufer", branch: "İnegöl Şubesi" },
         { priority: 10, key: "inegöl", branch: "İnegöl Şubesi" },
         { priority: 10, key: "inegol", branch: "İnegöl Şubesi" },
         { priority: 10, key: "yenişehir", branch: "İnegöl Şubesi" },
@@ -3296,10 +3261,80 @@ function applySmartParsing() {
         { priority: 10, key: "iznik", branch: "İnegöl Şubesi" },
         { priority: 10, key: "i̇znik", branch: "İnegöl Şubesi" },
         { priority: 10, key: "gemlik", branch: "İnegöl Şubesi" },
+        { priority: 10, key: "mudanya", branch: "İnegöl Şubesi" },
+        { priority: 10, key: "gürsu", branch: "İnegöl Şubesi" },
+        { priority: 10, key: "gursu", branch: "İnegöl Şubesi" },
+        { priority: 10, key: "kestel", branch: "İnegöl Şubesi" },
+        { priority: 10, key: "mustafakemalpaşa", branch: "İnegöl Şubesi" },
+        { priority: 10, key: "mustafakemalpasa", branch: "İnegöl Şubesi" },
+        { priority: 10, key: "karacabey", branch: "İnegöl Şubesi" },
+        { priority: 10, key: "bursa", branch: "İnegöl Şubesi" },
+
+        // Kavacık Şubesi
+        { priority: 10, key: "kavacık", branch: "Kavacık Şubesi" },
+        { priority: 10, key: "kavacik", branch: "Kavacık Şubesi" },
+        { priority: 10, key: "beykoz", branch: "Kavacık Şubesi" },
+        { priority: 10, key: "göksu", branch: "Kavacık Şubesi" },
+
+        // Derince Şubesi
+        { priority: 10, key: "derince", branch: "Derince Şubesi" },
+
+        // Gölcük Şubesi
+        { priority: 10, key: "gölcük", branch: "Gölcük Şubesi" },
+        { priority: 10, key: "golcuk", branch: "Gölcük Şubesi" },
+        { priority: 10, key: "başiskele", branch: "Gölcük Şubesi" },
+        { priority: 10, key: "karamürsel", branch: "Gölcük Şubesi" },
+        { priority: 10, key: "değirmendere", branch: "Gölcük Şubesi" },
+
+        // Körfez Şubesi
+        { priority: 10, key: "körfez", branch: "Körfez Şubesi" },
+        { priority: 10, key: "korfez", branch: "Körfez Şubesi" },
+        { priority: 10, key: "yarımca", branch: "Körfez Şubesi" },
+        { priority: 10, key: "tütünçiftlik", branch: "Körfez Şubesi" },
+
+        // Çayırova Şubesi
+        { priority: 10, key: "çayırova", branch: "Çayırova Şubesi" },
+        { priority: 10, key: "cayirova", branch: "Çayırova Şubesi" },
+        { priority: 10, key: "darıca", branch: "Çayırova Şubesi" },
+        { priority: 10, key: "şekerpınar", branch: "Çayırova Şubesi" },
+
+        // Gebze Şubesi
+        { priority: 10, key: "gebze", branch: "Gebze Şubesi" },
+        { priority: 10, key: "dilovası", branch: "Gebze Şubesi" },
+
+        // Çekmeköy Şubesi
+        { priority: 10, key: "çekmeköy", branch: "Çekmeköy Şubesi" },
+        { priority: 10, key: "cekmekoy", branch: "Çekmeköy Şubesi" },
+        { priority: 10, key: "şile", branch: "Çekmeköy Şubesi" },
+        { priority: 10, key: "sile", branch: "Çekmeköy Şubesi" },
+        { priority: 10, key: "kumbaba", branch: "Çekmeköy Şubesi" },
+        { priority: 10, key: "taşdelen", branch: "Çekmeköy Şubesi" },
+        { priority: 10, key: "tasdelen", branch: "Çekmeköy Şubesi" },
+        { priority: 10, key: "madenler", branch: "Çekmeköy Şubesi" },
+
+        // Sultanbeyli Şubesi
+        { priority: 10, key: "sultanbeyli", branch: "Sultanbeyli Şubesi" },
+        { priority: 10, key: "pendik", branch: "Sultanbeyli Şubesi" },
+        { priority: 10, key: "kurtköy", branch: "Sultanbeyli Şubesi" },
+
+        // Yenidoğan Şubesi
+        { priority: 10, key: "yenidoğan", branch: "Yenidoğan Şubesi" },
+        { priority: 10, key: "yenidogan", branch: "Yenidoğan Şubesi" },
+        { priority: 10, key: "sarıgazi", branch: "Yenidoğan Şubesi" },
+        { priority: 10, key: "sancaktepe", branch: "Yenidoğan Şubesi" },
+
+        // Paşabahçe Şubesi
+        { priority: 10, key: "paşabahçe", branch: "Paşabahçe Şubesi" },
+        { priority: 10, key: "pasabahce", branch: "Paşabahçe Şubesi" },
+        { priority: 10, key: "çubuklu", branch: "Paşabahçe Şubesi" },
+
+        // Düzce Şubesi
         { priority: 10, key: "düzce", branch: "Düzce Şubesi" },
         { priority: 10, key: "duzce", branch: "Düzce Şubesi" },
         { priority: 10, key: "gölyaka", branch: "Düzce Şubesi" },
         { priority: 10, key: "akçakoca", branch: "Düzce Şubesi" },
+
+        // İzmit & Sakarya Şubesi
         { priority: 10, key: "sakarya", branch: "İzmit Şubesi" },
         { priority: 10, key: "adapazarı", branch: "İzmit Şubesi" },
         { priority: 10, key: "adapazari", branch: "İzmit Şubesi" },
@@ -3320,9 +3355,7 @@ function applySmartParsing() {
         { priority: 10, key: "i̇zmit", branch: "İzmit Şubesi" },
         { priority: 10, key: "kartepe", branch: "İzmit Şubesi" },
         { priority: 10, key: "yahyakaptan", branch: "İzmit Şubesi" },
-        { priority: 1, key: "bursa", branch: "İnegöl Şubesi" },
-        { priority: 1, key: "kocaeli", branch: "İzmit Şubesi" },
-        { priority: 1, key: "sakarya", branch: "İzmit Şubesi" }
+        { priority: 1, key: "kocaeli", branch: "İzmit Şubesi" }
     ];
 
     let searchSpace = (flatText + " " + rawText).toLocaleLowerCase('tr-TR');
@@ -3742,19 +3775,23 @@ function applySmartParsing() {
     }
 
     if (!category) category = "GENEL ÜRÜN BİLGİSİ";
-    if (!product) {
+
+    if (explicitProduct && explicitProduct.length >= 3) {
+        product = explicitProduct;
+    } else if (product && product.trim().length > 0) {
+        product = product
+            .replace(/^(?:merhaba|slm|selam|iyi|günler|akşamlar|istiyorum|bilgi|almak|fiyatı|fiyatlar|nedir|ne|kadar|var|mı|yok|mu|elden|taksitle|\s)+/gi, '')
+            .trim();
+        if (!product || product.length < 2) {
+            product = matchedKeyword ? matchedKeyword.toUpperCase() : (category || "GENEL ÜRÜN BİLGİSİ");
+        }
+    } else {
         if (category === "LİMİT ÖĞREN") product = "LİMİT SORGULAMA";
         else product = "GENEL ÜRÜN BİLGİSİ";
     }
 
-    if (explicitProduct && explicitProduct.length >= 3) {
-        product = explicitProduct;
-    } else {
-        product = product
-            .replace(/^(?:merhaba|slm|selam|iyi|günler|akşamlar|istiyorum|bilgi|almak|fiyatı|fiyatlar|nedir|ne|kadar|var|mı|yok|mu|elden|taksitle|\s)+/gi, '')
-            .trim();
-        if (!product || product.length < 3) product = matchedKeyword ? matchedKeyword.toUpperCase() : category;
-    }
+    if (!category || category.trim().length === 0) category = "GENEL ÜRÜN BİLGİSİ";
+    if (!product || product.trim().length === 0) product = "GENEL ÜRÜN BİLGİSİ";
 
     if (phone) {
         var compContact = getCompareNum(phone);
