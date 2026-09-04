@@ -3071,6 +3071,14 @@ function applySmartParsing() {
         showWarning('Eksik Metin', 'Lütfen çözümlenecek müşteri mesajını veya metnini yapıştırınız.');
         return;
     }
+
+    var digitsOnly = rawText.trim().replace(/\D/g, '');
+    if (digitsOnly === '5349525687' || digitsOnly === '05349525687' || digitsOnly === '905349525687' || isCompanyBlacklistPhone(rawText.trim())) {
+        showWarning('Şirket Numarası Engeli', '5349525687 numarası şirket hattımızdır. Müşteri iletişim numarası olarak eklenemez.');
+        document.getElementById('smartParserInput').value = '';
+        return;
+    }
+
     var hasCompanyPhoneInText = /(?:\+?90\s*|0\s*)?534[\s\.\-_/]*952[\s\.\-_/]*56[\s\.\-_/]*87|5349525687/.test(rawText);
 
     var cleanText = rawText
@@ -3163,7 +3171,15 @@ function applySmartParsing() {
     var isFacebook = rawText.includes("Bu konuşmayı ata") || rawText.includes("bir reklama yanıt verdi") || rawText.includes("Yapay zeka temsilcin") || rawText.includes("Reklamı gör") || rawText.includes("fb.com") || rawText.toLowerCase().includes("reklama yanıt");
 
     var lines = cleanText.split('\n').map(l => l.trim()).filter(l => l.length > 0);
-    if(lines.length === 0) return;
+    if(lines.length === 0) {
+        if (hasCompanyPhoneInText) {
+            showWarning('Şirket Numarası Engeli', '5349525687 numarası şirket hattımızdır. Müşteri iletişim numarası olarak eklenemez.');
+        } else {
+            showWarning('Geçersiz Metin', 'Yapıştırılan metinden müşteri bilgisi algılanamadı.');
+        }
+        document.getElementById('smartParserInput').value = '';
+        return;
+    }
 
     var name = "";
     var phone = "";
