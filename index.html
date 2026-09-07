@@ -3219,10 +3219,11 @@ function applySmartParsing() {
     var category = "";
     var product = "";
 
-    // Müşteri numarasını ayıkla (5349525687 şirket hattını hariç tutarak gerçek müşteri numarasını bulur)
-    var allPhoneMatches = rawText.match(/(?:\+?90\s*|0\s*)?5\d{2}[\s\.\-_/]?\d{3}[\s\.\-_/]?\d{2}[\s\.\-_/]?\d{2}\b/g) || [];
-    var altPhoneMatches = rawText.match(/(?:\+?90\s*|0\s*)?5\d{2}[\s\.\-_/]?\d{3}[\s\.\-_/]?\d{4}\b/g) || [];
-    var rawDigitsMatches = rawText.match(/\b5\d{9}\b/g) || [];
+    // Müşteri numarasını ayıkla (5349525687 ve 5078152009 şirket hatlarını hariç tutarak gerçek müşteri numarasını bulur)
+    var textWithoutUrls = rawText.replace(/\[[^\]]*\]\([^\)]*\)/g, " ").replace(/https?:\/\/\S+/gi, " ").replace(/\b\d{12,}\b/g, " ");
+    var allPhoneMatches = textWithoutUrls.match(/(?:\+?90\s*|0\s*)?5\d{2}[\s\.\-_/]?\d{3}[\s\.\-_/]?\d{2}[\s\.\-_/]?\d{2}\b/g) || [];
+    var altPhoneMatches = textWithoutUrls.match(/(?:\+?90\s*|0\s*)?5\d{2}[\s\.\-_/]?\d{3}[\s\.\-_/]?\d{4}\b/g) || [];
+    var rawDigitsMatches = textWithoutUrls.match(/\b5\d{9}\b/g) || [];
     var combinedCandidates = allPhoneMatches.concat(altPhoneMatches, rawDigitsMatches);
 
     for (var i = 0; i < combinedCandidates.length; i++) {
@@ -3236,7 +3237,7 @@ function applySmartParsing() {
     }
 
     if (!phone) {
-        var allDigits = rawText.replace(/\D/g, '');
+        var allDigits = textWithoutUrls.replace(/\D/g, '');
         var dMatches = allDigits.match(/(?:90)?(5\d{9})/g) || [];
         for (var j = 0; j < dMatches.length; j++) {
             var cleanP = dMatches[j].replace(/^90/, '');
@@ -3518,6 +3519,29 @@ function applySmartParsing() {
     }
 
     // --- ENHANCED PRODUCT & CATEGORY PARSING ENGINE ---
+    function isInvalidProductPhrase(str) {
+        if (!str) return true;
+        let s = str.toLocaleLowerCase('tr-TR').trim();
+        if (s.length < 2) return true;
+        const invalidKeywords = [
+            'favori', 'ihtiyaç', 'fırsat', 'kampanya', 'avantaj', 'indirim', 
+            'seçenek', 'ödeme', 'taksit', 'elden taksit', 'taksitli alışveriş',
+            'ürünümüz', 'ürününüz', 'ürünler', 'ürünlerimiz', 'ürünlerinizi', 'ürününüzü',
+            'bilgi', 'detay', 'iletişim', 'mağaza', 'hedef avm', 'sohbet', 'bizimle',
+            'teslimat', 'kargo', 'gönderim', 'başvuru',
+            'eylül', 'ekim', 'kasım', 'aralık', 'ocak', 'şubat', 'mart', 'nisan', 'mayıs', 'haziran', 'temmuz', 'ağustos',
+            'öğrenebilir', 'nasıl yapılır', 'merhaba', 'fiyatı nedir', 'fiyat', 'neresi', 'yeriniz'
+        ];
+        let words = s.split(/\s+/).filter(w => w.length > 0);
+        if (words.length === 0) return true;
+        let allInvalid = words.every(w => invalidKeywords.some(ik => w.includes(ik)));
+        if (allInvalid) return true;
+        if (s.includes('favori ürün') || s.includes('ihtiyaçlarınızı') || s.includes('fırsat ürün') || s.includes('kampanya') || s === 'teslimat' || s === 'kargo' || s === 'ödeme') {
+            return true;
+        }
+        return false;
+    }
+
     let explicitProduct = "";
 
     function cleanExtractedProductString(raw_p) {
@@ -3544,7 +3568,7 @@ function applySmartParsing() {
         explicitProduct = "Düğün Paketi";
     } else if (adMatch && adMatch[1]) {
         let adP = cleanExtractedProductString(adMatch[1].replace(/\*/g, ''));
-        if (adP && adP.length >= 3 && !adP.toLowerCase().includes("merhaba") && !adP.toLowerCase().includes("bilgi")) {
+        if (adP && adP.length >= 3 && !isInvalidProductPhrase(adP)) {
             explicitProduct = adP;
         }
     }
@@ -3554,14 +3578,14 @@ function applySmartParsing() {
     let nameWords = nameLow.split(/\s+/).filter(w => w.length >= 2);
 
     if (!explicitProduct) {
-        let askingMatch = cleanText.match(/(?:acaba\s+)?([A-Za-z0-9çğıöşüÇĞIÖŞÜ\s\-]{3,50}?)\s*(?:için\s+)?(?:taksit\s*şartları(?:\s*nedir)?|şartları\s*nedir|şartlar\s*nedir|taksit\s*seçenekleri|taksit\s*imkanları|hakkında\s*bilgi|fiyatı\s*nedir|fiyatını\s*öğrenebilir|ne\s*kadar|var\s*mı|stokta\s*var\s*mı|almak\s*istiyorum|taksitli\s*fiyatı)/i);
+        let askingMatch = cleanText.match(/(?:acaba\s+)?([A-Za-z0-9çğıöşüÇĞIÖŞÜ\s\-]{2,50}?)(?:[\'’]?(?:in|ın|un|ün|nin|nın|nun|nün))?\s*(?:için\s+)?(?:taksitli\s+|taksit\s+)?(?:fiyatı|fiytı|fiyati|fıyatı|fiyat|şartları|şartlar|seçenekleri|imkanları|ücreti|tutarı|bilgisi|hakkında\s*bilgi|var\s*mı|stokta\s*var\s*mı|ne\s*kadar)(?:\s*nedir|\s*öğrenebilir|\s*alabilir)?/i);
         if (askingMatch && askingMatch[1]) {
             let candidateAsk = cleanExtractedProductString(askingMatch[1]);
             if (candidateAsk.includes('\n')) candidateAsk = candidateAsk.split('\n').pop().trim();
-            if (candidateAsk && candidateAsk.length >= 3) {
+            if (candidateAsk && candidateAsk.length >= 2) {
                 let candLow = candidateAsk.toLocaleLowerCase('tr-TR').trim();
                 let isCustomerName = (nameLow && (candLow === nameLow || nameWords.includes(candLow)));
-                if (!isCustomerName && !candLow.includes("merhaba") && !candLow.includes("ürünler") && !candLow.includes("bilgi") && !candLow.includes("yeriniz") && !candLow.includes("numaranız")) {
+                if (!isCustomerName && !isInvalidProductPhrase(candidateAsk)) {
                     explicitProduct = candidateAsk;
                 }
             }
@@ -3595,8 +3619,19 @@ function applySmartParsing() {
     if (isExplicitInvalid || explicitProduct.toLowerCase().includes("vsm")) {
         if (/\b(?:volta\s+)?vsm\b/i.test(rawLower)) explicitProduct = "Volta VSM Elektrikli Motor";
     }
-    if (isExplicitInvalid || explicitProduct.toLowerCase().includes("ps4")) {
-        if (/\b(?:volta\s+)?ps[\s\-]?4\b/i.test(rawLower)) explicitProduct = "Volta PS4 Benzinli Scooter";
+    // PlayStation 5 & 4 Kalıpları
+    if (isExplicitInvalid || /\b(?:playstation|ps)\s*5\b/i.test(rawLower) || explicitProduct.toLowerCase().includes("ps 5") || explicitProduct.toLowerCase().includes("ps5")) {
+        if (/\b(?:sony\s+)?(?:playstation|ps)\s*5\b/i.test(rawLower)) {
+            explicitProduct = "Sony PlayStation 5";
+        }
+    }
+    if (isExplicitInvalid || (/\b(?:playstation|ps)\s*4\b/i.test(rawLower) && !rawLower.includes("volta") && !rawLower.includes("scooter") && !rawLower.includes("motor"))) {
+        if (/\b(?:sony\s+)?(?:playstation|ps)\s*4\b/i.test(rawLower)) {
+            explicitProduct = "Sony PlayStation 4";
+        }
+    }
+    if (isExplicitInvalid || (explicitProduct.toLowerCase().includes("ps4") && (rawLower.includes("volta") || rawLower.includes("scooter") || rawLower.includes("motor")))) {
+        if (/\bvolta\s+ps[\s\-]?4\b/i.test(rawLower) || (rawLower.includes("volta") && rawLower.includes("ps4"))) explicitProduct = "Volta PS4 Benzinli Scooter";
     }
     if (isExplicitInvalid || explicitProduct.toLowerCase().includes("vt5")) {
         if (/\b(?:volta\s+)?vt[\s\-]?5\b/i.test(rawLower)) explicitProduct = "Volta VT5 3 Tekerlekli Motor";
@@ -3669,7 +3704,7 @@ function applySmartParsing() {
             keywords: [
                 "cep telefonu", "akıllı telefon", "telefon", "iphone", "samsung", "galaxy", "xiaomi", "redmi",
                 "poco", "huawei", "honor", "realme", "oppo", "vivo", "tablet", "ipad", "laptop", "bilgisayar",
-                "notebook", "televizyon", "tv", "smart tv", "oled", "qled", "4k tv", "4k", "playstation", "playstatıon", "ps5", "ps4",
+                "notebook", "televizyon", "tv", "smart tv", "oled", "qled", "4k tv", "4k", "playstation", "playstatıon", "playstation 5", "playstation 4", "ps 5", "ps 4", "ps5", "ps4",
                 "xbox", "nintendo", "akıllı saat", "apple watch", "watch", "kulaklık", "airpods", "bluetooth kulaklık",
                 "soundbar", "hoparlör", "monitör", "oyuncu kasası", "sony", "onvo", "dijitsu", "regal", "sunny", "axen", "tcl", "lg", "philips"
             ],
@@ -3894,10 +3929,10 @@ function applySmartParsing() {
                 let rVar = redmiMatch[2] ? (" " + redmiMatch[2].toUpperCase()) : "";
                 category = "Elektronik";
                 product = "Xiaomi Redmi Note " + rMod + rVar;
-            } else if (lowSearch.includes("ps5") || lowSearch.includes("playstation 5")) {
+            } else if (lowSearch.includes("ps5") || lowSearch.includes("playstation 5") || /\b(?:playstation|ps)\s*5\b/i.test(lowSearch)) {
                 category = "Elektronik";
                 product = "Sony PlayStation 5";
-            } else if ((lowSearch.includes("ps4") || lowSearch.includes("playstation 4")) && !lowSearch.includes("volta") && !lowSearch.includes("scooter")) {
+            } else if ((lowSearch.includes("ps4") || lowSearch.includes("playstation 4") || /\b(?:playstation|ps)\s*4\b/i.test(lowSearch)) && !lowSearch.includes("volta") && !lowSearch.includes("scooter") && !lowSearch.includes("motor")) {
                 category = "Elektronik";
                 product = "Sony PlayStation 4";
             } else if (lowSearch.includes("volta") && (lowSearch.includes("ps4") || lowSearch.includes("scooter"))) {
