@@ -3144,6 +3144,14 @@ function applySmartParsing() {
         .replace(/mesajlarınıza sırasıyla dönüş yapılmaktadır/gi, "")
         .replace(/bu sohbet, bilgi almak için mesaj atın reklamına verilmiş bir yanıt içeriyor/gi, "")
         .replace(/reklamı gör/gi, "")
+        .replace(/Otomatik\s*yanıt\.?[^\n]*/gi, "")
+        .replace(/Manage Automations/gi, "")
+        .replace(/Instagram gönderine yapılan bir yoruma gizli bir yanıt gönderdin\.?[^\n]*/gi, "")
+        .replace(/Yorumu gör/gi, "")
+        .replace(/Form doldurmak istemezseniz bize şu bilgileri iletmeniz yeterli:?/gi, "")
+        .replace(/Ad\s*Soyad\s*[–\-]\s*İl\s*\/\s*İlçe\s*[–\-]\s*İrtibat\s*Numaranız/gi, "")
+        .replace(/Koltuk takımlarımızda kredi kartsız \d+ aya varan elden taksit seçenekleri hakkında detaylı bilgi alabilirsiniz\.?[^\n]*/gi, "")
+        .replace(/Başvuru yapmak için elden taksit formumuzu doldurabilirsiniz:?/gi, "")
         .replace(/This app was built in Streamlit! Check it out and visit/gi, "")
         .replace(/HEDEF AVM LİMİT ÖĞREN/gi, "")
         .replace(/fb\.com/gi, "")
@@ -3187,8 +3195,8 @@ function applySmartParsing() {
 
     var flatText = cleanText.replace(/\n/g, ' ');
     var lowerClean = flatText.toLocaleLowerCase('tr-TR');
-    var isWebForm = rawText.includes("Talep #") || rawText.includes("TC Kimlik") || flatText.includes("Ad Soyad");
-    var isFacebook = rawText.includes("Bu konuşmayı ata") || rawText.includes("bir reklama yanıt verdi") || rawText.includes("Yapay zeka temsilcin") || rawText.includes("Reklamı gör") || rawText.includes("fb.com") || rawText.toLowerCase().includes("reklama yanıt");
+    var isFacebook = rawText.includes("business.facebook.com") || rawText.includes("Bu konuşmayı ata") || rawText.includes("bir reklama yanıt verdi") || rawText.includes("Yapay zeka temsilcin") || rawText.includes("Reklamı gör") || rawText.includes("fb.com") || rawText.includes("thread_type=") || rawText.toLowerCase().includes("reklama yanıt");
+    var isWebForm = !isFacebook && (rawText.includes("Talep #") || rawText.includes("TC Kimlik") || ((flatText.includes("Ad Soyad") || flatText.includes("Adı Soyadı")) && (rawText.includes("SKU") || rawText.includes("Sepet") || rawText.includes("Taksit Tutar") || rawText.includes("elden-taksit-basvurusu"))));
 
         var lines = cleanText.split('\n').map(l => l.trim()).filter(l => l.length > 0);
     if(lines.length === 0) {
@@ -3204,11 +3212,9 @@ function applySmartParsing() {
     var name = "";
     var phone = "";
     var branch = "";
-    var media = isFacebook ? "Facebook" : ""; 
+    var media = isFacebook ? "Facebook" : (isWebForm ? "Web Sitesi Form" : ""); 
     var category = "";
     var product = "";
-
-    if(isWebForm) media = "Web Sitesi Form";
 
     // Müşteri numarasını ayıkla (5349525687 şirket hattını hariç tutarak gerçek müşteri numarasını bulur)
     var allPhoneMatches = rawText.match(/(?:\+?90\s*|0\s*)?5\d{2}[\s\.\-_/]?\d{3}[\s\.\-_/]?\d{2}[\s\.\-_/]?\d{2}\b/g) || [];
@@ -3247,18 +3253,61 @@ function applySmartParsing() {
             if (talepMatch && talepMatch[1]) name = talepMatch[1].trim();
         }
     } else {
-        var fbAdNameMatch = rawText.match(/^([A-Za-zçğıöşüÇĞIÖŞÜ\s]{3,35})\s+(?:bir\s+reklama\s+yanıt\s+verdi|adlı\s+kişi|size\s+bir\s+mesaj\s+gönderdi)/im);
-        if (fbAdNameMatch && fbAdNameMatch[1]) {
-            name = fbAdNameMatch[1].trim();
-        }
-
-        if (!name) {
-            var wpNameMatch = rawText.match(/(?:\[\d{1,2}:\d{2}(?:,\s*\d{1,2}\.\d{2}\.\d{4})?\]\s*|\b)([A-Za-zçğıöşüÇĞIÖŞÜ\s]{3,30}):\s+/m);
-            if (wpNameMatch && wpNameMatch[1] && !wpNameMatch[1].toLowerCase().includes("hedef") && !wpNameMatch[1].toLowerCase().includes("temsilci")) {
-                name = wpNameMatch[1].trim();
+        // 1. Önce telefon numarasının hemen üstündeki iletişim bloğunu kontrol et (Örn: Harun Kıraç \n İstanbul Ümraniye \n 0553...)
+        if (!name && phone) {
+            let phoneLineIdx = -1;
+            for (let i = lines.length - 1; i >= 0; i--) {
+                if (lines[i].replace(/\D/g, '').includes(phone)) {
+                    phoneLineIdx = i;
+                    break;
+                }
+            }
+            if (phoneLineIdx >= 0) {
+                const locKeywords = ["ümraniye", "umraniye", "kadıköy", "kadikoy", "üsküdar", "uskudar", "kavacık", "kavacik", "beykoz", "çekmeköy", "sultanbeyli", "yenidoğan", "paşabahçe", "gebze", "çayırova", "düzce", "izmit", "inegöl", "bursa", "kocaeli", "sakarya", "adapazarı", "derince", "körfez", "gölcük", "başiskele", "kartepe", "nilüfer", "osmangazi", "yıldırım"];
+                for (let offset = 1; offset <= 3 && (phoneLineIdx - offset) >= 0; offset++) {
+                    let cand = lines[phoneLineIdx - offset].trim();
+                    let candLow = cand.toLocaleLowerCase('tr-TR');
+                    let isLoc = false;
+                    for (let lk of locKeywords) {
+                        if (candLow.includes(lk)) { isLoc = true; break; }
+                    }
+                    if (isLoc || candLow.includes("istanbul") || candLow.includes("bursa") || candLow.includes("kocaeli") || candLow.includes("düzce") || candLow.includes("sakarya") || candLow.includes("mahallesi") || candLow.includes("sokak") || candLow.includes("cadde") || candLow.includes("no:")) {
+                        continue;
+                    }
+                    if (candLow.includes("ad soyad") || candLow.includes("irtibat") || candLow.includes("telefon") || candLow.includes("bilgi") || candLow.includes("otomatik") || candLow.includes("merhaba") || candLow.includes("temsilci") || candLow.includes("hedef") || candLow.includes("form") || candLow.includes("taksit") || candLow.includes("başvuru")) {
+                        continue;
+                    }
+                    if (cand.match(/^[a-zA-ZçğıöşüÇĞIÖŞÜ\s\.]+$/) && !cand.match(/\d/) && cand.length >= 3 && cand.length <= 35) {
+                        let wordCount = cand.trim().split(/\s+/).length;
+                        if (wordCount >= 2 && wordCount <= 4) {
+                            name = cand;
+                            break;
+                        }
+                    }
+                }
             }
         }
 
+        // 2. Meta / Facebook Lead reklam başlığı (Ahmet Yılmaz bir reklama yanıt verdi)
+        if (!name) {
+            var fbAdNameMatch = rawText.match(/^([A-Za-zçğıöşüÇĞIÖŞÜ\s]{3,35})\s+(?:bir\s+reklama\s+yanıt\s+verdi|adlı\s+kişi|size\s+bir\s+mesaj\s+gönderdi)/im);
+            if (fbAdNameMatch && fbAdNameMatch[1]) {
+                name = fbAdNameMatch[1].trim();
+            }
+        }
+
+        // 3. WhatsApp konuşma başlığı
+        if (!name) {
+            var wpNameMatch = rawText.match(/(?:^|\[\d{1,2}:\d{2}(?:,\s*\d{1,2}\.\d{2}\.\d{4})?\]\s*|\d{1,2}\.\d{2}\.\d{4},\s*\d{1,2}:\d{2}\s*-\s*)([A-Za-zçğıöşüÇĞIÖŞÜ\s]{3,30}):\s+/m);
+            if (wpNameMatch && wpNameMatch[1]) {
+                let wpN = wpNameMatch[1].trim().toLowerCase();
+                if (!wpN.includes("hedef") && !wpN.includes("temsilci") && !wpN.includes("form") && !wpN.includes("doldur") && !wpN.includes("bilgi") && !wpN.includes("taksit") && !wpN.includes("başvuru")) {
+                    name = wpNameMatch[1].trim();
+                }
+            }
+        }
+
+        // 4. İsim beyanı ("adım Ahmet", "Ahmet ben")
         if (!name) {
             var nameDeclMatch = flatText.match(/(?:adım|ismim|benim adım|adım soyadım)\s+([a-zA-ZçğıöşüÇĞIÖŞÜ\s]{3,25})(?:\s+ben)?/i);
             if (nameDeclMatch && nameDeclMatch[1]) {
@@ -3285,7 +3334,8 @@ function applySmartParsing() {
         }
     }
     if (name) {
-         name = name.split(/\s+/).filter(w => w.length > 0).map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ');
+        name = name.replace(/^[^\wçğıöşüÇĞIÖŞÜ]+|[^\wçğıöşüÇĞIÖŞÜ]+$/gi, '').trim();
+        name = name.split(/\s+/).filter(w => w.length > 0).map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ');
     }
 
     const districtBranchMap = [
@@ -3315,6 +3365,14 @@ function applySmartParsing() {
         // Kavacık Şubesi
         { priority: 10, key: "kavacık", branch: "Kavacık Şubesi" },
         { priority: 10, key: "kavacik", branch: "Kavacık Şubesi" },
+        { priority: 10, key: "ümraniye", branch: "Kavacık Şubesi" },
+        { priority: 10, key: "umraniye", branch: "Kavacık Şubesi" },
+        { priority: 10, key: "kadıköy", branch: "Kavacık Şubesi" },
+        { priority: 10, key: "kadikoy", branch: "Kavacık Şubesi" },
+        { priority: 10, key: "üsküdar", branch: "Kavacık Şubesi" },
+        { priority: 10, key: "uskudar", branch: "Kavacık Şubesi" },
+        { priority: 10, key: "ataşehir", branch: "Kavacık Şubesi" },
+        { priority: 10, key: "atasehir", branch: "Kavacık Şubesi" },
         { priority: 10, key: "beykoz", branch: "Kavacık Şubesi" },
         { priority: 10, key: "göksu", branch: "Kavacık Şubesi" },
 
@@ -3418,7 +3476,7 @@ function applySmartParsing() {
         let bottomText = lines.slice(-4).join(' ').toLocaleLowerCase('tr-TR');
 
         for (let item of districtBranchMap) {
-            let regex = new RegExp("\\b" + item.key + "\\b", "i");
+            let regex = new RegExp("(?:^|[^a-zçğıöşü0-9])" + item.key.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + "(?:$|[^a-zçğıöşü0-9])", "i");
             let inBottom = regex.test(bottomText);
             let inFull = regex.test(searchSpace);
 
@@ -3466,15 +3524,36 @@ function applySmartParsing() {
         }
     }
 
-    // Ek Sosyal Medya Başlık Kalıpları: "X ürünü hakkında bilgi", "X için yazıyorum", "X var mı", "X ne kadar", "X fiyatı nedir"
+    // Ek Sosyal Medya Başlık Kalıpları: "X ürünü hakkında bilgi", "X için taksit şartları nedir", "X var mı", "X ne kadar", "X fiyatı nedir"
     if (!explicitProduct) {
-        let askingMatch = cleanText.match(/(?:acaba\s+)?([A-Za-z0-9çğıöşüÇĞIÖŞÜ\s\-]{3,40}?)\s*(?:hakkında\s*bilgi|fiyatı\s*nedir|fiyatını\s*öğrenebilir|ne\s*kadar|var\s*mı|stokta\s*var\s*mı|almak\s*istiyorum|taksitli\s*fiyatı)/i);
+        let askingMatch = cleanText.match(/(?:acaba\s+)?([A-Za-z0-9çğıöşüÇĞIÖŞÜ\s\-]{3,50}?)\s*(?:için\s+)?(?:taksit\s*şartları(?:\s*nedir)?|şartları\s*nedir|şartlar\s*nedir|taksit\s*seçenekleri|taksit\s*imkanları|hakkında\s*bilgi|fiyatı\s*nedir|fiyatını\s*öğrenebilir|ne\s*kadar|var\s*mı|stokta\s*var\s*mı|almak\s*istiyorum|taksitli\s*fiyatı)/i);
         if (askingMatch && askingMatch[1]) {
             let candidateAsk = cleanExtractedProductString(askingMatch[1]);
-            if (candidateAsk && candidateAsk.length >= 3 && !candidateAsk.toLowerCase().includes("merhaba") && !candidateAsk.toLowerCase().includes("ürünler") && !candidateAsk.toLowerCase().includes("bilgi") && !candidateAsk.toLowerCase().includes("yeriniz")) {
+            if (candidateAsk.includes('\n')) candidateAsk = candidateAsk.split('\n').pop().trim();
+            if (candidateAsk && candidateAsk.length >= 3 && !candidateAsk.toLowerCase().includes("merhaba") && !candidateAsk.toLowerCase().includes("ürünler") && !candidateAsk.toLowerCase().includes("bilgi") && !candidateAsk.toLowerCase().includes("yeriniz") && !candidateAsk.toLowerCase().includes("numaranız")) {
                 explicitProduct = candidateAsk;
             }
         }
+    }
+
+    // Popüler Araç / Motor Modelleri Tanımlama (Volta EV1 vb.)
+    let rawLower = (rawText + " " + cleanText).toLocaleLowerCase('tr-TR');
+    if (!explicitProduct || explicitProduct.toLowerCase().includes("ev1") || explicitProduct.toLowerCase().includes("ev-1")) {
+        if (/\b(?:volta\s+)?ev[\s\-]?1\b/i.test(rawLower)) {
+            explicitProduct = "Volta EV1 Elektrikli Motor";
+        }
+    }
+    if (!explicitProduct || explicitProduct.toLowerCase().includes("vs7")) {
+        if (/\b(?:volta\s+)?vs[\s\-]?7\b/i.test(rawLower)) explicitProduct = "Volta VS7 Elektrikli Motor";
+    }
+    if (!explicitProduct || explicitProduct.toLowerCase().includes("vsm")) {
+        if (/\b(?:volta\s+)?vsm\b/i.test(rawLower)) explicitProduct = "Volta VSM Elektrikli Motor";
+    }
+    if (!explicitProduct || explicitProduct.toLowerCase().includes("ps4")) {
+        if (/\b(?:volta\s+)?ps[\s\-]?4\b/i.test(rawLower)) explicitProduct = "Volta PS4 Benzinli Scooter";
+    }
+    if (!explicitProduct || explicitProduct.toLowerCase().includes("vt5")) {
+        if (/\b(?:volta\s+)?vt[\s\-]?5\b/i.test(rawLower)) explicitProduct = "Volta VT5 3 Tekerlekli Motor";
     }
 
     if (!explicitProduct && isWebForm) {
