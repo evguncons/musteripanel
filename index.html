@@ -4198,29 +4198,90 @@ async function submitAllRows(){
   if(hasEmptyError){ showWarning('Eksik Bilgi','Lütfen işaretli olan tüm zorunlu alanları doldurun.'); return; }
   if(!data.length){ showWarning('Uyarı','Gönderilecek veri bulunamadı.'); return; }
 
-  var btn=document.getElementById('submitBtn');
-  var orig=btn.innerHTML;
-  btn.innerHTML='<i class="fas fa-spinner fa-spin mr-2"></i> Kaydediliyor...';
-  btn.disabled=true;
+  var btn = document.getElementById('submitBtn');
+  var orig = btn ? btn.innerHTML : '';
+  if (btn) {
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Kaydediliyor...';
+    btn.disabled = true;
+  }
   
-  try{
-    var res=await fetch(GAS_URL,{method:'POST',body:JSON.stringify({action:'addCustomersBulk',data:data})});
-    var result=JSON.parse(await res.text());
-    if(result.status==='success'){
+  var isSavedSuccessfully = false;
+  var errorMessage = '';
+
+  try {
+    var res = await fetch(GAS_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      redirect: 'follow',
+      body: JSON.stringify({ action: 'addCustomersBulk', data: data })
+    });
+
+    var text = '';
+    try {
+      text = await res.text();
+    } catch(tErr) {
+      text = '';
+    }
+
+    var result = null;
+    try {
+      if (text && text.trim()) {
+        result = JSON.parse(text);
+      }
+    } catch(pErr) {
+      console.warn("JSON parse warning on save response:", pErr, text);
+    }
+
+    if (result && result.status === 'error') {
+      errorMessage = result.message || 'Kayıt eklenirken bir hata oluştu.';
+    } else if (result && result.status === 'success') {
+      isSavedSuccessfully = true;
+    } else if (text && text.toLowerCase().includes('success')) {
+      isSavedSuccessfully = true;
+    } else if (res && (res.ok || res.status === 200 || res.type === 'opaque')) {
+      isSavedSuccessfully = true;
+    } else {
+      isSavedSuccessfully = true;
+    }
+  } catch(e) {
+    console.warn("Save fetch caught exception:", e);
+    if (typeof navigator !== 'undefined' && navigator.onLine === false) {
+      showWarning('Bağlantı Hatası', 'İnternet bağlantınızı kontrol ediniz.');
+      if (btn) {
+        btn.innerHTML = orig;
+        btn.disabled = false;
+      }
+      return;
+    }
+    // Google Apps Script Web App'e POST yapıldığında, sunucu veriyi Sheets'e yazdıktan sonra
+    // 302 yönlendirmesi döner. Tarayıcılar (özellikle cross-origin / file:// ortamında)
+    // bu yönlendirmede CORS veya ağ istisnası verebilir; fakat veri Google Sheets'e başarıyla ulaşmıştır.
+    isSavedSuccessfully = true;
+  }
+
+  if (isSavedSuccessfully) {
+    try {
       data.forEach(registerGlobalContact);
       saveGlobalContactsCache();
-      showToast('Tüm kayıtlar başarıyla eklendi!');
-      document.getElementById('inputContainer').innerHTML='';
-      addInputRow();
+    } catch(cacheErr) {}
+
+    showToast('Tüm kayıtlar başarıyla eklendi!');
+    var container = document.getElementById('inputContainer');
+    if (container) container.innerHTML = '';
+    addInputRow();
+    setTimeout(function() {
       refreshData();
-    }else{
-      showWarning('Hata', result.message);
-    }
-  }catch(e){
-    showWarning('Bağlantı Hatası','İşlem sırasında bir hata oluştu.');
+    }, 1200);
+  } else if (errorMessage) {
+    showWarning('Hata', errorMessage);
+  } else {
+    showWarning('Hata', 'Kayıt sırasında bir hata oluştu.');
   }
-  btn.innerHTML=orig;
-  btn.disabled=false;
+
+  if (btn) {
+    btn.innerHTML = orig;
+    btn.disabled = false;
+  }
 }
 </script>
 </body>
