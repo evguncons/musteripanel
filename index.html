@@ -1258,6 +1258,7 @@ function parseLogDate(timeStr) {
 function doLogin(){
   var pass=document.getElementById('loginPass').value;
   if(pass==='134679'){
+    try { sessionStorage.setItem('crm_logged_in', '1'); } catch(e) {}
     document.getElementById('loginScreen').style.opacity='0';
     setTimeout(() => {
         document.getElementById('loginScreen').style.display='none';
@@ -1265,15 +1266,33 @@ function doLogin(){
         populatePeriodSelector();
         populateSalesBranchFilter();
         addInputRow();
+
+        // 1. Önce önbellekten veriyi anında (3 ms) ekrana yükle
+        var currPeriod = document.getElementById('currentPeriod') ? document.getElementById('currentPeriod').value : '';
+        loadCachedDashboardData(currPeriod);
+
+        // 2. Canlı verileri arka planda eşitlenmek üzere çek
         fetchData();
-        setInterval(fetchData, 10000); 
-    }, 400);
+
+        // 3. Arka plan canlı kontrol periyodu (Google Sheets kotası ve gecikmeleri önlemek için 60 sn)
+        if (window.fetchDataInterval) clearInterval(window.fetchDataInterval);
+        window.fetchDataInterval = setInterval(fetchData, 60000); 
+    }, 300);
   } else {
     document.getElementById('loginError').style.display='block';
   }
 }
 document.getElementById('loginBtn').addEventListener('click',doLogin);
 document.getElementById('loginPass').addEventListener('keydown',function(e){if(e.key==='Enter') doLogin();});
+
+window.addEventListener('DOMContentLoaded', function() {
+  try {
+    if (sessionStorage.getItem('crm_logged_in') === '1') {
+      document.getElementById('loginPass').value = '134679';
+      doLogin();
+    }
+  } catch(e) {}
+});
 
 function switchTab(tab){
   currentTab=tab;
@@ -1339,10 +1358,100 @@ function populateSalesBranchFilter() {
 var isFetchingData = false;
 var fetchRetryTimeout = null;
 
-function refreshData(){
-  var el=document.getElementById('lastUpdateTime');
-  if(el) el.textContent=new Date().toLocaleTimeString('tr-TR',{hour:'2-digit',minute:'2-digit', second:'2-digit'});
+// Hızlı Önbellek Sistemi (Stale-While-Revalidate)
+function loadCachedDashboardData(period) {
+  try {
+    var key = 'crm_dash_cache_' + (period || 'current');
+    var cachedStr = localStorage.getItem(key) || localStorage.getItem('crm_dash_cache_current');
+    if (cachedStr) {
+      var cachedData = JSON.parse(cachedStr);
+      if (cachedData && cachedData.records && cachedData.records.length > 0) {
+        applyDashboardData(cachedData, true);
+        return true;
+      }
+    }
+  } catch(e) {
+    console.warn("Önbellek okuma hatası:", e);
+  }
+  return false;
+}
+
+function saveDashboardDataToCache(data, period) {
+  try {
+    if (!data || !data.records || data.records.length === 0) return;
+    data._cachedTime = new Date().toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' });
+    var key = 'crm_dash_cache_' + (period || 'current');
+    var jsonStr = JSON.stringify(data);
+    localStorage.setItem(key, jsonStr);
+    localStorage.setItem('crm_dash_cache_current', jsonStr);
+  } catch(e) {
+    console.warn("Önbellek yazma uyarısı:", e);
+    try {
+      for (let i = localStorage.length - 1; i >= 0; i--) {
+        let k = localStorage.key(i);
+        if (k && k.startsWith('crm_dash_cache_') && k !== 'crm_dash_cache_current') {
+          localStorage.removeItem(k);
+        }
+      }
+      if (data && data.records) {
+        localStorage.setItem('crm_dash_cache_current', JSON.stringify(data));
+      }
+    } catch(err) {}
+  }
+}
+
+function applyDashboardData(data, isFromCache = false) {
+  if (!data || !data.records) return;
+
+  allRecordsData = (data.records || []).sort(function(a, b) {
+    return parseAnyDate(b.timestamp || b.date) - parseAnyDate(a.timestamp || a.date);
+  });
+
+  try {
+    allRecordsData.forEach(registerGlobalContact);
+    saveGlobalContactsCache();
+  } catch(e) {}
+
+  branchStatsData = (data.stats || []).sort((a, b) => b.totalRevenue - a.totalRevenue);
+  updateKPIsFromGlobal(data.global);
+
+  allSnapLogs = data.snapLogs || [];
+  branchNamesData = data.branchNames || [];
+
+  renderPerformance();
+  updateSalesView();
+  renderDashTopBranches();
+
+  if (currentTab === 'dashboard') renderDashCharts();
+  if (currentTab === 'category') {
+    catAnalyticsRendered = true;
+    renderCategoryAnalytics();
+  } else {
+    catAnalyticsRendered = false;
+  }
+  if (currentTab === 'log') {
+    renderCiroLogs();
+  }
+
+  var el = document.getElementById('lastUpdateTime');
+  if (el) {
+    if (isFromCache) {
+      var timeStr = data._cachedTime || 'Önbellek';
+      el.innerHTML = '<span style="color:var(--text3); font-size:0.75rem;">(' + timeStr + ')</span> · <span style="color:var(--sys-blue); font-size:0.75rem;"><i class="fas fa-sync-alt fa-spin mr-1"></i>Eşitleniyor...</span>';
+    } else {
+      var nowStr = new Date().toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+      el.innerHTML = '<span style="color:var(--sys-green);"><i class="fas fa-check-circle mr-1"></i>' + nowStr + '</span>';
+    }
+  }
+}
+
+function refreshData(isPeriodChange = false){
+  var period = document.getElementById('currentPeriod') ? document.getElementById('currentPeriod').value : '';
   if (fetchRetryTimeout) { clearTimeout(fetchRetryTimeout); fetchRetryTimeout = null; }
+  
+  // Varsa önce o dönemin önbelleğini anında ekrana bas
+  loadCachedDashboardData(period);
+
   fetchData(true);
 }
 
@@ -1350,7 +1459,10 @@ async function fetchData(isManualTrigger = false){
   if(isFetchingData) return;
   isFetchingData = true;
 
-  var period=document.getElementById('currentPeriod')?document.getElementById('currentPeriod').value:'';
+  var refreshIcon = document.querySelector('button[title="Verileri Yenile"] i');
+  if (refreshIcon) refreshIcon.classList.add('fa-spin');
+
+  var period = document.getElementById('currentPeriod') ? document.getElementById('currentPeriod').value : '';
   
   const controller = typeof AbortController !== 'undefined' ? new AbortController() : null;
   const timeoutId = controller ? setTimeout(() => controller.abort(), 60000) : null;
@@ -1359,7 +1471,7 @@ async function fetchData(isManualTrigger = false){
     var fetchOpts = { method: 'GET', redirect: 'follow' };
     if (controller) fetchOpts.signal = controller.signal;
 
-    var res = await fetch(GAS_URL+'?action=getDashboardData&period='+encodeURIComponent(period)+'&t='+Date.now(), fetchOpts);
+    var res = await fetch(GAS_URL + '?action=getDashboardData&period=' + encodeURIComponent(period) + '&t=' + Date.now(), fetchOpts);
     if (timeoutId) clearTimeout(timeoutId);
 
     var data = await res.json();
@@ -1368,57 +1480,31 @@ async function fetchData(isManualTrigger = false){
         clearTimeout(fetchRetryTimeout);
         fetchRetryTimeout = null;
       }
-      allRecordsData=(data.records||[]).sort(function(a,b){
-        return parseAnyDate(b.timestamp || b.date) - parseAnyDate(a.timestamp || a.date);
-      });
-      allRecordsData.forEach(registerGlobalContact);
-      saveGlobalContactsCache();
-      
-      branchStatsData = (data.stats || []).sort((a,b) => b.totalRevenue - a.totalRevenue);
-      updateKPIsFromGlobal(data.global);
-      
-      allSnapLogs = data.snapLogs || [];
-      branchNamesData = data.branchNames || [];
-      
-      renderPerformance();
-      updateSalesView(); 
-      renderDashTopBranches();
-      
-      if(currentTab==='dashboard') renderDashCharts();
-      if(currentTab==='category'){
-        catAnalyticsRendered=true;
-        renderCategoryAnalytics();
-      } else {
-        catAnalyticsRendered=false;
-      }
-      if(currentTab==='log'){
-          renderCiroLogs();
-      }
-      
-      var el=document.getElementById('lastUpdateTime');
-      if(el) el.textContent=new Date().toLocaleTimeString('tr-TR',{hour:'2-digit',minute:'2-digit', second:'2-digit'});
+      saveDashboardDataToCache(data, period);
+      applyDashboardData(data, false);
     } else {
       handleFetchFailure((data && data.message) ? data.message : "Sunucudan veri dönmedi.");
     }
   }catch(e){
     if (timeoutId) clearTimeout(timeoutId);
     console.error("fetchData Hatası:", e);
-    var errText = (e && e.name === 'AbortError') ? 'Sunucu yanıtı gecikti, otomatik yeniden deneniyor...' : 'Bağlantı kesintisi, otomatik yeniden bağlanılıyor...';
+    var errText = (e && e.name === 'AbortError') ? 'Sunucu yanıtı gecikti, arka planda yeniden deneniyor...' : 'Bağlantı kesintisi, arka planda yeniden deneniyor...';
     handleFetchFailure(errText);
   } finally {
     isFetchingData = false;
+    if (refreshIcon) refreshIcon.classList.remove('fa-spin');
   }
 }
 
 function handleFetchFailure(msg) {
   if (allRecordsData.length === 0) {
-    showEmptyOrErrorState(msg + ' (Otomatik yeniden deneniyor...)');
+    showEmptyOrErrorState(msg + ' (Yeniden deneniyor...)');
   }
   if (!fetchRetryTimeout) {
     fetchRetryTimeout = setTimeout(() => {
       fetchRetryTimeout = null;
       fetchData();
-    }, 4000);
+    }, 10000);
   }
 }
 
