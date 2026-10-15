@@ -200,58 +200,6 @@ select.inp{appearance:none;line-height:1.5;background-image:url("data:image/svg+
 body:not(.dark) .theme-toggle{background:#cbd5e1}
 body.dark .theme-toggle{background:#0ea5e9}
 body.dark .theme-toggle .knob{transform:translateX(20px)}
-
-@media print {
-  @page {
-    size: A4 portrait;
-    margin: 8mm 10mm;
-  }
-  html, body {
-    background: #ffffff !important;
-    color: #0f172a !important;
-    font-size: 13px !important;
-    margin: 0 !important;
-    padding: 0 !important;
-    width: 100% !important;
-    min-height: 100% !important;
-    overflow: visible !important;
-  }
-  body * {
-    visibility: hidden !important;
-  }
-  .app-header, .no-print, nav, header, .sidebar, .btn, .modal-bg, #navTabs, select, input, .toast, .theme-toggle, #loginScreen {
-    display: none !important;
-  }
-  #exportContentArea, #exportContentArea *,
-  #aiReportExportArea, #aiReportExportArea * {
-    visibility: visible !important;
-  }
-  #exportContentArea, #aiReportExportArea {
-    display: block !important;
-    position: absolute !important;
-    left: 0 !important;
-    top: 0 !important;
-    width: 100% !important;
-    margin: 0 !important;
-    padding: 10px 15px !important;
-    background: #ffffff !important;
-    color: #0f172a !important;
-    border: none !important;
-    box-shadow: none !important;
-  }
-  .print-break-avoid {
-    break-inside: avoid !important;
-    page-break-inside: avoid !important;
-  }
-  table {
-    width: 100% !important;
-    border-collapse: collapse !important;
-  }
-  th, td {
-    -webkit-print-color-adjust: exact !important;
-    print-color-adjust: exact !important;
-  }
-}
 </style>
 </head>
 <body>
@@ -313,6 +261,7 @@ body.dark .theme-toggle .knob{transform:translateX(20px)}
     </div>
   </header>
 
+  <!-- DASHBOARD GÖRÜNÜMÜ -->
   <div id="view-dashboard" class="tab-content">
     <div class="grid-kpi" id="kpiRow">
       <div class="kpi-card" style="--accent:#0ea5e9"><i class="fas fa-share-square kpi-icon-bg"></i><div style="position:relative; z-index:2"><div style="font-size:.75rem;font-weight:800;color:var(--text3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:.6rem">Toplam Yönlendirme</div><div style="font-size:2.5rem;font-weight:800;color:var(--text);line-height:1" id="globalTotalRecords">0</div><div style="font-size:.8rem;color:var(--text3);margin-top:.4rem; font-weight:600">bu dönem</div></div></div>
@@ -342,6 +291,7 @@ body.dark .theme-toggle .knob{transform:translateX(20px)}
     </div>
   </div>
 
+  <!-- MÜŞTERİ KAYIT GÖRÜNÜMÜ -->
   <div id="view-entry" class="tab-content active">
     
     <!-- EXCEL / META LEADS TOPLU YÜKLEME KARTI -->
@@ -351,7 +301,7 @@ body.dark .theme-toggle .knob{transform:translateX(20px)}
           <div class="sec-icon" style="background:rgba(16, 185, 129, 0.1);color:var(--sys-green)"><i class="fas fa-file-excel text-xl"></i></div>
           <div>
             <div style="font-size:1.1rem;font-weight:800;color:var(--text)">Excel İle Toplu Müşteri Yükleme (Meta Leads)</div>
-            <div style="font-size:.75rem;font-weight:600;color:var(--text3)">Facebook/Meta Form Leads Excel dosyanızı yükleyin. N (İsim), O (Telefon), P (Şehir/Şube) sütunları otomatik eşleştirilir.</div>
+            <div style="font-size:.75rem;font-weight:600;color:var(--text3)">Sadece <b>İstanbul, Bursa, Düzce, Kocaeli, Sakarya/Adapazarı</b> şubelerimize yönlendirilir. Trabzon, Ankara vb. dışındaki tüm iller otomatik es geçilir.</div>
           </div>
         </div>
         <span class="badge" style="background:rgba(16, 185, 129, 0.15); color:var(--sys-green); padding:4px 10px; border-radius:8px; font-weight:800; font-size:0.75rem;">Limit Öğren Modülü</span>
@@ -364,8 +314,8 @@ body.dark .theme-toggle .knob{transform:translateX(20px)}
           <i class="fas fa-cloud-upload-alt" style="font-size: 2.8rem; color: var(--sys-green); margin-bottom: 0.75rem;"></i>
           <h4 style="font-size: 1.1rem; font-weight: 800; color: var(--text); margin-bottom: 0.3rem;">Excel Dosyanızı Buraya Sürükleyin veya Tıklayıp Seçin</h4>
           <p style="font-size: 0.8rem; font-weight: 600; color: var(--text3); margin-bottom: 0.75rem;">Desteklenen Formatlar: <b>.xls, .xlsx, .csv</b> (Örn: limit öğren form_Leads...)</p>
-          <div style="display: inline-flex; align-items: center; gap: 0.5rem; background: var(--surface); border: 1px solid var(--border); padding: 0.4rem 0.8rem; border-radius: 0.6rem; font-size: 0.75rem; font-weight: 700; color: var(--text2);">
-            <span><b>N Sütunu:</b> Ad Soyad</span> • <span><b>O Sütunu:</b> Telefon</span> • <span><b>P Sütunu:</b> Şube / İlçe</span>
+          <div style="display: inline-flex; align-items: center; gap: 0.5rem; background: var(--surface); border: 1px solid var(--border); padding: 0.4rem 0.8rem; border-radius: 0.6rem; font-size: 0.75rem; font-weight: 700; color: var(--text2); flex-wrap:wrap; justify-content:center;">
+            <span><b>N:</b> Ad Soyad</span> • <span><b>O:</b> Telefon</span> • <span><b>P:</b> Şehir (Izmit/İzmit/Sakarya ➔ İzmit, İstanbul ➔ Çekmeköy)</span> • <span style="color:var(--sys-red)"><b>Bölge Dışı Şehirler (Trabzon, Ankara vb.) Asla Yönlendirilmez / Es Geçilir</b></span>
           </div>
         </div>
 
@@ -385,7 +335,7 @@ body.dark .theme-toggle .knob{transform:translateX(20px)}
               <div style="font-size: 1.8rem; font-weight: 800; color: var(--sys-orange); font-family: monospace; margin-top: 4px;" id="statExcelDuplicate">0</div>
             </div>
             <div style="background: rgba(239, 68, 68, 0.08); border: 1px solid rgba(239, 68, 68, 0.25); border-radius: 1rem; padding: 1rem; text-align: center;">
-              <div style="font-size: 0.7rem; font-weight: 800; color: var(--sys-red); text-transform: uppercase;">Geçersiz / Hatalı</div>
+              <div style="font-size: 0.7rem; font-weight: 800; color: var(--sys-red); text-transform: uppercase;">Bölge Dışı / Hatalı Şehir</div>
               <div style="font-size: 1.8rem; font-weight: 800; color: var(--sys-red); font-family: monospace; margin-top: 4px;" id="statExcelInvalid">0</div>
             </div>
           </div>
@@ -396,8 +346,9 @@ body.dark .theme-toggle .knob{transform:translateX(20px)}
               <button class="btn btn-ghost btn-sm active" id="btnFilterAll" onclick="setExcelFilter('all')">Tümü (<span id="cntAll">0</span>)</button>
               <button class="btn btn-ghost btn-sm" id="btnFilterReady" onclick="setExcelFilter('ready')"><i class="fas fa-check text-green-500 mr-1"></i> Eklenecekler (<span id="cntReady">0</span>)</button>
               <button class="btn btn-ghost btn-sm" id="btnFilterDup" onclick="setExcelFilter('duplicate')"><i class="fas fa-user-clock text-amber-500 mr-1"></i> Mükerrerler (<span id="cntDup">0</span>)</button>
+              <button class="btn btn-ghost btn-sm" id="btnFilterInvalid" onclick="setExcelFilter('invalid')"><i class="fas fa-ban text-red-500 mr-1"></i> Bölge Dışı / Es Geçilen (<span id="cntInvalid">0</span>)</button>
             </div>
-            <div style="display: flex; gap: 0.75rem; align-items: center;">
+            <div style="display: flex; gap: 0.75rem; align-items: center; flex-wrap:wrap;">
               <span style="font-size: 0.8rem; font-weight: 700; color: var(--text3);">Sayfa Başı:</span>
               <select id="excelPageSize" class="inp" style="height: 36px; padding: 0.2rem 1.8rem 0.2rem 0.8rem; font-size: 0.85rem; width: auto; border-radius: 0.6rem;" onchange="excelPageSizeChange(this.value)">
                 <option value="15" selected>15</option>
@@ -419,7 +370,7 @@ body.dark .theme-toggle .knob{transform:translateX(20px)}
                   <th style="text-align: left;">Müşteri Adı Soyadı (N)</th>
                   <th style="text-align: left;">Telefon (O)</th>
                   <th style="text-align: left;">Atanan Şube (P)</th>
-                  <th style="text-align: left;">Orijinal Şehir</th>
+                  <th style="text-align: left;">Excel Orijinal Şehir</th>
                   <th style="text-align: left;">Medya</th>
                   <th style="text-align: left;">Kategori / Ürün</th>
                   <th style="text-align: center;">Durum</th>
@@ -443,6 +394,7 @@ body.dark .theme-toggle .knob{transform:translateX(20px)}
       </div>
     </div>
 
+    <!-- MANUEL VE AKILLI METİN GİRİŞİ -->
     <div class="card border-t-4 border-t-brand-500" style="border-top: 4px solid var(--sys-blue);">
       <div class="sec-header">
         <div class="sec-icon" style="background:rgba(14, 165, 233, 0.1);color:var(--sys-blue)"><i class="fas fa-user-plus text-xl"></i></div>
@@ -477,6 +429,7 @@ body.dark .theme-toggle .knob{transform:translateX(20px)}
     </div>
   </div>
 
+  <!-- KATEGORİ ANALİZİ GÖRÜNÜMÜ -->
   <div id="view-category" class="tab-content">
     <div class="grid-kpi" id="catKpiRow">
       <div class="kpi-card" style="--accent:var(--sys-blue)"><div style="font-size:.75rem;font-weight:800;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:.6rem">En Yüksek Hacim</div><div style="font-size:1.5rem;font-weight:800;color:var(--text);line-height:1.2;margin-bottom:.3rem" id="ck-topHacim">—</div><div style="font-size:.95rem;color:var(--sys-blue);font-weight:700" id="ck-topHacimVal">0 kayıt</div></div>
@@ -510,6 +463,7 @@ body.dark .theme-toggle .knob{transform:translateX(20px)}
     </div>
   </div>
 
+  <!-- PERFORMANS GÖRÜNÜMÜ -->
   <div id="view-performance" class="tab-content">
     <div class="card" style="padding:2rem 1.5rem;margin-bottom:1.5rem;overflow:visible; background: var(--surface2);">
       <div style="text-align:center;margin-bottom:2rem">
@@ -529,6 +483,7 @@ body.dark .theme-toggle .knob{transform:translateX(20px)}
     <div id="branchStatsBody"><div style="display:flex;justify-content:center;padding:4rem"><div class="loader"></div></div></div>
   </div>
 
+  <!-- SATIŞA DÖNENLER GÖRÜNÜMÜ -->
   <div id="view-sales" class="tab-content">
     <div class="card" style="display:flex;flex-direction:column;min-height:600px; border-top:4px solid var(--sys-green);">
       <div class="sec-header" style="justify-content:space-between; background:var(--surface2)">
@@ -566,6 +521,7 @@ body.dark .theme-toggle .knob{transform:translateX(20px)}
     </div>
   </div>
 
+  <!-- AI RAPORU GÖRÜNÜMÜ -->
   <div id="view-report" class="tab-content">
     <div class="card" style="margin-bottom:1.5rem; border-top:4px solid var(--sys-purple);">
       <div class="sec-header">
@@ -628,6 +584,7 @@ body.dark .theme-toggle .knob{transform:translateX(20px)}
     </div>
   </div>
 
+  <!-- CİRO LOGLARI GÖRÜNÜMÜ -->
   <div id="view-log" class="tab-content">
     <div class="card" style="margin-bottom:1.5rem; border-top:4px solid var(--sys-blue);">
       <div class="sec-header" style="background:var(--surface2); justify-content:space-between; align-items:center;">
@@ -666,6 +623,7 @@ body.dark .theme-toggle .knob{transform:translateX(20px)}
     </div>
   </div>
 
+  <!-- RAPOR DIŞA AKTAR GÖRÜNÜMÜ -->
   <div id="view-export" class="tab-content">
     <div class="card no-print" style="margin-bottom:1.5rem; border-top:4px solid #10b981;">
       <div class="sec-header" style="background:var(--surface2);">
@@ -780,7 +738,6 @@ var allSalesFiltered = [];
 
 var allSnapLogs = []; 
 var branchNamesData = []; 
-var memPeaks = JSON.parse(localStorage.getItem('crm_mem_peaks') || '{}');
 
 window.globalContactsMap = JSON.parse(localStorage.getItem('crm_global_contacts') || '{}');
 
@@ -788,7 +745,7 @@ window.globalContactsMap = JSON.parse(localStorage.getItem('crm_global_contacts'
 var excelParsedRows = [];
 var excelCurrentPage = 1;
 var excelPageSize = 15;
-var excelCurrentFilter = 'all'; // 'all', 'ready', 'duplicate'
+var excelCurrentFilter = 'all'; // 'all', 'ready', 'duplicate', 'invalid'
 
 function registerGlobalContact(r) {
     if (!r || !r.contact) return;
@@ -974,71 +931,166 @@ function parseAnyDate(dStr) {
 }
 
 // =========================================================================
-// 🚀 EXCEL / META LEADS TOPLU İÇE AKTARIM VE OTOMATİK EŞLEŞTİRME MOTORU
+// 🚀 AKILLI ŞEHİR VE ŞUBE EŞLEŞTİRME MOTORU (HEDEF AVM RESMİ MAĞAZA AĞI)
 // =========================================================================
 
-// P Sütunundaki İl / İlçe Bilgisini Şubeye Eşleştirme (Kullanıcının Özel Kuralları Dahil)
-function mapLocationToBranch(locationStr) {
-  if (!locationStr) return "Çekmeköy Şubesi";
-  var s = String(locationStr).trim().toLocaleLowerCase('tr-TR');
+// Şehir / Konum metnini Türkçe & İngilizce I/İ ve özel karakter tuzaklarından temizleyen normalizasyon
+function normalizeLocationString(str) {
+  if (!str) return '';
+  return String(str)
+    .trim()
+    .replace(/İ/g, 'i')
+    .replace(/I/g, 'i')
+    .replace(/ı/g, 'i')
+    .toLocaleLowerCase('tr-TR')
+    .replace(/i̇/g, 'i')
+    .replace(/ı/g, 'i')
+    .replace(/ğ/g, 'g')
+    .replace(/ü/g, 'u')
+    .replace(/ş/g, 's')
+    .replace(/ö/g, 'o')
+    .replace(/ç/g, 'c')
+    .replace(/[^a-z0-9\s]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
 
-  // 1. Kural: "adapazarı ve sakarya olanları İzmit şubesi seçilsin"
-  if (s.includes('adapazar') || s.includes('sakarya') || s.includes('serdivan') || s.includes('erenler') || s.includes('hendek') || s.includes('akyaz') || s.includes('sapanca') || s.includes('karasu')) {
+// Hizmet Bölgesi Dışındaki (Hedef AVM mağazası bulunmayan) İllerin Kesin Engelleme Listesi
+// Trabzon, Ankara, İzmir, Adana, Antalya vb. bu iller tespit edildiğinde ASLA şube atanmaz, null döner!
+const OUTSIDE_REGION_REGEX = /\b(adana|adiyaman|afyon|afyonkarahisar|agri|amasya|ankara|antalya|artvin|aydin|balikesir|bilecik|bingol|bitlis|bolu|burdur|canakkale|cankiri|corum|denizli|diyarbakir|edirne|elazig|erzincan|erzurum|eskisehir|gaziantep|antep|giresun|gumushane|hakkari|hatay|antakya|isparta|mersin|icel|izmir|kars|kastamonu|kayseri|kirklareli|kirsehir|konya|kutahya|malatya|manisa|kahramanmaras|maras|mardin|mugla|mus|nevsehir|nigde|ordu|osmaniye|rize|samsun|siirt|sinop|sivas|tekirdag|tokat|trabzon|tunceli|sanliurfa|urfa|usak|van|yozgat|zonguldak|aksaray|bayburt|karaman|kirikkale|batman|sirnak|bartin|ardahan|igdir|yalova|karabuk|kilis|alanya|bodrum|fethiye|marmaris|corlu|cerkezkoy|tarsus)\b/i;
+
+// P Sütunundaki İl / İlçe Bilgisini Şubeye Eşleştirme (Hedef AVM Resmi Mağazaları)
+// SADECE: İstanbul, Kocaeli, Sakarya/Adapazarı, Bursa, Düzce illerine yönlendirme yapılır.
+// Trabzon, Ankara veya liste dışındaki şehirler ASLA şubeye atanmaz (null döner ve es geçilir).
+function mapLocationToBranch(locationStr) {
+  if (!locationStr) return null;
+  var raw = String(locationStr).trim();
+
+  // 1. Kural: Rakam/numaradan oluşan veya 2 karakterden kısa girdileri es geç
+  var digitsClean = raw.replace(/\D/g, '');
+  var lettersClean = raw.replace(/[^a-zA-ZçğıöşüÇĞIÖŞÜ]/g, '');
+  if (lettersClean.length < 2 || (digitsClean.length > 0 && lettersClean.length === 0)) {
+    return null;
+  }
+
+  var s = normalizeLocationString(raw);
+  if (!s || s.length < 3) return null;
+
+  // Anlamsız genel metinleri es geç
+  var blacklistWords = [
+    'yok', 'hayir', 'bilmiyorum', 'fark etmez', 'belirtilmedi', 'merkez', 'ev', 'is', 'adres',
+    'test', 'deneme', 'asdf', 'asdasd', 'qwe', 'turkiye', 'turkey', 'yabanci', 'diger', 'bos'
+  ];
+  if (blacklistWords.includes(s)) return null;
+
+  // 2. Kural: HEDEF AVM HİZMET BÖLGESİ DIŞI KESİN ENGELLEME
+  // Trabzon, Ankara, İzmir, Adana, Antalya vb. dış illerden yazanlar kesinlikle şubelere YÖNLENDİRİLMEZ!
+  if (OUTSIDE_REGION_REGEX.test(s)) {
+    return null;
+  }
+
+  // 3. Kural: SAKARYA & ADAPAZARI İL VE TÜM İLÇELERİ -> İZMİT ŞUBESİ
+  // "adapazarı ve sakarya olanları İzmit şubesi seçilsin"
+  // "ayrıca Izmit gibi yazanlara dikkat et İzmit şubesine aktarsın"
+  if (
+    s.includes('izmit') || s.includes('adapazar') || s.includes('sakarya') ||
+    s.includes('serdivan') || s.includes('erenler') || s.includes('hendek') ||
+    s.includes('akyaz') || s.includes('sapanca') || s.includes('karasu') ||
+    s.includes('arifiye') || s.includes('pamukova') || s.includes('geyve') ||
+    s.includes('ferizli') || s.includes('kaynarca') || s.includes('kocaali') ||
+    s.includes('tarakli') || s.includes('karapurcek') || s.includes('sogutlu') ||
+    s.includes('kartepe') || s.includes('yahyakaptan') || s.includes('kandira') ||
+    (s.includes('kocaeli') && !s.includes('gebze') && !s.includes('cayirova') && !s.includes('golcuk') && !s.includes('korfez') && !s.includes('derince') && !s.includes('darica'))
+  ) {
     return 'İzmit Şubesi';
   }
 
-  // 2. Kural: "Istanbul yazanları çekmeköy şubesi seçsin otomatik"
-  // (Önce daha spesifik şubemiz geçiyor mu kontrol et, genel istanbul ise Çekmeköy yap)
-  if (s.includes('kavacık') || s.includes('kavacik') || s.includes('beykoz') || s.includes('ümraniye') || s.includes('umraniye') || s.includes('kadıköy') || s.includes('üsküdar') || s.includes('ataşehir')) {
-    return 'Kavacık Şubesi';
-  }
-  if (s.includes('sultanbeyli') || s.includes('pendik') || s.includes('kurtköy')) {
-    return 'Sultanbeyli Şubesi';
-  }
-  if (s.includes('yenidoğan') || s.includes('yenidogan') || s.includes('sarıgazi') || s.includes('sancaktepe')) {
-    return 'Yenidoğan Şubesi';
-  }
-  if (s.includes('paşabahçe') || s.includes('pasabahce') || s.includes('çubuklu')) {
-    return 'Paşabahçe Şubesi';
-  }
-  if (s.includes('çayırova') || s.includes('cayirova') || s.includes('darıca') || s.includes('şekerpınar')) {
-    return 'Çayırova Şubesi';
-  }
-  if (s.includes('gebze') || s.includes('dilovası')) {
-    return 'Gebze Şubesi';
-  }
-  if (s.includes('gölcük') || s.includes('golcuk') || s.includes('başiskele') || s.includes('karamürsel')) {
-    return 'Gölcük Şubesi';
-  }
-  if (s.includes('körfez') || s.includes('korfez') || s.includes('yarımca')) {
-    return 'Körfez Şubesi';
-  }
-  if (s.includes('derince')) {
+  // 4. Kural: KOCAELİ ŞUBELERİ (Hedef AVM Mağazaları)
+  // Derince Şubesi
+  if (s.includes('derince') || s.includes('cenedag') || s.includes('denizciler')) {
     return 'Derince Şubesi';
   }
-  if (s.includes('izmit') || s.includes('i̇zmit') || s.includes('kocaeli')) {
-    return 'İzmit Şubesi';
+  // Körfez Şubesi
+  if (s.includes('korfez') || s.includes('yarimca') || s.includes('tutunciftlik') || s.includes('agadere') || s.includes('kirazliyali') || s.includes('hereke')) {
+    return 'Körfez Şubesi';
   }
-  if (s.includes('düzce') || s.includes('duzce') || s.includes('akçakoca') || s.includes('gölyaka')) {
-    return 'Düzce Şubesi';
+  // Gölcük Şubesi
+  if (s.includes('golcuk') || s.includes('basiskele') || s.includes('karamursel') || s.includes('degirmendere') || s.includes('yuvacik') || s.includes('kullar') || s.includes('ihsaniye')) {
+    return 'Gölcük Şubesi';
   }
-  if (s.includes('inegöl') || s.includes('inegol') || s.includes('bursa') || s.includes('osmangazi') || s.includes('nilüfer') || s.includes('yıldırım')) {
+  // Çayırova Şubesi
+  if (s.includes('cayirova') || s.includes('darica') || s.includes('sekerpinar')) {
+    return 'Çayırova Şubesi';
+  }
+  // Gebze Şubesi
+  if (s.includes('gebze') || s.includes('dilovasi') || s.includes('hacihalil') || s.includes('mutlukent') || s.includes('kirazpinar')) {
+    return 'Gebze Şubesi';
+  }
+
+  // 5. Kural: BURSA & İNEGÖL İL VE TÜM İLÇELERİ -> İNEGÖL ŞUBESİ
+  if (
+    s.includes('inegol') || s.includes('bursa') || s.includes('osmangazi') ||
+    s.includes('nilufer') || s.includes('yildirim') || s.includes('gursu') ||
+    s.includes('kestel') || s.includes('gemlik') || s.includes('mudanya') ||
+    s.includes('yenisehir') || s.includes('orhangazi') || s.includes('iznik') ||
+    s.includes('karacabey') || s.includes('mustafakemalpasa') || s.includes('harmancik') ||
+    s.includes('keles') || s.includes('orhaneli')
+  ) {
     return 'İnegöl Şubesi';
   }
 
-  // Istanbul / İstanbul yazıyorsa veya Çekmeköy ise -> Çekmeköy Şubesi
-  if (s.includes('istanbul') || s.includes('i̇stanbul') || s.includes('çekmeköy') || s.includes('cekmekoy') || s.includes('taşdelen') || s.includes('şile')) {
+  // 6. Kural: DÜZCE İL VE TÜM İLÇELERİ -> DÜZCE ŞUBESİ
+  if (
+    s.includes('duzce') || s.includes('akcakoca') || s.includes('golyaka') ||
+    s.includes('kaynasli') || s.includes('cilimli') || s.includes('yigilca') ||
+    s.includes('gumusova') || s.includes('cumayeri') || s.includes('burhaniye') ||
+    s.includes('konuralp')
+  ) {
+    return 'Düzce Şubesi';
+  }
+
+  // 7. Kural: İSTANBUL ŞUBELERİ (Hedef AVM Mağazaları)
+  // Kavacık Şubesi
+  if (s.includes('kavacik') || s.includes('beykoz') || s.includes('umraniye') || s.includes('kadikoy') || s.includes('uskudar') || s.includes('atasehir') || s.includes('goksu')) {
+    return 'Kavacık Şubesi';
+  }
+  // Paşabahçe Şubesi
+  if (s.includes('pasabahce') || s.includes('cubuklu')) {
+    return 'Paşabahçe Şubesi';
+  }
+  // Sultanbeyli Şubesi
+  if (s.includes('sultanbeyli') || s.includes('pendik') || s.includes('kurtkoy') || s.includes('tuzla') || s.includes('kartal') || s.includes('maltepe')) {
+    return 'Sultanbeyli Şubesi';
+  }
+  // Yenidoğan Şubesi
+  if (s.includes('yenidogan') || s.includes('sarigazi') || s.includes('sancaktepe') || s.includes('samandira')) {
+    return 'Yenidoğan Şubesi';
+  }
+  // Çekmeköy Şubesi (Özel Kural: "Istanbul yazanları çekmeköy şubesi seçsin otomatik")
+  if (
+    s.includes('istanbul') || s.includes('cekmekoy') || s.includes('tasdelen') ||
+    s.includes('sile') || s.includes('kumbaba') || s.includes('madenler') ||
+    s.includes('alemdag') || s.includes('avcilar') || s.includes('bagcilar') ||
+    s.includes('bahcelievler') || s.includes('bakirkoy') || s.includes('basaksehir') ||
+    s.includes('bayrampasa') || s.includes('besiktas') || s.includes('beylikduzu') ||
+    s.includes('beyoglu') || s.includes('buyukcekmece') || s.includes('catalca') ||
+    s.includes('esenler') || s.includes('esenyurt') || s.includes('eyup') ||
+    s.includes('eyupsultan') || s.includes('fatih') || s.includes('gaziosmanpasa') ||
+    s.includes('gungoren') || s.includes('kagithane') || s.includes('kucukcekmece') ||
+    s.includes('sariyer') || s.includes('silivri') || s.includes('sultangazi') ||
+    s.includes('sisli') || s.includes('zeytinburnu')
+  ) {
     return 'Çekmeköy Şubesi';
   }
 
-  // 3. Şube adlarından biri doğrudan geçiyorsa
+  // 8. Listedeki resmi şube adlarından biri tam geçiyorsa
   for (var i = 0; i < BRANCHES.length; i++) {
-    var bName = BRANCHES[i].replace(/ Şubesi/gi, '').toLocaleLowerCase('tr-TR');
-    if (s.includes(bName)) return BRANCHES[i];
+    var bNorm = normalizeLocationString(BRANCHES[i].replace(/ Şubesi/gi, ''));
+    if (s.includes(bNorm)) return BRANCHES[i];
   }
 
-  // Varsayılan Çekmeköy Şubesi
-  return 'Çekmeköy Şubesi';
+  // Belirtilen 5 hedef bölge dışındaki tüm yerler için KESİNLİKLE null dön
+  return null;
 }
 
 // Drag & Drop Olay Dinleyicileri
@@ -1092,7 +1144,6 @@ function processParsedExcelData(rows) {
   var dupCount = 0;
   var invalidCount = 0;
 
-  // Başlık satırı kontrolü: Eğer ilk satır "id", "created_time", "full_name", "ad" içeriyorsa veri 1. indeksten başlar
   var startIdx = 0;
   if (rows.length > 0) {
     var firstRowStr = rows[0].join(' ').toLocaleLowerCase('tr-TR');
@@ -1105,15 +1156,13 @@ function processParsedExcelData(rows) {
     var row = rows[i];
     if (!row || row.length === 0) continue;
 
-    // Sütun Eşleştirmeleri:
-    // N Sütunu -> 14. sütun (Index 13)
-    // O Sütunu -> 15. sütun (Index 14)
-    // P Sütunu -> 16. sütun (Index 15)
+    // N Sütunu -> İsim Soyisim (Index 13)
+    // O Sütunu -> Telefon (Index 14)
+    // P Sütunu -> Şehir / İlçe (Index 15)
     var rawName = String(row[13] || '').trim();
     var rawPhone = String(row[14] || '').trim();
     var rawLocation = String(row[15] || '').trim();
 
-    // Tarih sütunu (Meta formlarında genelde B sütunu [Index 1] created_time olur)
     var rawDate = row[1] || row[0] || '';
     var dateFormatted = getTodayDT().replace('T', ' ');
     if (rawDate) {
@@ -1124,7 +1173,7 @@ function processParsedExcelData(rows) {
       }
     }
 
-    if (!rawName && !rawPhone && !rawLocation) continue; // Boş satırı atla
+    if (!rawName && !rawPhone && !rawLocation) continue;
 
     totalCount++;
 
@@ -1138,7 +1187,12 @@ function processParsedExcelData(rows) {
     var status = 'ready';
     var reason = 'Kayıt Yapılabilir';
 
-    if (cleanPhone.length < 7) {
+    // 1. ŞEHİR KONTROLÜ: İstanbul, Bursa, Düzce, Kocaeli, Sakarya/Adapazarı dışındakiler (Trabzon, Ankara vb.) ES GEÇİLİR!
+    if (!assignedBranch) {
+      status = 'invalid';
+      reason = 'Bölge Dışı / Şube Yok (' + (rawLocation || 'Belirtilmedi') + ')';
+      invalidCount++;
+    } else if (cleanPhone.length < 7) {
       status = 'invalid';
       reason = 'Eksik veya Hatalı Telefon';
       invalidCount++;
@@ -1147,13 +1201,12 @@ function processParsedExcelData(rows) {
       reason = 'Şirket Numarası Engeli';
       invalidCount++;
     } else {
-      // 1. Bu ay içinde sistemde kayıtlı mı?
+      // 2. MÜKERRER KONTROLÜ: Bu ay içinde sistemde kayıtlı mı?
       var compNum = cleanPhone.slice(-10);
       var existsInMonth = allRecordsData.some(function(rec) {
         return getCompareNum(rec.contact) === compNum && isRecordInActiveMonth(rec);
       });
 
-      // 2. Excel içinde daha önce geçti mi?
       if (existsInMonth) {
         status = 'duplicate';
         reason = 'Bu Ay Zaten Sistemde Kayıtlı (Es Geçildi)';
@@ -1173,17 +1226,29 @@ function processParsedExcelData(rows) {
       name: rawName || 'İsimsiz',
       phone: cleanPhone,
       rawLocation: rawLocation || '-',
-      branch: assignedBranch,
-      media: 'Facebook', // Geliş medyası Facebook
-      category: 'LİMİT ÖĞREN', // Kategori LİMİT ÖĞREN
-      product: 'LİMİT ÖĞRENME', // Ürün adı LİMİT ÖĞRENME
+      branch: assignedBranch || '',
+      media: 'Facebook',
+      category: 'LİMİT ÖĞREN',
+      product: 'LİMİT ÖĞRENME',
       date: dateFormatted,
       status: status,
       reason: reason
     });
   }
 
-  // Sayaçları ve Özet Alanını Güncelle
+  updateExcelSummaryCounters();
+  document.getElementById('excelSummaryArea').style.display = 'block';
+  excelCurrentPage = 1;
+  renderExcelTable();
+  showToast('✓ Excel incelendi: ' + readyCount + ' temiz kayıt, ' + dupCount + ' mükerrer, ' + invalidCount + ' bölge dışı/hatalı şehir tespit edildi.');
+}
+
+function updateExcelSummaryCounters() {
+  var totalCount = excelParsedRows.length;
+  var readyCount = excelParsedRows.filter(r => r.status === 'ready').length;
+  var dupCount = excelParsedRows.filter(r => r.status === 'duplicate').length;
+  var invalidCount = excelParsedRows.filter(r => r.status === 'invalid').length;
+
   document.getElementById('statExcelTotal').textContent = totalCount;
   document.getElementById('statExcelReady').textContent = readyCount;
   document.getElementById('statExcelDuplicate').textContent = dupCount;
@@ -1192,12 +1257,10 @@ function processParsedExcelData(rows) {
   document.getElementById('cntAll').textContent = totalCount;
   document.getElementById('cntReady').textContent = readyCount;
   document.getElementById('cntDup').textContent = dupCount;
+  var elInv = document.getElementById('cntInvalid');
+  if (elInv) elInv.textContent = invalidCount;
+  
   document.getElementById('btnSaveReadyCount').textContent = readyCount;
-
-  document.getElementById('excelSummaryArea').style.display = 'block';
-  excelCurrentPage = 1;
-  renderExcelTable();
-  showToast('✓ Excel başarıyla çözümlendi: ' + readyCount + ' temiz kayıt, ' + dupCount + ' mükerrer tespit edildi.');
 }
 
 function setExcelFilter(filterType) {
@@ -1206,6 +1269,7 @@ function setExcelFilter(filterType) {
   if (filterType === 'all') document.getElementById('btnFilterAll').classList.add('active');
   if (filterType === 'ready') document.getElementById('btnFilterReady').classList.add('active');
   if (filterType === 'duplicate') document.getElementById('btnFilterDup').classList.add('active');
+  if (filterType === 'invalid' && document.getElementById('btnFilterInvalid')) document.getElementById('btnFilterInvalid').classList.add('active');
   excelCurrentPage = 1;
   renderExcelTable();
 }
@@ -1223,6 +1287,7 @@ function renderExcelTable() {
   var filtered = excelParsedRows.filter(function(row) {
     if (excelCurrentFilter === 'ready') return row.status === 'ready';
     if (excelCurrentFilter === 'duplicate') return row.status === 'duplicate';
+    if (excelCurrentFilter === 'invalid') return row.status === 'invalid';
     return true;
   });
 
@@ -1250,10 +1315,12 @@ function renderExcelTable() {
     } else if (item.status === 'duplicate') {
       statusBadge = '<span style="background:rgba(245,158,11,0.15); color:var(--sys-orange); padding:4px 8px; border-radius:6px; font-weight:800; font-size:0.75rem;" title="' + item.reason + '"><i class="fas fa-user-clock mr-1"></i> Mükerrer (Es Geçildi)</span>';
     } else {
-      statusBadge = '<span style="background:rgba(239,68,68,0.12); color:var(--sys-red); padding:4px 8px; border-radius:6px; font-weight:800; font-size:0.75rem;" title="' + item.reason + '"><i class="fas fa-times-circle mr-1"></i> ' + item.reason + '</span>';
+      statusBadge = '<span style="background:rgba(239,68,68,0.12); color:var(--sys-red); padding:4px 8px; border-radius:6px; font-weight:800; font-size:0.75rem;" title="' + item.reason + '"><i class="fas fa-ban mr-1"></i> ' + item.reason + '</span>';
     }
 
-    var branchSelectHtml = '<select class="inp" style="height:36px; padding:0.2rem 1.8rem 0.2rem 0.6rem; font-size:0.85rem; width:150px; border-radius:0.6rem;" onchange="updateExcelRowBranch(' + item.id + ', this.value)">';
+    var selectBorder = !item.branch ? 'border:1px solid var(--sys-red); background:rgba(239,68,68,0.06); color:var(--sys-red); font-weight:800;' : '';
+    var branchSelectHtml = '<select class="inp" style="height:36px; padding:0.2rem 1.8rem 0.2rem 0.6rem; font-size:0.85rem; width:170px; border-radius:0.6rem; ' + selectBorder + '" onchange="updateExcelRowBranch(' + item.id + ', this.value)">';
+    branchSelectHtml += '<option value="" ' + (!item.branch ? 'selected' : '') + ' disabled>' + (!item.branch ? '⚠️ Şube Seçilmedi (Bölge Dışı)' : 'Şube Seçiniz...') + '</option>';
     BRANCHES.forEach(function(b) {
       var sel = (b === item.branch) ? 'selected' : '';
       branchSelectHtml += '<option value="' + b + '" ' + sel + '>' + b.replace(' Şubesi', '') + '</option>';
@@ -1265,7 +1332,7 @@ function renderExcelTable() {
       + '<td><input type="text" class="inp" style="height:36px; padding:0.2rem 0.6rem; font-size:0.88rem; width:180px;" value="' + item.name + '" onchange="updateExcelRowName(' + item.id + ', this.value)"></td>'
       + '<td style="font-family:monospace; font-weight:700; color:var(--text);">' + item.phone + '</td>'
       + '<td>' + branchSelectHtml + '</td>'
-      + '<td style="font-size:0.8rem; color:var(--text3); max-width:140px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="' + item.rawLocation + '">' + item.rawLocation + '</td>'
+      + '<td style="font-size:0.8rem; color:var(--text3); max-width:140px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="' + item.rawLocation + '">' + (item.rawLocation || '-') + '</td>'
       + '<td><span style="background:rgba(59,130,246,0.1); color:var(--sys-blue); padding:3px 8px; border-radius:6px; font-weight:800; font-size:0.75rem;">' + item.media + '</span></td>'
       + '<td><div style="font-size:0.85rem; font-weight:800; color:var(--text);">' + item.category + '</div><div style="font-size:0.75rem; color:var(--text3);">' + item.product + '</div></td>'
       + '<td style="text-align:center;">' + statusBadge + '</td>'
@@ -1276,7 +1343,27 @@ function renderExcelTable() {
 
 function updateExcelRowBranch(id, newBranch) {
   var row = excelParsedRows.find(r => r.id === id);
-  if (row) row.branch = newBranch;
+  if (!row) return;
+  row.branch = newBranch;
+
+  if (newBranch && row.status === 'invalid' && (row.reason.includes('Bölge') || row.reason.includes('Şehir') || row.reason.includes('Şube'))) {
+    if (row.phone.length >= 7 && !isCompanyBlacklistPhone(row.phone)) {
+      var compNum = row.phone.slice(-10);
+      var existsInMonth = allRecordsData.some(function(rec) {
+        return getCompareNum(rec.contact) === compNum && isRecordInActiveMonth(rec);
+      });
+      if (!existsInMonth) {
+        row.status = 'ready';
+        row.reason = 'Kayıt Yapılabilir (Manuel Şube)';
+      }
+    }
+  } else if (!newBranch && row.status === 'ready') {
+    row.status = 'invalid';
+    row.reason = 'Bölge Dışı / Şube Yok';
+  }
+
+  updateExcelSummaryCounters();
+  renderExcelTable();
 }
 
 function updateExcelRowName(id, newName) {
@@ -1286,19 +1373,7 @@ function updateExcelRowName(id, newName) {
 
 function deleteExcelRow(id) {
   excelParsedRows = excelParsedRows.filter(r => r.id !== id);
-  var readyCount = excelParsedRows.filter(r => r.status === 'ready').length;
-  var dupCount = excelParsedRows.filter(r => r.status === 'duplicate').length;
-  var invalidCount = excelParsedRows.filter(r => r.status === 'invalid').length;
-
-  document.getElementById('statExcelTotal').textContent = excelParsedRows.length;
-  document.getElementById('statExcelReady').textContent = readyCount;
-  document.getElementById('statExcelDuplicate').textContent = dupCount;
-  document.getElementById('statExcelInvalid').textContent = invalidCount;
-  document.getElementById('cntAll').textContent = excelParsedRows.length;
-  document.getElementById('cntReady').textContent = readyCount;
-  document.getElementById('cntDup').textContent = dupCount;
-  document.getElementById('btnSaveReadyCount').textContent = readyCount;
-
+  updateExcelSummaryCounters();
   renderExcelTable();
 }
 
@@ -1314,9 +1389,9 @@ function clearExcelImport() {
 }
 
 async function submitExcelBatch() {
-  var readyRows = excelParsedRows.filter(r => r.status === 'ready');
+  var readyRows = excelParsedRows.filter(r => r.status === 'ready' && r.branch);
   if (readyRows.length === 0) {
-    showWarning('Kayıt Bulunamadı', 'Sisteme eklenebilecek temiz ve geçerli bir başvuru satırı bulunamadı.');
+    showWarning('Kayıt Bulunamadı', 'Sisteme eklenebilecek temiz ve şubesi tanımlı bir müşteri satırı bulunamadı. Hizmet bölgesi dışındaki şehirler (Trabzon, Ankara vb.) ve mükerrerler otomatik olarak es geçilmiştir.');
     return;
   }
 
@@ -1347,11 +1422,7 @@ async function submitExcelBatch() {
       body: JSON.stringify({ action: 'addCustomersBulk', data: payloadData })
     });
 
-    var resultText = await res.text();
-    var resultObj = null;
-    try { resultObj = JSON.parse(resultText); } catch(err) {}
-
-    showToast('✓ ' + readyRows.length + ' adet müşteri kaydı başarıyla eklendi! Mükerrerler es geçildi.');
+    showToast('✓ ' + readyRows.length + ' adet müşteri kaydı başarıyla eklendi! Bölge dışı şehirler ve mükerrerler es geçildi.');
     clearExcelImport();
     setTimeout(function() {
       refreshData();
@@ -1699,7 +1770,6 @@ function buildCatStats(){
 
 function renderCategoryAnalytics(){
   var sorted=buildCatStats();
-  var totalVol=sorted.reduce(function(s,e){return s+e[1].volume;},0);
   var fmt=function(n){return '₺'+new Intl.NumberFormat('tr-TR',{maximumFractionDigits:0}).format(n||0);};
 
   var topCat=sorted[0];
@@ -1994,6 +2064,7 @@ function applySmartParsing() {
     var name = lines.length > 0 ? lines[0] : '';
     if (name.length > 35) name = name.substring(0, 35);
 
+    // Akıllı şehir eşleştirme (Yalnızca 5 hedef bölge kabul edilir, Trabzon/Ankara gibi dış iller asla yönlendirilmez!)
     var branch = mapLocationToBranch(flatText);
 
     addInputRow();
@@ -2002,13 +2073,25 @@ function applySmartParsing() {
 
     if(name) targetRow.querySelector('.inp-name').value = name;
     if(phone) targetRow.querySelector('.inp-contact').value = phone;
-    if(branch) targetRow.querySelector('.inp-branch').value = branch;
+    
+    // Eğer müşteri bölge dışındaysa şube seçimi BOŞ bırakılır, kullanıcı uyarılır
+    if(branch) {
+      targetRow.querySelector('.inp-branch').value = branch;
+    } else {
+      targetRow.querySelector('.inp-branch').value = '';
+    }
+
     targetRow.querySelector('.inp-media').value = 'Facebook';
     targetRow.querySelector('.inp-category').value = 'LİMİT ÖĞREN';
     targetRow.querySelector('.inp-product').value = 'LİMİT ÖĞRENME';
 
     document.getElementById('smartParserInput').value = '';
-    showToast('✓ Metin satıra dönüştürüldü.');
+    
+    if (branch) {
+      showToast('✓ Metin satıra dönüştürüldü (' + branch.replace(' Şubesi', '') + ').');
+    } else {
+      showToast('⚠️ Müşteri konumu mağaza ağımız dışındadır (Trabzon, Ankara vb.). Şube atanmadı.');
+    }
 }
 </script>
 </body>
