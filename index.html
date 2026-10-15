@@ -934,7 +934,6 @@ function parseAnyDate(dStr) {
 // 🚀 AKILLI ŞEHİR VE ŞUBE EŞLEŞTİRME MOTORU (HEDEF AVM RESMİ MAĞAZA AĞI)
 // =========================================================================
 
-// Şehir / Konum metnini Türkçe & İngilizce I/İ ve özel karakter tuzaklarından temizleyen normalizasyon
 function normalizeLocationString(str) {
   if (!str) return '';
   return String(str)
@@ -955,13 +954,10 @@ function normalizeLocationString(str) {
     .trim();
 }
 
-// Hizmet Bölgesi Dışındaki (Hedef AVM mağazası bulunmayan) İllerin Kesin Engelleme Listesi
-// Trabzon, Ankara, İzmir, Adana, Antalya vb. bu iller tespit edildiğinde ASLA şube atanmaz, null döner!
+// Hizmet Bölgesi Dışındaki İllerin Kesin Engelleme Listesi
+// Trabzon, Ankara, İzmir, Adana, Antalya vb. iller tespit edildiğinde ASLA şube atanmaz!
 const OUTSIDE_REGION_REGEX = /\b(adana|adiyaman|afyon|afyonkarahisar|agri|amasya|ankara|antalya|artvin|aydin|balikesir|bilecik|bingol|bitlis|bolu|burdur|canakkale|cankiri|corum|denizli|diyarbakir|edirne|elazig|erzincan|erzurum|eskisehir|gaziantep|antep|giresun|gumushane|hakkari|hatay|antakya|isparta|mersin|icel|izmir|kars|kastamonu|kayseri|kirklareli|kirsehir|konya|kutahya|malatya|manisa|kahramanmaras|maras|mardin|mugla|mus|nevsehir|nigde|ordu|osmaniye|rize|samsun|siirt|sinop|sivas|tekirdag|tokat|trabzon|tunceli|sanliurfa|urfa|usak|van|yozgat|zonguldak|aksaray|bayburt|karaman|kirikkale|batman|sirnak|bartin|ardahan|igdir|yalova|karabuk|kilis|alanya|bodrum|fethiye|marmaris|corlu|cerkezkoy|tarsus)\b/i;
 
-// P Sütunundaki İl / İlçe Bilgisini Şubeye Eşleştirme (Hedef AVM Resmi Mağazaları)
-// SADECE: İstanbul, Kocaeli, Sakarya/Adapazarı, Bursa, Düzce illerine yönlendirme yapılır.
-// Trabzon, Ankara veya liste dışındaki şehirler ASLA şubeye atanmaz (null döner ve es geçilir).
 function mapLocationToBranch(locationStr) {
   if (!locationStr) return null;
   var raw = String(locationStr).trim();
@@ -976,7 +972,6 @@ function mapLocationToBranch(locationStr) {
   var s = normalizeLocationString(raw);
   if (!s || s.length < 3) return null;
 
-  // Anlamsız genel metinleri es geç
   var blacklistWords = [
     'yok', 'hayir', 'bilmiyorum', 'fark etmez', 'belirtilmedi', 'merkez', 'ev', 'is', 'adres',
     'test', 'deneme', 'asdf', 'asdasd', 'qwe', 'turkiye', 'turkey', 'yabanci', 'diger', 'bos'
@@ -984,14 +979,12 @@ function mapLocationToBranch(locationStr) {
   if (blacklistWords.includes(s)) return null;
 
   // 2. Kural: HEDEF AVM HİZMET BÖLGESİ DIŞI KESİN ENGELLEME
-  // Trabzon, Ankara, İzmir, Adana, Antalya vb. dış illerden yazanlar kesinlikle şubelere YÖNLENDİRİLMEZ!
   if (OUTSIDE_REGION_REGEX.test(s)) {
     return null;
   }
 
   // 3. Kural: SAKARYA & ADAPAZARI İL VE TÜM İLÇELERİ -> İZMİT ŞUBESİ
-  // "adapazarı ve sakarya olanları İzmit şubesi seçilsin"
-  // "ayrıca Izmit gibi yazanlara dikkat et İzmit şubesine aktarsın"
+  // Ayrıca Izmit / izmit / İzmit yazımları
   if (
     s.includes('izmit') || s.includes('adapazar') || s.includes('sakarya') ||
     s.includes('serdivan') || s.includes('erenler') || s.includes('hendek') ||
@@ -1005,7 +998,7 @@ function mapLocationToBranch(locationStr) {
     return 'İzmit Şubesi';
   }
 
-  // 4. Kural: KOCAELİ ŞUBELERİ (Hedef AVM Mağazaları)
+  // 4. Kural: KOCAELİ ŞUBELERİ
   // Derince Şubesi
   if (s.includes('derince') || s.includes('cenedag') || s.includes('denizciler')) {
     return 'Derince Şubesi';
@@ -1049,7 +1042,7 @@ function mapLocationToBranch(locationStr) {
     return 'Düzce Şubesi';
   }
 
-  // 7. Kural: İSTANBUL ŞUBELERİ (Hedef AVM Mağazaları)
+  // 7. Kural: İSTANBUL ŞUBELERİ
   // Kavacık Şubesi
   if (s.includes('kavacik') || s.includes('beykoz') || s.includes('umraniye') || s.includes('kadikoy') || s.includes('uskudar') || s.includes('atasehir') || s.includes('goksu')) {
     return 'Kavacık Şubesi';
@@ -1083,13 +1076,12 @@ function mapLocationToBranch(locationStr) {
     return 'Çekmeköy Şubesi';
   }
 
-  // 8. Listedeki resmi şube adlarından biri tam geçiyorsa
+  // 8. Listedeki resmi şube adlarından biri geçiyorsa
   for (var i = 0; i < BRANCHES.length; i++) {
     var bNorm = normalizeLocationString(BRANCHES[i].replace(/ Şubesi/gi, ''));
     if (s.includes(bNorm)) return BRANCHES[i];
   }
 
-  // Belirtilen 5 hedef bölge dışındaki tüm yerler için KESİNLİKLE null dön
   return null;
 }
 
@@ -1183,7 +1175,6 @@ function processParsedExcelData(rows) {
     else if (cleanPhone.length > 10) cleanPhone = cleanPhone.slice(-10);
 
     var assignedBranch = mapLocationToBranch(rawLocation);
-
     var status = 'ready';
     var reason = 'Kayıt Yapılabilir';
 
