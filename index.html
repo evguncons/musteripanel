@@ -2032,38 +2032,110 @@ async function submitAllRows(){
   }
 }
 
+function inferProductCategory(product) {
+    var text = normalizeLocationString(product);
+    var rules = [
+      ['Bebek ve Çocuk', /bebek|cocuk|oyuncak|puset/],
+      ['Baza+Yatak+Başlık', /baza|yatak|baslik/],
+      ['Beyaz Eşya', /buzdolabi|camasir makinesi|bulasik makinesi|kurutma makinesi|derin dondurucu|ankastre|davlumbaz|firin|ocak/],
+      ['Elektrikli-Benzinli Araç', /scooter|motosiklet|bisiklet|elektrikli arac/],
+      ['Elektronik', /telefon|televizyon|\btv\b(?!\s+unitesi)|bilgisayar|laptop|notebook|tablet|kulaklik|hoparlor|oyun konsolu|playstation|monitor|akilli saat|iphone|galaxy/],
+      ['Elektrikli Ev Aletleri', /supurge|airfryer|fritoz|kahve|cay makinesi|cayci|kettle|blender|mikser|tost|utu|vantilator|isitici|sac kurutma|robot/],
+      ['Mobilya Aksesuarı', /sehpa|z sehpa|dresuar|puf/],
+      ['Mobilya', /koltuk|kanepe|kose takim|yemek odasi|yatak odasi|gardirop|dolap|masa|sandalye|konsol|tv unitesi/],
+      ['Halı', /hali|kilim|yolluk/],
+      ['Tekstil', /nevresim|battaniye|yorgan|yastik|havlu|perde|pike|carsaf/],
+      ['Züccaciye', /tencere|tava|tabak|bardak|catal|kasik|bicak|yemek takim|fincan/],
+      ['Ayakkabı', /ayakkabi|bot\b|cizme|terlik|sneaker/],
+      ['Kişisel Aksesuar', /saat|canta|cuzdan|gozluk|taki/],
+      ['Ev Dekorasyonu', /avize|abajur|vazo|ayna|tablo/]
+    ];
+    var match = rules.find(function(rule) { return rule[1].test(text); });
+    return match ? match[0] : 'GENEL ÜRÜN BİLGİSİ';
+}
+
+function parseSmartCustomer(rawText) {
+    var text = String(rawText || '').normalize('NFKC').replace(/\r\n?/g, '\n');
+    function plain(value) {
+      return value.replace(/\[([^\]]+)\]\([^)]*\)/g, '$1')
+        .replace(/[*_`]/g, '').replace(/^#+\s*/, '').trim();
+    }
+    var lines = text.split('\n').map(plain).filter(Boolean);
+    var fields = {};
+    var products = [];
+    var productColumn = -1;
+    var inCart = false;
+    lines.forEach(function(line, index) {
+      if (/^Sepet$/i.test(line)) { inCart = true; return; }
+      var cells = line.split(/\||\t/).map(function(cell) { return cell.trim(); });
+      if (cells[0] === '') cells.shift();
+      if (cells[cells.length - 1] === '') cells.pop();
+      if (cells.length > 1) {
+        var headerIndex = cells.findIndex(function(cell) { return /^Ürün$/i.test(cell); });
+        if (headerIndex >= 0) { productColumn = headerIndex; inCart = true; return; }
+        if (inCart && productColumn >= 0) {
+          var product = cells[productColumn];
+          if (product && !/^[-:\s]+$/.test(product) && !/^Toplam\b/i.test(product)) products.push(product);
+          return;
+        }
+        fields[normalizeLocationString(cells[0])] = cells[1];
+      } else {
+        var pair = line.match(/^(Ad Soyad|Telefon|Mağaza|Şube|Şehir|Tarih|Geliş Medyası|Kaynak|Ürün)\s*:\s*(.+)$/i);
+        if (pair) fields[normalizeLocationString(pair[1])] = pair[2];
+        else if (/^(Ad Soyad|Telefon|Mağaza|Şube|Şehir|Tarih|Geliş Medyası|Kaynak)$/i.test(line) && lines[index + 1]) {
+          fields[normalizeLocationString(line)] = lines[index + 1];
+        }
+      }
+    });
+    var title = lines.find(function(line) { return /^Talep\s*#?\d+\s*[—–-]/i.test(line); });
+    var name = fields['ad soyad'] || (title ? title.replace(/^Talep\s*#?\d+\s*[—–-]\s*/i, '') : '');
+    if (!name && lines.length && !/^Talep\b|^Yeni$|^Müşteri$|^\|/.test(lines[0])) name = lines[0];
+    var phoneText = fields.telefon || text;
+    var phoneMatch = phoneText.match(/(?:\+?90\s*|0\s*)?5\d{2}[\s.\-_/]?\d{3}[\s.\-_/]?\d{2}[\s.\-_/]?\d{2}\b/);
+    var phone = phoneMatch ? phoneMatch[0].replace(/\D/g, '').replace(/^(?:90|0)(?=5\d{9}$)/, '') : '';
+    var location = fields.magaza || fields.sube || fields.sehir || text;
+    var directBranch = BRANCHES.find(function(branch) {
+      return normalizeLocationString(branch.replace(/ Şubesi$/, '')) === normalizeLocationString(location.replace(/\s*\(\d+\)\s*$/, '').replace(/ Şubesi$/, ''));
+    });
+    var product = products.length ? products.join(' / ') : (fields.urun || '');
+    var source = fields['gelis medyasi'] || fields.kaynak || '';
+    var sourceText = normalizeLocationString(source);
+    var media = '';
+    if (sourceText) {
+      if (/instagram/.test(sourceText)) media = 'Instagram';
+      else if (/facebook/.test(sourceText)) media = 'Facebook';
+      else if (/whats\s*app/.test(sourceText)) media = 'Whatsapp';
+      else if (/sms/.test(sourceText)) media = 'SMS LİNK';
+      else if (/cagri|telefon/.test(sourceText)) media = 'Çağrı';
+      else if (/web|site|form/.test(sourceText)) media = 'Web Sitesi Form';
+    } else if (title || (fields['ad soyad'] && inCart)) media = 'Web Sitesi Form';
+    else if (/instagram/i.test(text)) media = 'Instagram';
+    else if (/facebook/i.test(text)) media = 'Facebook';
+    else if (/whatsapp/i.test(text)) media = 'Whatsapp';
+    var isLimit = !product && /limit\s+öğren/i.test(text);
+    var date = (fields.tarih || '').match(/^(\d{2})\.(\d{2})\.(\d{4})\s+(\d{2}):(\d{2})$/);
+    return {
+      name: name, contact: phone, branch: directBranch || mapLocationToBranch(location) || '',
+      media: media, product: product || (isLimit ? 'LİMİT ÖĞRENME' : ''),
+      category: product ? inferProductCategory(product) : (isLimit ? 'LİMİT ÖĞREN' : 'GENEL ÜRÜN BİLGİSİ'),
+      date: date ? date[3] + '-' + date[2] + '-' + date[1] + 'T' + date[4] + ':' + date[5] : ''
+    };
+}
+
 function applySmartParsing() {
     var rawText = (document.getElementById('smartParserInput').value || "").normalize("NFKC");
     if(!rawText.trim()) return;
 
-    var cleanText = rawText
-        .replace(/\[Detayları\s*gör\]\([^\)]*\)/gi, "")
-        .replace(/\[Bu\s*konuşmayı\s*ata\]\([^\)]*\)/gi, "")
-        .replace(/#[a-zA-Z0-9çğıöşüÇĞIÖŞÜ]+/g, "")
-        .trim();
-
-    var flatText = cleanText.replace(/\n/g, ' ');
-    var phone = '';
-    var m = flatText.match(/(?:\+?90\s*|0\s*)?5\d{2}[\s\.\-_/]?\d{3}[\s\.\-_/]?\d{2}[\s\.\-_/]?\d{2}\b/);
-    if(m) {
-      phone = m[0].replace(/\D/g, '');
-      if (phone.length === 12 && phone.startsWith('90')) phone = phone.substring(2);
-      else if (phone.length === 11 && phone.startsWith('0')) phone = phone.substring(1);
-    }
-
-    var lines = cleanText.split('\n').map(l => l.trim()).filter(l => l.length > 0);
-    var name = lines.length > 0 ? lines[0] : '';
-    if (name.length > 35) name = name.substring(0, 35);
-
-    // Akıllı şehir eşleştirme (Yalnızca 5 hedef bölge kabul edilir, Trabzon/Ankara gibi dış iller asla yönlendirilmez!)
-    var branch = mapLocationToBranch(flatText);
+    var parsed = parseSmartCustomer(rawText);
+    var branch = parsed.branch;
 
     addInputRow();
     var rows = document.querySelectorAll('#inputContainer > .entry-card');
     var targetRow = rows[rows.length - 1];
 
-    if(name) targetRow.querySelector('.inp-name').value = name;
-    if(phone) targetRow.querySelector('.inp-contact').value = phone;
+    targetRow.querySelector('.inp-name').value = parsed.name;
+    targetRow.querySelector('.inp-contact').value = parsed.contact;
+    if(parsed.date) targetRow.querySelector('input[type="datetime-local"]').value = parsed.date;
     
     // Eğer müşteri bölge dışındaysa şube seçimi BOŞ bırakılır, kullanıcı uyarılır
     if(branch) {
@@ -2072,9 +2144,9 @@ function applySmartParsing() {
       targetRow.querySelector('.inp-branch').value = '';
     }
 
-    targetRow.querySelector('.inp-media').value = 'Facebook';
-    targetRow.querySelector('.inp-category').value = 'LİMİT ÖĞREN';
-    targetRow.querySelector('.inp-product').value = 'LİMİT ÖĞRENME';
+    targetRow.querySelector('.inp-media').value = parsed.media;
+    targetRow.querySelector('.inp-category').value = parsed.category;
+    targetRow.querySelector('.inp-product').value = parsed.product;
 
     document.getElementById('smartParserInput').value = '';
     
