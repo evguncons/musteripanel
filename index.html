@@ -331,7 +331,7 @@ body.dark .theme-toggle .knob{transform:translateX(20px)}
               <div style="font-size: 1.8rem; font-weight: 800; color: var(--sys-green); font-family: monospace; margin-top: 4px;" id="statExcelReady">0</div>
             </div>
             <div style="background: rgba(245, 158, 11, 0.08); border: 1px solid rgba(245, 158, 11, 0.25); border-radius: 1rem; padding: 1rem; text-align: center;">
-              <div style="font-size: 0.7rem; font-weight: 800; color: var(--sys-orange); text-transform: uppercase;">Mükerrer (Es Geçilen)</div>
+              <div style="font-size: 0.7rem; font-weight: 800; color: var(--sys-orange); text-transform: uppercase;">Mükerrer (Seçilebilir)</div>
               <div style="font-size: 1.8rem; font-weight: 800; color: var(--sys-orange); font-family: monospace; margin-top: 4px;" id="statExcelDuplicate">0</div>
             </div>
             <div style="background: rgba(239, 68, 68, 0.08); border: 1px solid rgba(239, 68, 68, 0.25); border-radius: 1rem; padding: 1rem; text-align: center;">
@@ -344,7 +344,7 @@ body.dark .theme-toggle .knob{transform:translateX(20px)}
           <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem; margin-bottom: 1rem; background: var(--surface2); padding: 0.75rem 1rem; border-radius: 0.875rem; border: 1px solid var(--border);">
             <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
               <button class="btn btn-ghost btn-sm active" id="btnFilterAll" onclick="setExcelFilter('all')">Tümü (<span id="cntAll">0</span>)</button>
-              <button class="btn btn-ghost btn-sm" id="btnFilterReady" onclick="setExcelFilter('ready')"><i class="fas fa-check text-green-500 mr-1"></i> Eklenecekler (<span id="cntReady">0</span>)</button>
+              <button class="btn btn-ghost btn-sm" id="btnFilterReady" onclick="setExcelFilter('ready')"><i class="fas fa-check text-green-500 mr-1"></i> Temiz Kayıtlar (<span id="cntReady">0</span>)</button>
               <button class="btn btn-ghost btn-sm" id="btnFilterDup" onclick="setExcelFilter('duplicate')"><i class="fas fa-user-clock text-amber-500 mr-1"></i> Mükerrerler (<span id="cntDup">0</span>)</button>
               <button class="btn btn-ghost btn-sm" id="btnFilterInvalid" onclick="setExcelFilter('invalid')"><i class="fas fa-ban text-red-500 mr-1"></i> Bölge Dışı / Es Geçilen (<span id="cntInvalid">0</span>)</button>
             </div>
@@ -357,16 +357,21 @@ body.dark .theme-toggle .knob{transform:translateX(20px)}
                 <option value="100">100</option>
               </select>
               <button class="btn btn-sm" style="background: var(--surface); color: var(--sys-red); border: 1px solid var(--border);" onclick="clearExcelImport()"><i class="fas fa-trash-alt mr-1"></i> Temizle</button>
-              <button class="btn btn-primary btn-sm" id="btnSaveExcelBatch" style="background: linear-gradient(135deg, #10b981, #059669); box-shadow: 0 4px 12px rgba(16,185,129,0.3);" onclick="submitExcelBatch()"><i class="fas fa-cloud-upload-alt mr-1"></i> Temiz Kayıtları Kaydet (<span id="btnSaveReadyCount">0</span>)</button>
+              <button class="btn btn-primary btn-sm" id="btnSaveExcelBatch" style="background: linear-gradient(135deg, #10b981, #059669); box-shadow: 0 4px 12px rgba(16,185,129,0.3);" onclick="submitExcelBatch()"><i class="fas fa-cloud-upload-alt mr-1"></i> Seçilenleri Kaydet (<span id="btnSaveReadyCount">0</span>)</button>
             </div>
           </div>
 
+          <div style="display:flex; flex-wrap:wrap; align-items:center; gap:0.75rem; margin-bottom:1rem;">
+            <button class="btn btn-ghost btn-sm" onclick="selectFilteredExcelRows(true)">Filtredekileri Seç</button>
+            <button class="btn btn-ghost btn-sm" onclick="selectFilteredExcelRows(false)">Filtredekilerin Seçimini Kaldır</button>
+            <span style="font-size:0.8rem; color:var(--text3);">Seçimler tüm sayfalarda korunur. Seçilen mükerrerler de yeni kayıt olarak eklenir.</span>
+          </div>
           <!-- Sayfalama (Pagination) Destekli İnceleme Tablosu -->
           <div style="overflow-x: auto; border: 1px solid var(--border); border-radius: 0.875rem; background: var(--card-bg);">
             <table class="tbl" style="width: 100%; border-collapse: collapse;">
               <thead>
                 <tr>
-                  <th style="width: 50px; text-align: center;">#</th>
+                  <th style="width: 50px; text-align: center;">Seç / #</th>
                   <th style="text-align: left;">Müşteri Adı Soyadı (N)</th>
                   <th style="text-align: left;">Telefon (O)</th>
                   <th style="text-align: left;">Atanan Şube (P)</th>
@@ -1200,11 +1205,11 @@ function processParsedExcelData(rows) {
 
       if (existsInMonth) {
         status = 'duplicate';
-        reason = 'Bu Ay Zaten Sistemde Kayıtlı (Es Geçildi)';
+        reason = 'Bu Ay Zaten Sistemde Kayıtlı';
         dupCount++;
       } else if (seenBatchPhones[compNum]) {
         status = 'duplicate';
-        reason = 'Excel İçi Mükerrer Başvuru (Es Geçildi)';
+        reason = 'Excel İçi Mükerrer Başvuru';
         dupCount++;
       } else {
         seenBatchPhones[compNum] = true;
@@ -1223,6 +1228,7 @@ function processParsedExcelData(rows) {
       product: 'LİMİT ÖĞRENME',
       date: dateFormatted,
       status: status,
+      selected: status === 'ready',
       reason: reason
     });
   }
@@ -1230,8 +1236,35 @@ function processParsedExcelData(rows) {
   updateExcelSummaryCounters();
   document.getElementById('excelSummaryArea').style.display = 'block';
   excelCurrentPage = 1;
-  renderExcelTable();
+  setExcelFilter('all');
   showToast('✓ Excel incelendi: ' + readyCount + ' temiz kayıt, ' + dupCount + ' mükerrer, ' + invalidCount + ' bölge dışı/hatalı şehir tespit edildi.');
+}
+
+function canSaveExcelRow(row) {
+  return (row.status === 'ready' || row.status === 'duplicate') && !!row.branch &&
+    row.phone.length >= 7 && !isCompanyBlacklistPhone(row.phone);
+}
+
+function getFilteredExcelRows() {
+  return excelParsedRows.filter(function(row) {
+    return excelCurrentFilter === 'all' || row.status === excelCurrentFilter;
+  });
+}
+
+function getSelectedExcelRows() {
+  return excelParsedRows.filter(function(row) { return row.selected && canSaveExcelRow(row); });
+}
+
+function selectFilteredExcelRows(selected) {
+  getFilteredExcelRows().forEach(function(row) { row.selected = selected && canSaveExcelRow(row); });
+  updateExcelSummaryCounters();
+  renderExcelTable();
+}
+
+function toggleExcelRowSelection(id, selected) {
+  var row = excelParsedRows.find(function(row) { return row.id === id; });
+  if (row) row.selected = selected && canSaveExcelRow(row);
+  updateExcelSummaryCounters();
 }
 
 function updateExcelSummaryCounters() {
@@ -1251,7 +1284,7 @@ function updateExcelSummaryCounters() {
   var elInv = document.getElementById('cntInvalid');
   if (elInv) elInv.textContent = invalidCount;
   
-  document.getElementById('btnSaveReadyCount').textContent = readyCount;
+  document.getElementById('btnSaveReadyCount').textContent = getSelectedExcelRows().length;
 }
 
 function setExcelFilter(filterType) {
@@ -1275,12 +1308,7 @@ function renderExcelTable() {
   var tbody = document.getElementById('excelTableBody');
   if (!tbody) return;
 
-  var filtered = excelParsedRows.filter(function(row) {
-    if (excelCurrentFilter === 'ready') return row.status === 'ready';
-    if (excelCurrentFilter === 'duplicate') return row.status === 'duplicate';
-    if (excelCurrentFilter === 'invalid') return row.status === 'invalid';
-    return true;
-  });
+  var filtered = getFilteredExcelRows();
 
   var totalPages = Math.ceil(filtered.length / excelPageSize) || 1;
   if (excelCurrentPage > totalPages) excelCurrentPage = totalPages;
@@ -1304,7 +1332,7 @@ function renderExcelTable() {
     if (item.status === 'ready') {
       statusBadge = '<span style="background:rgba(16,185,129,0.12); color:var(--sys-green); padding:4px 8px; border-radius:6px; font-weight:800; font-size:0.75rem;"><i class="fas fa-check-circle mr-1"></i> Eklenecek</span>';
     } else if (item.status === 'duplicate') {
-      statusBadge = '<span style="background:rgba(245,158,11,0.15); color:var(--sys-orange); padding:4px 8px; border-radius:6px; font-weight:800; font-size:0.75rem;" title="' + item.reason + '"><i class="fas fa-user-clock mr-1"></i> Mükerrer (Es Geçildi)</span>';
+      statusBadge = '<span style="background:rgba(245,158,11,0.15); color:var(--sys-orange); padding:4px 8px; border-radius:6px; font-weight:800; font-size:0.75rem;" title="' + item.reason + '"><i class="fas fa-user-clock mr-1"></i> Mükerrer</span>';
     } else {
       statusBadge = '<span style="background:rgba(239,68,68,0.12); color:var(--sys-red); padding:4px 8px; border-radius:6px; font-weight:800; font-size:0.75rem;" title="' + item.reason + '"><i class="fas fa-ban mr-1"></i> ' + item.reason + '</span>';
     }
@@ -1319,7 +1347,7 @@ function renderExcelTable() {
     branchSelectHtml += '</select>';
 
     return '<tr class="tbl-row">'
-      + '<td style="text-align:center; font-weight:800; color:var(--text3); font-family:monospace;">' + globalIdx + '</td>'
+      + '<td style="text-align:center; font-weight:800; color:var(--text3); font-family:monospace;"><input type="checkbox" aria-label="Kaydedilecek satırı seç" ' + (item.selected && canSaveExcelRow(item) ? 'checked ' : '') + (!canSaveExcelRow(item) ? 'disabled ' : '') + 'onchange="toggleExcelRowSelection(' + item.id + ', this.checked)"> ' + globalIdx + '</td>'
       + '<td><input type="text" class="inp" style="height:36px; padding:0.2rem 0.6rem; font-size:0.88rem; width:180px;" value="' + item.name + '" onchange="updateExcelRowName(' + item.id + ', this.value)"></td>'
       + '<td style="font-family:monospace; font-weight:700; color:var(--text);">' + item.phone + '</td>'
       + '<td>' + branchSelectHtml + '</td>'
@@ -1343,14 +1371,17 @@ function updateExcelRowBranch(id, newBranch) {
       var existsInMonth = allRecordsData.some(function(rec) {
         return getCompareNum(rec.contact) === compNum && isRecordInActiveMonth(rec);
       });
-      if (!existsInMonth) {
-        row.status = 'ready';
-        row.reason = 'Kayıt Yapılabilir (Manuel Şube)';
-      }
+      var existsInExcel = excelParsedRows.some(function(other) {
+        return other.id !== row.id && other.branch && other.status !== 'invalid' && other.phone.slice(-10) === compNum;
+      });
+      row.status = existsInMonth || existsInExcel ? 'duplicate' : 'ready';
+      row.reason = row.status === 'duplicate' ? 'Mükerrer Başvuru (Manuel Şube)' : 'Kayıt Yapılabilir (Manuel Şube)';
+      row.selected = row.status === 'ready';
     }
-  } else if (!newBranch && row.status === 'ready') {
+  } else if (!newBranch) {
     row.status = 'invalid';
     row.reason = 'Bölge Dışı / Şube Yok';
+    row.selected = false;
   }
 
   updateExcelSummaryCounters();
@@ -1380,13 +1411,14 @@ function clearExcelImport() {
 }
 
 async function submitExcelBatch() {
-  var readyRows = excelParsedRows.filter(r => r.status === 'ready' && r.branch);
+  var btn = document.getElementById('btnSaveExcelBatch');
+  if (btn.disabled) return;
+  var readyRows = getSelectedExcelRows();
   if (readyRows.length === 0) {
-    showWarning('Kayıt Bulunamadı', 'Sisteme eklenebilecek temiz ve şubesi tanımlı bir müşteri satırı bulunamadı. Hizmet bölgesi dışındaki şehirler (Trabzon, Ankara vb.) ve mükerrerler otomatik olarak es geçilmiştir.');
+    showWarning('Kayıt Seçilmedi', 'Kaydetmek istediğiniz temiz veya mükerrer kayıtları işaretleyin. Şubesi eksik ve hatalı kayıtlar seçilemez.');
     return;
   }
 
-  var btn = document.getElementById('btnSaveExcelBatch');
   var origHtml = btn.innerHTML;
   btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Kaydediliyor (' + readyRows.length + ')...';
   btn.disabled = true;
@@ -1413,21 +1445,26 @@ async function submitExcelBatch() {
       body: JSON.stringify({ action: 'addCustomersBulk', data: payloadData })
     });
 
-    showToast('✓ ' + readyRows.length + ' adet müşteri kaydı başarıyla eklendi! Bölge dışı şehirler ve mükerrerler es geçildi.');
-    clearExcelImport();
+    var result = await res.json();
+    if (!res.ok || result.status !== 'success') {
+      showWarning('Kayıt Sonucu', (result.message || 'Kayıt işlemi tamamlanamadı.') + '\nBazı satırlar işlenmiş olabilir. Yeniden kaydetmeden önce kayıtları kontrol edin.');
+      return;
+    }
+    var savedIds = new Set(readyRows.map(function(row) { return row.id; }));
+    excelParsedRows = excelParsedRows.filter(function(row) { return !savedIds.has(row.id); });
+    showToast('✓ Seçilen ' + readyRows.length + ' kayıt eklendi (mükerrerler dahil).');
+    if (!excelParsedRows.length) clearExcelImport();
+    else renderExcelTable();
     setTimeout(function() {
       refreshData();
     }, 1200);
 
   } catch(e) {
-    showToast('✓ Kayıtlar sisteme iletildi, panel yenileniyor.');
-    clearExcelImport();
-    setTimeout(function() {
-      refreshData();
-    }, 1200);
+    showWarning('Kayıt Doğrulanamadı', 'Sunucudan kayıt sonucu alınamadı. Seçimler korundu. Yeniden kaydetmeden önce kayıtları kontrol edin.');
   } finally {
     btn.innerHTML = origHtml;
     btn.disabled = false;
+    updateExcelSummaryCounters();
   }
 }
 
