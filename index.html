@@ -597,7 +597,7 @@ body.dark .theme-toggle .knob{transform:translateX(20px)}
             <div class="sec-icon" style="background:rgba(14,165,233,0.1);color:var(--sys-blue)"><i class="fas fa-history text-xl"></i></div>
             <div>
                 <div style="font-size:1.1rem;font-weight:800;color:var(--text)">Ciro Hareketleri ve Zaman Çizelgesi</div>
-                <div style="font-size:.75rem;font-weight:600;color:var(--text3)">5 dakikada bir otomatik alınan veya manuel kaydedilen toplam ciro verileri.</div>
+                <div style="font-size:.75rem;font-weight:600;color:var(--text3)">Manuel veya Apps Script zamanlayıcısıyla kaydedilen aylık toplam ciro verileri.</div>
             </div>
         </div>
         <button class="btn btn-ghost btn-sm" onclick="triggerManualLog()" id="btnManualLog"><i class="fas fa-camera mr-2" style="color:var(--sys-blue)"></i> Şimdi Manuel Kayıt Al</button>
@@ -742,6 +742,7 @@ var salesItemsPerPage = 12;
 var allSalesFiltered = [];
 
 var allSnapLogs = []; 
+var snapLogsError = '';
 var branchNamesData = []; 
 
 window.globalContactsMap = JSON.parse(localStorage.getItem('crm_global_contacts') || '{}');
@@ -1613,6 +1614,7 @@ function applyDashboardData(data, isFromCache = false) {
   updateKPIsFromGlobal(data.global);
 
   allSnapLogs = data.snapLogs || [];
+  snapLogsError = data.snapLogsError || '';
   branchNamesData = data.branchNames || [];
 
   renderPerformance();
@@ -1670,6 +1672,106 @@ async function fetchData(isManualTrigger = false){
   } finally {
     isFetchingData = false;
     if (refreshIcon) refreshIcon.classList.remove('fa-spin');
+  }
+}
+
+function escapeLogHtml(value) {
+  return String(value == null ? '' : value).replace(/[&<>"']/g, function(char) {
+    return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[char];
+  });
+}
+
+function getCiroLogView() {
+  var startDate = document.getElementById('logStartDate').value;
+  var endDate = document.getElementById('logEndDate').value;
+  var startTime = document.getElementById('logStartTime').value || '00:00';
+  var endTime = document.getElementById('logEndTime').value || '23:59';
+  var start = startDate ? parseAnyDate(startDate + 'T' + startTime) : -Infinity;
+  var end = endDate ? parseAnyDate(endDate + 'T' + endTime) + 59999 : Infinity;
+  if (start > end) return { error: 'Başlangıç tarihi bitiş tarihinden sonra olamaz.', rows: [] };
+  var logs = allSnapLogs.map(function(log) {
+    return { t: log.t, time: parseAnyDate(log.t), g: Number(log.g) || 0, b: (log.b || []).map(function(v) { return Number(v) || 0; }) };
+  }).filter(function(log) { return log.time > 0; }).sort(function(a, b) { return a.time - b.time; });
+  var rows = logs.map(function(log, index) {
+    var previous = logs[index - 1];
+    var date = new Date(log.time);
+    var prevDate = previous ? new Date(previous.time) : null;
+    var sameMonth = prevDate && date.getFullYear() === prevDate.getFullYear() && date.getMonth() === prevDate.getMonth();
+    return {
+      t: log.t, time: log.time, g: log.g, b: log.b,
+      delta: sameMonth ? log.g - previous.g : 0,
+      branchDeltas: log.b.map(function(value, i) { return sameMonth ? value - (previous.b[i] || 0) : 0; }),
+      baseline: !sameMonth
+    };
+  }).filter(function(log) { return log.time >= start && log.time <= end; });
+  return { rows: rows, error: '' };
+}
+
+function renderCiroLogs() {
+  var container = document.getElementById('logContainer');
+  if (!container) return;
+  if (snapLogsError) {
+    container.innerHTML = '<div class="card" style="padding:2rem;color:var(--sys-red);">' + escapeLogHtml(snapLogsError) + '</div>';
+    return;
+  }
+  var view = getCiroLogView();
+  if (view.error || !view.rows.length) {
+    container.innerHTML = '<div class="card" style="padding:2rem;text-align:center;color:var(--text3);">' +
+      (view.error || (allSnapLogs.length ? 'Seçili tarih aralığında ciro kaydı bulunamadı.' : 'Henüz ciro kaydı yok. İlk kaydı almak için “Şimdi Manuel Kayıt Al” düğmesine basın.')) + '</div>';
+    return;
+  }
+  var money = function(value) { return new Intl.NumberFormat('tr-TR', { style: 'currency', currency: 'TRY', maximumFractionDigits: 2 }).format(value); };
+  var net = view.rows.reduce(function(total, log) { return total + log.delta; }, 0);
+  var latest = view.rows[view.rows.length - 1];
+  var html = '<div class="card" style="padding:1.5rem;margin-bottom:1rem;"><div style="color:var(--text3);">Seçili Aralıktaki Net Ciro Değişimi</div><div style="font-size:1.8rem;font-weight:800;color:var(--sys-blue);">' + money(net) + '</div><div style="font-size:.8rem;color:var(--text3);">' + view.rows.length + ' kayıt · Son aylık toplam: ' + money(latest.g) + '</div><div style="font-size:.75rem;color:var(--text3);margin-top:.5rem;">Değişimler önceki kayıtla karşılaştırılır. Her ayın ilk kaydı başlangıç kabul edilir.</div></div>';
+  html += '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:.75rem;margin-bottom:1rem;">';
+  branchNamesData.forEach(function(name, i) {
+    var change = view.rows.reduce(function(total, log) { return total + (log.branchDeltas[i] || 0); }, 0);
+    html += '<button class="card" style="padding:1rem;text-align:left;color:var(--text);cursor:pointer;" onclick="openCiroLogBranch(' + i + ')"><strong>' + escapeLogHtml(name) + '</strong><div style="margin-top:.5rem;">' + money(latest.b[i] || 0) + '</div><div style="font-size:.8rem;color:var(--text3);">Net değişim: ' + money(change) + '</div></button>';
+  });
+  html += '</div><div class="card" style="overflow-x:auto;"><table class="tbl" style="width:100%;"><thead><tr><th>Tarih / Saat</th><th>Aylık Toplam Ciro</th><th>Önceki Kayda Göre Değişim</th></tr></thead><tbody>';
+  html += view.rows.slice().reverse().map(function(log) {
+    return '<tr><td>' + escapeLogHtml(log.t) + '</td><td>' + money(log.g) + '</td><td>' + (log.baseline ? 'Başlangıç kaydı' : money(log.delta)) + '</td></tr>';
+  }).join('');
+  container.innerHTML = html + '</tbody></table></div>';
+}
+
+function openCiroLogBranch(index) {
+  if (!Number.isInteger(index) || index < 0 || index >= branchNamesData.length) return;
+  var view = getCiroLogView();
+  document.getElementById('modalLogTitle').textContent = branchNamesData[index];
+  var money = function(value) { return new Intl.NumberFormat('tr-TR', { style: 'currency', currency: 'TRY' }).format(value); };
+  document.getElementById('modalLogTimeline').innerHTML = view.rows.slice().reverse().map(function(log) {
+    return '<div style="padding:1rem;border-bottom:1px solid var(--border);"><strong>' + escapeLogHtml(log.t) + '</strong><div>Aylık toplam: ' + money(log.b[index] || 0) + '</div><div style="color:var(--text3);">' + (log.baseline ? 'Başlangıç kaydı' : 'Değişim: ' + money(log.branchDeltas[index] || 0)) + '</div></div>';
+  }).join('') || '<div>Seçili tarih aralığında kayıt bulunamadı.</div>';
+  document.getElementById('logBranchModal').classList.add('show');
+}
+
+async function triggerManualLog() {
+  var btn = document.getElementById('btnManualLog');
+  if (btn.disabled) return;
+  var original = btn.innerHTML;
+  btn.disabled = true;
+  btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> Kayıt alınıyor...';
+  try {
+    var response = await fetch(GAS_URL, {
+      method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, redirect: 'follow',
+      body: JSON.stringify({ action: 'manualLogSnapshot' })
+    });
+    var result = await response.json();
+    if (!response.ok || result.status !== 'success') throw new Error(result.message || 'Ciro kaydı alınamadı.');
+    showToast('✓ Ciro kaydı alındı.');
+    var period = document.getElementById('currentPeriod').value || '';
+    var dataResponse = await fetch(GAS_URL + '?action=getDashboardData&period=' + encodeURIComponent(period) + '&t=' + Date.now());
+    var data = await dataResponse.json();
+    if (!dataResponse.ok || !data.records) throw new Error('Kayıt alındı ancak liste yenilenemedi. Verileri Yenile düğmesini kullanın.');
+    saveDashboardDataToCache(data, period);
+    applyDashboardData(data, false);
+  } catch (error) {
+    showWarning('Ciro Logları', error.message || 'Sunucuya ulaşılamadı.');
+  } finally {
+    btn.innerHTML = original;
+    btn.disabled = false;
   }
 }
 
