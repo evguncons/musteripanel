@@ -712,6 +712,47 @@ body.dark .theme-toggle .knob{transform:translateX(20px)}
   </div>
 </div>
 
+<style>
+  #duplicatePrompt .dup-dialog{background:var(--card-bg);border:1px solid var(--border);border-radius:1.5rem;width:100%;max-width:760px;max-height:90vh;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 24px 80px rgba(0,0,0,.3);text-align:left;}
+  #duplicatePrompt .dup-header{padding:1.5rem;display:flex;gap:1rem;align-items:center;border-bottom:1px solid var(--border);}
+  #duplicatePrompt .dup-icon{width:48px;height:48px;border-radius:14px;background:rgba(245,158,11,.12);color:var(--sys-orange);display:grid;place-items:center;font-size:1.3rem;flex-shrink:0;}
+  #duplicatePrompt .dup-body{padding:1.5rem;overflow-y:auto;min-height:0;}
+  #duplicatePrompt .dup-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.75rem;margin:1.25rem 0;}
+  #duplicatePrompt .dup-stat{padding:1rem;border:1px solid var(--border);border-radius:12px;background:var(--surface2);}
+  #duplicatePrompt .dup-stat b{display:block;font-size:1.65rem;color:var(--text);font-family:monospace;}
+  #duplicatePrompt .dup-muted{font-size:.8rem;color:var(--text3);line-height:1.5;}
+  #duplicatePrompt .dup-event{display:grid;grid-template-columns:30px 1fr;gap:.75rem;padding:1rem 0;border-bottom:1px solid var(--border);}
+  #duplicatePrompt .dup-number{width:28px;height:28px;border-radius:50%;display:grid;place-items:center;background:rgba(14,165,233,.1);color:var(--sys-blue);font-size:.8rem;font-weight:800;}
+  #duplicatePrompt .dup-tags{display:flex;flex-wrap:wrap;gap:.5rem;margin:.45rem 0;}
+  #duplicatePrompt .dup-tag{padding:.2rem .55rem;border-radius:6px;background:var(--surface2);font-size:.75rem;color:var(--text2);}
+  #duplicatePrompt .dup-footer{padding:1rem 1.5rem;border-top:1px solid var(--border);background:var(--surface2);display:grid;grid-template-columns:1fr 1fr auto;gap:.75rem;}
+  #duplicatePrompt .dup-footer button{height:auto;min-height:48px;white-space:normal;}
+  @media(max-width:520px){#duplicatePrompt .dup-header,#duplicatePrompt .dup-body{padding:1rem;}#duplicatePrompt .dup-stat{padding:.65rem;}#duplicatePrompt .dup-footer{padding:1rem;grid-template-columns:1fr 1fr;}#duplicatePrompt .dup-footer button:last-child{grid-column:1/-1;}}
+</style>
+<div id="duplicatePrompt" class="modal-bg" style="z-index:10000;">
+  <div class="modal-content dup-dialog" role="dialog" aria-modal="true" aria-labelledby="duplicatePromptTitle" aria-describedby="duplicatePromptMessage" onkeydown="handleDuplicatePromptKey(event)">
+    <div class="dup-header">
+      <div class="dup-icon"><i class="fas fa-user-clock" aria-hidden="true"></i></div>
+      <div style="flex:1;min-width:0;"><div class="dup-muted">MÜŞTERİ GEÇMİŞİ</div><h3 id="duplicatePromptTitle" style="font-size:1.2rem;font-weight:800;color:var(--text);margin:.2rem 0;">Daha önce yönlendirilmiş</h3><div id="duplicatePromptContact" class="dup-muted"></div></div>
+    </div>
+    <div class="dup-body">
+      <p id="duplicatePromptMessage" style="white-space:pre-line;line-height:1.7;color:var(--text);margin:0;"></p>
+      <div class="dup-stats" aria-live="polite">
+        <div class="dup-stat"><b id="duplicateMonthCount">—</b><span class="dup-muted">Bu ay yönlendirme</span></div>
+        <div class="dup-stat"><b id="duplicateBranchCount">—</b><span class="dup-muted">Farklı şube</span></div>
+        <div class="dup-stat"><b id="duplicateCategoryCount">—</b><span class="dup-muted">Farklı kategori</span></div>
+      </div>
+      <div style="display:flex;justify-content:space-between;gap:.5rem;flex-wrap:wrap;"><strong style="color:var(--text);">Bu ayki yönlendirmeler</strong><span id="duplicateHistoryPeriod" class="dup-muted"></span></div>
+      <div id="duplicatePromptHistory" aria-live="polite"></div>
+      <p class="dup-muted" style="margin:1rem 0 0;">Devam Et ve Satış Ekle önceki müşteri bilgilerini satıra doldurur. Satış Ekle için yeni tutar gerekir. Tamam yalnızca bu pencereyi kapatır. Kayıt, Hepsini Kaydet ile yapılır.</p>
+    </div>
+    <div class="dup-footer">
+      <button class="btn btn-primary" onclick="resolveDuplicatePrompt('continue')"><i class="fas fa-arrow-right mr-1"></i> Devam Et</button>
+      <button class="btn btn-primary" style="background:var(--sys-green);" onclick="resolveDuplicatePrompt('sale')"><i class="fas fa-shopping-cart mr-1"></i> Satış Ekle</button>
+      <button id="duplicateCloseButton" class="btn btn-ghost" onclick="resolveDuplicatePrompt('cancel')">Tamam</button>
+    </div>
+  </div>
+</div>
 <div id="warningModal" class="modal-bg" style="z-index: 9999;">
   <div class="modal-content" style="background:var(--card-bg);border:2px solid var(--sys-red);border-radius:1.5rem;width:100%;max-width:480px;text-align:center;box-shadow:var(--shadow-md); padding:2rem;">
     <div style="width:64px;height:64px;background:rgba(239, 68, 68, 0.1);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 1.2rem;" id="warningIconBg">
@@ -771,7 +812,8 @@ function registerGlobalContact(r) {
     if (comp && comp.length >= 7) {
         var existing = window.globalContactsMap[comp];
         var isSale = isRecordSale(r);
-        if (!existing || isSale || (!existing.customerNo && r.customerNo)) {
+        if (!existing || parseAnyDate(r.timestamp || r.date) > parseAnyDate(existing.timestamp || existing.date) ||
+            (!existing.timestamp && !existing.date) || (!existing.customerNo && r.customerNo)) {
             window.globalContactsMap[comp] = {
                 name: r.name || (existing ? existing.name : ''),
                 contact: r.contact || (existing ? existing.contact : ''),
@@ -782,7 +824,8 @@ function registerGlobalContact(r) {
                 media: r.media || (existing ? existing.media : ''),
                 amount: r.amount || (existing ? existing.amount : 0),
                 result: r.result || (existing ? existing.result : ''),
-                order: r.order || (existing ? existing.order : '')
+                order: r.order || (existing ? existing.order : ''),
+                date: r.date || '', timestamp: r.timestamp || '', sheetName: r.sheetName || ''
             };
         }
     }
@@ -810,8 +853,10 @@ function isRecordInActiveMonth(r, targetPeriod) {
     if (r.sheetName && r.sheetName.toLocaleLowerCase('tr-TR').trim() === periodStr) return true;
     if (r.period && r.period.toLocaleLowerCase('tr-TR').trim() === periodStr) return true;
 
-    var dVal = r.date || r.timestamp;
-    if (dVal) {
+    var dates = [r.date, r.timestamp];
+    for (var i = 0; i < dates.length; i++) {
+      var dVal = dates[i];
+      if (!dVal) continue;
         var t = parseAnyDate(dVal);
         if (t > 0) {
             var d = new Date(t);
@@ -1187,10 +1232,7 @@ function processParsedExcelData(rows) {
 
     totalCount++;
 
-    var cleanPhone = rawPhone.replace(/\D/g, '');
-    if (cleanPhone.length === 12 && cleanPhone.startsWith('90')) cleanPhone = cleanPhone.substring(2);
-    else if (cleanPhone.length === 11 && cleanPhone.startsWith('0')) cleanPhone = cleanPhone.substring(1);
-    else if (cleanPhone.length > 10) cleanPhone = cleanPhone.slice(-10);
+    var cleanPhone = getCompareNum(rawPhone);
 
     var assignedBranch = mapLocationToBranch(rawLocation);
     var status = 'ready';
@@ -1628,6 +1670,8 @@ function applyDashboardData(data, isFromCache = false) {
   allSnapLogs = data.snapLogs || [];
   snapLogsError = data.snapLogsError || '';
   branchNamesData = data.branchNames || [];
+  document.querySelectorAll('#inputContainer .inp-contact').forEach(function(input) { checkDuplicatePhone(input); });
+  if (activeDuplicatePrompt) loadDuplicateMonthHistory(activeDuplicatePrompt);
 
   renderPerformance();
   updateSalesView();
@@ -2475,7 +2519,7 @@ function addInputRow(){
     +'<div><label class="inp-label">Tarih & Saat</label><input type="datetime-local" class="inp" value="'+getTodayDT()+'"></div>'
     +'<div><label class="inp-label" style="color:var(--sys-blue)">Şube <span style="color:var(--sys-red)">*</span></label><select class="inp inp-branch">'+bOpts+'</select></div>'
     +'<div><label class="inp-label" style="color:var(--sys-blue)">Müşteri Adı Soyadı <span style="color:var(--sys-red)">*</span></label><input type="text" class="inp inp-name" placeholder="Örn: Ahmet Yılmaz"></div>'
-    +'<div><label class="inp-label">İletişim Numarası</label><input type="text" class="inp inp-contact" placeholder="5XX..." oninput="if(this.value.replace(/\\D/g,\'\').length>=10) checkDuplicatePhone(this)"></div>'
+    +'<div><label class="inp-label">İletişim Numarası</label><input type="text" class="inp inp-contact" placeholder="5XX..." oninput="checkDuplicatePhone(this)"><div class="duplicate-warning" role="status" style="display:none;color:var(--sys-orange);font-size:.8rem;font-weight:700;margin-top:.4rem;"></div></div>'
     +'<div><label class="inp-label">Müşteri No (F Sütunu)</label><input type="text" class="inp inp-customerno" placeholder="Opsiyonel"></div>'
     +'<div><label class="inp-label" style="color:var(--sys-blue)">Geliş Medyası <span style="color:var(--sys-red)">*</span></label><select class="inp inp-media"><option value="" disabled selected>Seçiniz...</option><option value="Instagram">Instagram</option><option value="Whatsapp">Whatsapp</option><option value="Facebook">Facebook</option><option value="Çağrı">Çağrı</option><option value="Web Sitesi Form">Web Sitesi Form</option><option value="SMS LİNK">SMS LİNK</option></select></div>'
     +'</div>'
@@ -2488,20 +2532,168 @@ function addInputRow(){
   c.appendChild(d);
 }
 
-function checkDuplicatePhone(inp) {
-  var raw = inp.value;
-  var cmp = getCompareNum(raw);
-  if (cmp.length >= 7) {
-    var exists = allRecordsData.some(function(r) {
-      return getCompareNum(r.contact) === cmp && isRecordInActiveMonth(r);
-    });
-    if (exists) {
-      showToast('⚠️ Dikkat: Bu telefon numarası bu ay içinde daha önce yönlendirilmiştir!');
+var duplicatePromptQueue = [];
+var activeDuplicatePrompt = null;
+
+function handleDuplicatePromptKey(event) {
+  if (event.key === 'Escape') { event.preventDefault(); resolveDuplicatePrompt('cancel'); return; }
+  if (event.key !== 'Tab') return;
+  var buttons = document.querySelectorAll('#duplicatePrompt button');
+  var first = buttons[0], last = buttons[buttons.length - 1];
+  if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); }
+  else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
+}
+
+function duplicateRecordTime(record) {
+  return parseAnyDate(record.timestamp) || parseAnyDate(record.date);
+}
+
+function renderDuplicateMonthHistory(records, prompt) {
+  if (activeDuplicatePrompt !== prompt) return;
+  var now = new Date();
+  var history = records.filter(function(record) {
+    if (record.pending || getCompareNum(record.contact) !== prompt.phone) return false;
+    var time = duplicateRecordTime(record);
+    if (time) {
+      var date = new Date(time);
+      return date.getFullYear() === now.getFullYear() && date.getMonth() === now.getMonth();
     }
+    var period = now.toLocaleDateString('tr-TR', { month: 'long', year: 'numeric' }).toLocaleLowerCase('tr-TR');
+    return String(record.sheetName || record.period || '').toLocaleLowerCase('tr-TR').trim() === period;
+  }).sort(function(a, b) { return duplicateRecordTime(a) - duplicateRecordTime(b); });
+  document.getElementById('duplicateMonthCount').textContent = history.length;
+  document.getElementById('duplicateBranchCount').textContent = new Set(history.map(function(record) { return record.branch; }).filter(Boolean)).size;
+  document.getElementById('duplicateCategoryCount').textContent = new Set(history.map(function(record) { return record.category; }).filter(Boolean)).size;
+  function safe(value) { return String(value || 'Belirtilmemiş').replace(/[&<>"']/g, function(char) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[char]; }); }
+  document.getElementById('duplicatePromptHistory').innerHTML = history.map(function(record, index) {
+    var time = duplicateRecordTime(record);
+    var date = time ? new Date(time).toLocaleString('tr-TR') : 'Tarih belirtilmemiş';
+    return '<div class="dup-event"><div class="dup-number">' + (index + 1) + '</div><div><div style="display:flex;justify-content:space-between;gap:.5rem;flex-wrap:wrap;"><strong style="color:var(--text);">' + safe(record.branch) + '</strong><span class="dup-muted">' + safe(date) + '</span></div><div class="dup-tags"><span class="dup-tag">' + safe(record.category) + '</span><span class="dup-tag">' + safe(record.media) + '</span></div><div style="font-size:.9rem;color:var(--text);overflow-wrap:anywhere;">' + safe(record.product) + '</div></div></div>';
+  }).join('') || '<div class="dup-muted" style="padding:1.25rem 0;">Bu ay kaydedilmiş yönlendirme bulunmuyor. Bekleyen form satırları sayıya dahil edilmez.</div>';
+}
+
+async function loadDuplicateMonthHistory(prompt) {
+  var now = new Date();
+  var month = now.toLocaleDateString('tr-TR', { month: 'long', year: 'numeric' });
+  document.getElementById('duplicateHistoryPeriod').textContent = month + ' · Eskiden yeniye';
+  ['duplicateMonthCount', 'duplicateBranchCount', 'duplicateCategoryCount'].forEach(function(id) { document.getElementById(id).textContent = '—'; });
+  document.getElementById('duplicatePromptHistory').textContent = 'Yönlendirme geçmişi yükleniyor...';
+  var periodInput = document.getElementById('currentPeriod');
+  var selectedPeriod = periodInput ? periodInput.value : '';
+  if (!selectedPeriod || selectedPeriod.toLocaleLowerCase('tr-TR').trim() === month.toLocaleLowerCase('tr-TR') || selectedPeriod === 'all') {
+    renderDuplicateMonthHistory(allRecordsData, prompt);
+    return;
+  }
+  try {
+    var response = await fetch(GAS_URL + '?action=getDashboardData&period=' + encodeURIComponent(month.toLocaleUpperCase('tr-TR')) + '&t=' + Date.now());
+    var data = await response.json();
+    if (!response.ok || !Array.isArray(data.records)) throw new Error('Geçmiş alınamadı');
+    renderDuplicateMonthHistory(data.records, prompt);
+  } catch (error) {
+    if (activeDuplicatePrompt === prompt) document.getElementById('duplicatePromptHistory').textContent = 'Bu ayın yönlendirme geçmişi alınamadı. Sayaçlar doğrulanamadı; pencereyi yeniden açarak deneyebilirsiniz.';
   }
 }
 
+function findDuplicateRecord(phone, input) {
+  var cmp = getCompareNum(phone);
+  if (cmp.length < 7) return null;
+  var matches = allRecordsData.filter(function(record) { return getCompareNum(record.contact) === cmp; });
+  matches.sort(function(a, b) { return duplicateRecordTime(b) - duplicateRecordTime(a); });
+  if (matches.length) return matches[0];
+  var cached = window.globalContactsMap && window.globalContactsMap[cmp];
+  if (cached) return cached;
+  var other = Array.from(document.querySelectorAll('#inputContainer .inp-contact')).find(function(field) {
+    return field !== input && getCompareNum(field.value) === cmp;
+  });
+  if (!other) return null;
+  var row = other.closest('.entry-card');
+  return {
+    contact: other.value, name: row.querySelector('.inp-name').value,
+    branch: row.querySelector('.inp-branch').value, date: row.querySelector('input[type="datetime-local"]').value,
+    media: row.querySelector('.inp-media').value, category: row.querySelector('.inp-category').value,
+    product: row.querySelector('.inp-product').value, customerNo: row.querySelector('.inp-customerno').value,
+    pending: true
+  };
+}
+
+function showNextDuplicatePrompt() {
+  if (activeDuplicatePrompt || !duplicatePromptQueue.length) return;
+  activeDuplicatePrompt = duplicatePromptQueue.shift();
+  var record = activeDuplicatePrompt.record;
+  var time = parseAnyDate(record.timestamp || record.date);
+  var when = time ? new Date(time).toLocaleString('tr-TR') : (record.sheetName || 'Tarih bilgisi bulunamadı');
+  document.getElementById('duplicatePromptMessage').textContent =
+    'Bu numaraya ait ' + (record.pending ? 'giriş listesinde bekleyen' : 'önceki yönlendirme') + ' kaydı var.\n\n' +
+    '• Telefon: ' + activeDuplicatePrompt.input.value + '\n• Müşteri: ' + (record.name || 'Belirtilmemiş') +
+    '\n• Şube: ' + (record.branch || 'Belirtilmemiş') + '\n• Tarih: ' + when +
+    '\n• Ürün: ' + (record.product || 'Belirtilmemiş') + '\n• Müşteri No: ' + (record.customerNo || 'Belirtilmemiş') +
+    '\n• Kategori: ' + (record.category || 'Belirtilmemiş') + '\n• Geliş Medyası: ' + (record.media || 'Belirtilmemiş');
+  document.getElementById('duplicatePromptTitle').textContent = record.name || 'Daha önce yönlendirilmiş';
+  document.getElementById('duplicatePromptContact').textContent = activeDuplicatePrompt.input.value + ' · Önceki müşteri bilgileri';
+  document.getElementById('duplicatePrompt').classList.add('show');
+  loadDuplicateMonthHistory(activeDuplicatePrompt);
+  var closeButton = document.getElementById('duplicateCloseButton');
+  if (closeButton && closeButton.focus) closeButton.focus();
+}
+
+function resolveDuplicatePrompt(action) {
+  var prompt = activeDuplicatePrompt;
+  if (!prompt || !['continue', 'sale', 'cancel'].includes(action)) return;
+  activeDuplicatePrompt = null;
+  document.getElementById('duplicatePrompt').classList.remove('show');
+  var input = prompt.input;
+  var row = input.closest('.entry-card');
+  input._duplicatePending = false;
+  if (row && action === 'cancel') {
+    input._duplicateDismissed = prompt.phone;
+    input._duplicateAllowed = prompt.phone;
+    if (input.focus) input.focus();
+  } else if (row && getCompareNum(input.value) === prompt.phone) {
+    input._duplicateAllowed = prompt.phone;
+      var selectors = { name: '.inp-name', branch: '.inp-branch', customerNo: '.inp-customerno', media: '.inp-media', category: '.inp-category', product: '.inp-product' };
+      Object.keys(selectors).forEach(function(key) {
+        if (prompt.record[key]) row.querySelector(selectors[key]).value = prompt.record[key];
+      });
+      input.value = getCompareNum(prompt.record.contact || input.value);
+      row.querySelector('input[type="datetime-local"]').value = getTodayDT();
+      row._requiresSaleAmount = action === 'sale';
+      var amount = row.querySelector('.inp-amount');
+      amount.value = '';
+      amount.required = action === 'sale';
+      amount.min = action === 'sale' ? '0.01' : '0';
+      amount.placeholder = action === 'sale' ? 'Yeni satış tutarını giriniz' : 'Tutar (opsiyonel)';
+    if (action === 'sale') {
+      amount.focus();
+      showToast('Satış bilgileri hazır. Yeni tutarı girip Hepsini Kaydet düğmesine basın.');
+    } else showToast('Müşteri bilgileri dolduruldu. Hepsini Kaydet ile tekrar yönlendirebilirsiniz.');
+  }
+  showNextDuplicatePrompt();
+}
+
+function checkDuplicatePhone(inp, forcePrompt) {
+  if (!inp) return false;
+  var cmp = getCompareNum(inp.value);
+  var record = findDuplicateRecord(inp.value, inp);
+  var message = record ? 'Mükerrer kayıt: ' + (record.branch || 'Şube belirtilmemiş') + ' / ' + (record.date || record.timestamp || record.sheetName || 'Tarih belirtilmemiş') : '';
+  var row = inp.closest ? inp.closest('.entry-card') : null;
+  var warning = row ? row.querySelector('.duplicate-warning') : null;
+  if (warning) {
+    warning.textContent = message;
+    warning.style.display = message ? 'block' : 'none';
+  }
+  if (record && inp._duplicateAllowed !== cmp && (forcePrompt || inp._duplicateDismissed !== cmp) && !inp._duplicatePending) {
+    inp._duplicatePending = true;
+    duplicatePromptQueue.push({ input: inp, record: record, phone: cmp });
+    showNextDuplicatePrompt();
+  }
+  if (!record) inp._duplicateAllowed = '';
+  inp._duplicateMessage = message;
+  return !!message;
+}
+
 async function submitAllRows(){
+  var submitButton = document.getElementById('submitBtn');
+  if (submitButton && submitButton.disabled) return;
   var rows=document.querySelectorAll('#inputContainer > .entry-card');
   var data=[];
   var hasEmptyError=false;
@@ -2512,12 +2704,22 @@ async function submitAllRows(){
     var name=row.querySelector('.inp-name').value.trim();
     var media=row.querySelector('.inp-media').value;
     var rawContact=row.querySelector('.inp-contact').value;
+    var contactInput = row.querySelector('.inp-contact');
+    if (checkDuplicatePhone(contactInput, true) && contactInput._duplicateAllowed !== getCompareNum(rawContact)) return;
+    branch = row.querySelector('.inp-branch').value;
+    name = row.querySelector('.inp-name').value.trim();
+    media = row.querySelector('.inp-media').value;
     var customerNoInp=row.querySelector('.inp-customerno');
     var customerNoVal=customerNoInp ? customerNoInp.value.trim() : '';
     var dv=row.querySelector('input[type="datetime-local"]').value;
     var amountVal=row.querySelector('.inp-amount') ? row.querySelector('.inp-amount').value : '';
+    if (row._requiresSaleAmount && !(Number(amountVal) > 0)) {
+      showWarning('Satış Tutarı Eksik', 'Satış Ekle seçilen satır için sıfırdan büyük bir satış tutarı girin.');
+      row.querySelector('.inp-amount').focus();
+      return;
+    }
 
-    var contact = rawContact.replace(/^0+/, '');
+    var contact = getCompareNum(rawContact);
 
     if (contact && isCompanyBlacklistPhone(contact)) {
         showWarning('Şirket Numarası Engeli', 'Bu numara şirket hattımızdır, müşteri iletişim numarası olarak kaydedilemez.');
@@ -2555,15 +2757,19 @@ async function submitAllRows(){
       redirect: 'follow',
       body: JSON.stringify({ action: 'addCustomersBulk', data: data })
     });
+    var result = await res.json();
+    if (!res.ok || result.status !== 'success') {
+      showWarning('Kayıt Sonucu', (result.message || 'Kayıt işlemi tamamlanamadı.') + '\nBazı kayıtlar işlenmiş olabilir; tekrar göndermeden önce kontrol edin.');
+      return;
+    }
+    data.forEach(function(record) { allRecordsData.push(record); registerGlobalContact(record); });
+    saveGlobalContactsCache();
     showToast('Tüm kayıtlar başarıyla eklendi!');
     document.getElementById('inputContainer').innerHTML = '';
     addInputRow();
     setTimeout(refreshData, 1200);
   } catch(e) {
-    showToast('Kayıtlar sisteme kaydedildi.');
-    document.getElementById('inputContainer').innerHTML = '';
-    addInputRow();
-    setTimeout(refreshData, 1200);
+    showWarning('Kayıt Doğrulanamadı', 'Sunucudan kayıt sonucu alınamadı. Satırlar korundu; tekrar göndermeden önce kayıtları kontrol edin.');
   } finally {
     if (btn) { btn.innerHTML = orig; btn.disabled = false; }
   }
@@ -2625,8 +2831,13 @@ function parseSmartCustomer(rawText) {
       }
     });
     var title = lines.find(function(line) { return /^Talep\s*#?\d+\s*[—–-]/i.test(line); });
+    function isCustomerName(value) {
+      return /^[\p{L}\p{M}][\p{L}\p{M}\s.'’\-]*$/u.test(value) &&
+        !/^(Talep|Yeni|Müşteri|Telefon|Ad Soyad|Mağaza|Şube|Şehir|Tarih|Sepet)$/i.test(value);
+    }
     var name = fields['ad soyad'] || (title ? title.replace(/^Talep\s*#?\d+\s*[—–-]\s*/i, '') : '');
-    if (!name && lines.length && !/^Talep\b|^Yeni$|^Müşteri$|^\|/.test(lines[0])) name = lines[0];
+    if (!isCustomerName(name)) name = '';
+    if (!name && lines.length && isCustomerName(lines[0])) name = lines[0];
     var phoneText = fields.telefon || text;
     var phoneMatch = phoneText.match(/(?:\+?90\s*|0\s*)?5\d{2}[\s.\-_/]?\d{3}[\s.\-_/]?\d{2}[\s.\-_/]?\d{2}\b/);
     var phone = phoneMatch ? phoneMatch[0].replace(/\D/g, '').replace(/^(?:90|0)(?=5\d{9}$)/, '') : '';
@@ -2684,6 +2895,7 @@ function applySmartParsing() {
     targetRow.querySelector('.inp-media').value = parsed.media;
     targetRow.querySelector('.inp-category').value = parsed.category;
     targetRow.querySelector('.inp-product').value = parsed.product;
+    checkDuplicatePhone(targetRow.querySelector('.inp-contact'));
 
     document.getElementById('smartParserInput').value = '';
     
