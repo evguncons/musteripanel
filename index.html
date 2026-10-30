@@ -2801,9 +2801,14 @@ function parseSmartCustomer(rawText) {
     var text = String(rawText || '').normalize('NFKC').replace(/\r\n?/g, '\n');
     function plain(value) {
       return value.replace(/\[([^\]]+)\]\([^)]*\)/g, '$1')
-        .replace(/[*_`]/g, '').replace(/^#+\s*/, '').trim();
+        .replace(/https?:\/\/\S+/gi, '')
+        .replace(/&#x20;|&nbsp;|&#32;/gi, ' ')
+        .replace(/[*_`\\]/g, '').replace(/^#+\s*/, '').trim();
     }
-    var lines = text.split('\n').map(plain).filter(Boolean);
+    var lines = text.split('\n').map(plain).filter(function(line) {
+      return line && !/^(?:image|svg|\d{1,2}:\d{2}|[\s()]+)$/i.test(line) &&
+        !/^Bu konuşmayı ata/i.test(line) && !/^Hedef (?:Alışveriş|Alisveris).*gönderdi/i.test(line);
+    });
     var fields = {};
     var products = [];
     var productColumn = -1;
@@ -2823,7 +2828,7 @@ function parseSmartCustomer(rawText) {
         }
         fields[normalizeLocationString(cells[0])] = cells[1];
       } else {
-        var pair = line.match(/^(Ad Soyad|Telefon|Mağaza|Şube|Şehir|Tarih|Geliş Medyası|Kaynak|Ürün)\s*:\s*(.+)$/i);
+        var pair = line.match(/^(Ad Soyad|İsim Soyisim|Telefon|Mağaza|Şube|Şehir|Tarih|Geliş Medyası|Kaynak|Ürün|Ürün Adı|Model)\s*:\s*(.+)$/i);
         if (pair) fields[normalizeLocationString(pair[1])] = pair[2];
         else if (/^(Ad Soyad|Telefon|Mağaza|Şube|Şehir|Tarih|Geliş Medyası|Kaynak)$/i.test(line) && lines[index + 1]) {
           fields[normalizeLocationString(line)] = lines[index + 1];
@@ -2835,17 +2840,38 @@ function parseSmartCustomer(rawText) {
       return /^[\p{L}\p{M}][\p{L}\p{M}\s.'’\-]*$/u.test(value) &&
         !/^(Talep|Yeni|Müşteri|Telefon|Ad Soyad|Mağaza|Şube|Şehir|Tarih|Sepet)$/i.test(value);
     }
-    var name = fields['ad soyad'] || (title ? title.replace(/^Talep\s*#?\d+\s*[—–-]\s*/i, '') : '');
+    var name = fields['ad soyad'] || fields['isim soyisim'] || (title ? title.replace(/^Talep\s*#?\d+\s*[—–-]\s*/i, '') : '');
     if (!isCustomerName(name)) name = '';
+    var phonePattern = /(?:\+?90\s*|0\s*)?5\d{2}[\s().\-_/]*\d{3}[\s().\-_/]*\d{2}[\s().\-_/]*\d{2}\b/g;
+    // Önce açık telefon alanını, yoksa konuşmadaki son paylaşılan numarayı kullan.
+    var phoneMatches = (fields.telefon || lines.join('\n')).match(phonePattern);
+    var phone = phoneMatches ? phoneMatches[phoneMatches.length - 1].replace(/\D/g, '').slice(-10) : '';
+    if (!name && phone) {
+      var nameLine = lines.slice().reverse().find(function(line) {
+        var numbers = line.match(phonePattern);
+        return numbers && numbers.some(function(number) { return number.replace(/\D/g, '').slice(-10) === phone; }) &&
+          isCustomerName(line.replace(phonePattern, '').replace(/^[\s:,-]+|[\s:,-]+$/g, ''));
+      });
+      if (nameLine) name = nameLine.replace(phonePattern, '').replace(/^[\s:,-]+|[\s:,-]+$/g, '');
+    }
     if (!name && lines.length && isCustomerName(lines[0])) name = lines[0];
-    var phoneText = fields.telefon || text;
-    var phoneMatch = phoneText.match(/(?:\+?90\s*|0\s*)?5\d{2}[\s.\-_/]?\d{3}[\s.\-_/]?\d{2}[\s.\-_/]?\d{2}\b/);
-    var phone = phoneMatch ? phoneMatch[0].replace(/\D/g, '').replace(/^(?:90|0)(?=5\d{9}$)/, '') : '';
-    var location = fields.magaza || fields.sube || fields.sehir || text;
+    // URL içindeki şehir adları ve temsilcinin soru metinleri şube seçimini etkilemesin.
+    var locationLines = lines.filter(function(line) {
+      return !/[?？]|mağazalarımız|mağazamız|hangi il|iletirseniz|yönlendirelim/i.test(line) && line.split(/\s+/).length <= 8 && !line.includes('|');
+    });
+    var location = fields.magaza || fields.sube || fields.sehir || locationLines.join('\n');
     var directBranch = BRANCHES.find(function(branch) {
       return normalizeLocationString(branch.replace(/ Şubesi$/, '')) === normalizeLocationString(location.replace(/\s*\(\d+\)\s*$/, '').replace(/ Şubesi$/, ''));
     });
-    var product = products.length ? products.join(' / ') : (fields.urun || '');
+    var product = products.length ? products.join(' / ') : (fields.urun || fields['urun adi'] || fields.model || '');
+    if (!product) {
+      var productTerms = /\b(?:telefon|iphone|galaxy|televizyon|laptop|tablet|koltuk|kanepe|baza|yatak|buzdolabi|supurge|airfryer|hali|bisiklet|scooter|nevresim|tencere|camasir makinesi|bulasik makinesi|yemek odasi|yatak odasi|tv unitesi)\b/;
+      var productLine = lines.find(function(line) {
+        return !/iletirseniz|irtibat|isim soyisim|telefon.*(?:ilet|numara)|mağazalarımız|mağazamız/i.test(line) &&
+          !line.includes('|') && productTerms.test(normalizeLocationString(line));
+      });
+      if (productLine) product = productLine.replace(phonePattern, '').trim();
+    }
     var source = fields['gelis medyasi'] || fields.kaynak || '';
     var sourceText = normalizeLocationString(source);
     var media = '';
@@ -2857,14 +2883,16 @@ function parseSmartCustomer(rawText) {
       else if (/cagri|telefon/.test(sourceText)) media = 'Çağrı';
       else if (/web|site|form/.test(sourceText)) media = 'Web Sitesi Form';
     } else if (title || (fields['ad soyad'] && inCart)) media = 'Web Sitesi Form';
+    else if (/instagram_direct|IG_MESSAGE|instagram\.com/i.test(text)) media = 'Instagram';
+    else if (/whatsapp|wa\.me/i.test(text)) media = 'Whatsapp';
     else if (/instagram/i.test(text)) media = 'Instagram';
     else if (/facebook/i.test(text)) media = 'Facebook';
     else if (/whatsapp/i.test(text)) media = 'Whatsapp';
-    var isLimit = !product && /limit\s+öğren/i.test(text);
+    var isLimit = !product && /limit\s+(?:ogren|sorgula)|limitim|limit sorgusu/i.test(normalizeLocationString(lines.join(' ')));
     var date = (fields.tarih || '').match(/^(\d{2})\.(\d{2})\.(\d{4})\s+(\d{2}):(\d{2})$/);
     return {
       name: name, contact: phone, branch: directBranch || mapLocationToBranch(location) || '',
-      media: media, product: product || (isLimit ? 'LİMİT ÖĞRENME' : ''),
+      media: media, product: product || (isLimit ? 'LİMİT ÖĞRENME' : 'ÜRÜN BİLGİSİ'),
       category: product ? inferProductCategory(product) : (isLimit ? 'LİMİT ÖĞREN' : 'GENEL ÜRÜN BİLGİSİ'),
       date: date ? date[3] + '-' + date[2] + '-' + date[1] + 'T' + date[4] + ':' + date[5] : ''
     };
