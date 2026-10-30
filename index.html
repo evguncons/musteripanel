@@ -2828,7 +2828,7 @@ function parseSmartCustomer(rawText) {
         }
         fields[normalizeLocationString(cells[0])] = cells[1];
       } else {
-        var pair = line.match(/^(Ad Soyad|İsim Soyisim|Telefon|Mağaza|Şube|Şehir|Tarih|Geliş Medyası|Kaynak|Ürün|Ürün Adı|Model)\s*:\s*(.+)$/i);
+        var pair = line.match(/^(Ad Soyad|İsim Soyisim|Telefon|Mağaza|Şube|Şehir|Tarih|Geliş Medyası|Medya|Platform|Kaynak|Ürün|Ürün Adı|Model)\s*:\s*(.+)$/i);
         if (pair) fields[normalizeLocationString(pair[1])] = pair[2];
         else if (/^(Ad Soyad|Telefon|Mağaza|Şube|Şehir|Tarih|Geliş Medyası|Kaynak)$/i.test(line) && lines[index + 1]) {
           fields[normalizeLocationString(line)] = lines[index + 1];
@@ -2872,27 +2872,32 @@ function parseSmartCustomer(rawText) {
       });
       if (productLine) product = productLine.replace(phonePattern, '').trim();
     }
-    var source = fields['gelis medyasi'] || fields.kaynak || '';
+    var source = fields['gelis medyasi'] || fields.medya || fields.platform || fields.kaynak || '';
     var sourceText = normalizeLocationString(source);
     var media = '';
     if (sourceText) {
-      if (/instagram/.test(sourceText)) media = 'Instagram';
-      else if (/facebook/.test(sourceText)) media = 'Facebook';
-      else if (/whats\s*app/.test(sourceText)) media = 'Whatsapp';
+      if (/instagram|\big\b|insta/.test(sourceText)) media = 'Instagram';
+      else if (/facebook|messenger|\bfb\b/.test(sourceText)) media = 'Facebook';
+      else if (/whats\s*app|\bwp\b|\bwa\b/.test(sourceText)) media = 'Whatsapp';
       else if (/sms/.test(sourceText)) media = 'SMS LİNK';
       else if (/cagri|telefon/.test(sourceText)) media = 'Çağrı';
       else if (/web|site|form/.test(sourceText)) media = 'Web Sitesi Form';
-    } else if (title || (fields['ad soyad'] && inCart)) media = 'Web Sitesi Form';
-    else if (/instagram_direct|IG_MESSAGE|instagram\.com/i.test(text)) media = 'Instagram';
-    else if (/whatsapp|wa\.me/i.test(text)) media = 'Whatsapp';
-    else if (/instagram/i.test(text)) media = 'Instagram';
-    else if (/facebook/i.test(text)) media = 'Facebook';
-    else if (/whatsapp/i.test(text)) media = 'Whatsapp';
+    }
+    if (!media) {
+      if (title || (fields['ad soyad'] && inCart)) media = 'Web Sitesi Form';
+      else if (/instagram_direct|IG_MESSAGE|instagram|cdninstagram|ig\.me/i.test(text)) media = 'Instagram';
+      else if (/whats\s*app|wa\.me|api\.whatsapp/i.test(text)) media = 'Whatsapp';
+      else if (/facebook|messenger|FB_MESSAGE|m\.me\//i.test(text)) media = 'Facebook';
+      else if (/\bsms\b/i.test(text)) media = 'SMS LİNK';
+    }
+    // Kaynak bilgisi olmayan kopyalarda alan boş kalmasın; varsayımı kullanıcıya bildir.
+    var mediaAssumed = !media;
+    if (mediaAssumed) media = 'Instagram';
     var isLimit = !product && /limit\s+(?:ogren|sorgula)|limitim|limit sorgusu/i.test(normalizeLocationString(lines.join(' ')));
     var date = (fields.tarih || '').match(/^(\d{2})\.(\d{2})\.(\d{4})\s+(\d{2}):(\d{2})$/);
     return {
       name: name, contact: phone, branch: directBranch || mapLocationToBranch(location) || '',
-      media: media, product: product || (isLimit ? 'LİMİT ÖĞRENME' : 'ÜRÜN BİLGİSİ'),
+      media: media, mediaAssumed: mediaAssumed, product: product || (isLimit ? 'LİMİT ÖĞRENME' : 'ÜRÜN BİLGİSİ'),
       category: product ? inferProductCategory(product) : (isLimit ? 'LİMİT ÖĞREN' : 'GENEL ÜRÜN BİLGİSİ'),
       date: date ? date[3] + '-' + date[2] + '-' + date[1] + 'T' + date[4] + ':' + date[5] : ''
     };
@@ -2926,6 +2931,10 @@ function applySmartParsing() {
     checkDuplicatePhone(targetRow.querySelector('.inp-contact'));
 
     document.getElementById('smartParserInput').value = '';
+    if (parsed.mediaAssumed) {
+      showToast('Kaynak belirtilmediği için Instagram seçildi. Geliş medyasını kontrol edin.');
+      return;
+    }
     
     if (branch) {
       showToast('✓ Metin satıra dönüştürüldü (' + branch.replace(' Şubesi', '') + ').');
