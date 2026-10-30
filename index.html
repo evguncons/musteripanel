@@ -418,7 +418,7 @@ body.dark .theme-toggle .knob{transform:translateX(20px)}
                 </div>
             </div>
             <div style="display:flex; gap:0.75rem;">
-                <textarea id="smartParserInput" class="inp" style="height:50px; resize:none; padding-top:0.8rem; font-family:monospace; font-size:0.85rem;" placeholder="Kopyalanan metni buraya yapıştırın..." onpaste="setTimeout(applySmartParsing, 50);" oninput="if(this.value.trim().length > 10) { clearTimeout(window.parseTimer); window.parseTimer = setTimeout(applySmartParsing, 250); }"></textarea>
+                <textarea id="smartParserInput" class="inp" style="height:50px; resize:none; padding-top:0.8rem; font-family:monospace; font-size:0.85rem;" placeholder="Kopyalanan metni buraya yapıştırın..." onpaste="handleSmartParserPaste(event)" oninput="if(this.value.trim().length > 10) { clearTimeout(window.parseTimer); window.parseTimer = setTimeout(applySmartParsing, 250); }"></textarea>
                 <button onclick="applySmartParsing()" class="btn btn-primary" style="height:50px; flex-shrink:0; background:linear-gradient(135deg,var(--sys-purple),#7e22ce); box-shadow:0 4px 12px rgba(139, 92, 246, 0.25);"><i class="fas fa-bolt"></i> Çözümle</button>
             </div>
         </div>
@@ -2797,7 +2797,7 @@ function inferProductCategory(product) {
     return match ? match[0] : 'GENEL ÜRÜN BİLGİSİ';
 }
 
-function parseSmartCustomer(rawText) {
+function parseSmartCustomer(rawText, clipboardLinks) {
     var text = String(rawText || '').normalize('NFKC').replace(/\r\n?/g, '\n');
     function plain(value) {
       return value.replace(/\[([^\]]+)\]\([^)]*\)/g, '$1')
@@ -2877,7 +2877,7 @@ function parseSmartCustomer(rawText) {
     var media = '';
     // Meta gelen kutusunda asıl kanal thread_type ile belirtilir.
     // Reklam, profil ve yönlendirme linkleri başka platformlar içerebilir.
-    var channelText = text.replace(/%3[dD]/g, '=').replace(/%5[fF]/g, '_');
+    var channelText = (text + '\n' + (clipboardLinks || '')).replace(/%3[dD]/g, '=').replace(/%5[fF]/g, '_');
     var threadType = channelText.match(/\bthread_type\s*=\s*(FB_MESSAGE|IG_MESSAGE)\b/i);
     if (threadType) media = threadType[1].toUpperCase() === 'FB_MESSAGE' ? 'Facebook' : 'Instagram';
     if (!media && sourceText) {
@@ -2890,9 +2890,11 @@ function parseSmartCustomer(rawText) {
     }
     if (!media) {
       if (title || (fields['ad soyad'] && inCart)) media = 'Web Sitesi Form';
-      else if (/instagram_direct|IG_MESSAGE|instagram|cdninstagram|ig\.me/i.test(text)) media = 'Instagram';
-      else if (/whats\s*app|wa\.me|api\.whatsapp/i.test(text)) media = 'Whatsapp';
-      else if (/facebook|messenger|FB_MESSAGE|m\.me\//i.test(text)) media = 'Facebook';
+      else if (/instagram_direct|IG_MESSAGE/i.test(channelText)) media = 'Instagram';
+      else if (/whats\s*app|wa\.me|api\.whatsapp/i.test(channelText)) media = 'Whatsapp';
+      else if (/facebook|messenger|FB_MESSAGE|m\.me\/|fbcdn\.net/i.test(channelText) && !/instagram|cdninstagram|ig\.me/i.test(channelText)) media = 'Facebook';
+      else if (/instagram|cdninstagram|ig\.me/i.test(channelText)) media = 'Instagram';
+      else if (/bir reklama yanıt verdi|bu sohbet.*reklamına verilmiş/i.test(lines.join(' '))) media = 'Facebook';
       else if (/\bsms\b/i.test(text)) media = 'SMS LİNK';
     }
     // Kaynak bilgisi olmayan kopyalarda alan boş kalmasın; varsayımı kullanıcıya bildir.
@@ -2908,11 +2910,29 @@ function parseSmartCustomer(rawText) {
     };
 }
 
+function handleSmartParserPaste(event) {
+    var input = event.target;
+    var clipboard = event.clipboardData;
+    input._smartClipboardLinks = '';
+    input._smartClipboardText = clipboard ? clipboard.getData('text/plain') : '';
+    var html = clipboard ? clipboard.getData('text/html') : '';
+    if (html) {
+      var fragment = new DOMParser().parseFromString(html, 'text/html');
+      input._smartClipboardLinks = Array.from(fragment.querySelectorAll('a[href], img[src]')).map(function(element) {
+        return element.getAttribute('href') || element.getAttribute('src') || '';
+      }).join('\n');
+    }
+    clearTimeout(window.parseTimer);
+    window.parseTimer = setTimeout(applySmartParsing, 50);
+}
+
 function applySmartParsing() {
-    var rawText = (document.getElementById('smartParserInput').value || "").normalize("NFKC");
+    var parserInput = document.getElementById('smartParserInput');
+    var rawText = (parserInput.value || "").normalize("NFKC");
     if(!rawText.trim()) return;
 
-    var parsed = parseSmartCustomer(rawText);
+    var clipboardLinks = parserInput._smartClipboardText && parserInput._smartClipboardText.normalize('NFKC').trim() === rawText.trim() ? parserInput._smartClipboardLinks : '';
+    var parsed = parseSmartCustomer(rawText, clipboardLinks);
     var branch = parsed.branch;
 
     addInputRow();
@@ -2936,6 +2956,8 @@ function applySmartParsing() {
     checkDuplicatePhone(targetRow.querySelector('.inp-contact'));
 
     document.getElementById('smartParserInput').value = '';
+    parserInput._smartClipboardLinks = '';
+    parserInput._smartClipboardText = '';
     if (parsed.mediaAssumed) {
       showToast('Kaynak belirtilmediği için Instagram seçildi. Geliş medyasını kontrol edin.');
       return;
