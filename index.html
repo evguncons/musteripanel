@@ -2875,7 +2875,12 @@ function parseSmartCustomer(rawText) {
     var source = fields['gelis medyasi'] || fields.medya || fields.platform || fields.kaynak || '';
     var sourceText = normalizeLocationString(source);
     var media = '';
-    if (sourceText) {
+    // Meta gelen kutusunda asıl kanal thread_type ile belirtilir.
+    // Reklam, profil ve yönlendirme linkleri başka platformlar içerebilir.
+    var channelText = text.replace(/%3[dD]/g, '=').replace(/%5[fF]/g, '_');
+    var threadType = channelText.match(/\bthread_type\s*=\s*(FB_MESSAGE|IG_MESSAGE)\b/i);
+    if (threadType) media = threadType[1].toUpperCase() === 'FB_MESSAGE' ? 'Facebook' : 'Instagram';
+    if (!media && sourceText) {
       if (/instagram|\big\b|insta/.test(sourceText)) media = 'Instagram';
       else if (/facebook|messenger|\bfb\b/.test(sourceText)) media = 'Facebook';
       else if (/whats\s*app|\bwp\b|\bwa\b/.test(sourceText)) media = 'Whatsapp';
