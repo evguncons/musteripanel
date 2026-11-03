@@ -737,6 +737,12 @@ body.dark .theme-toggle .knob{transform:translateX(20px)}
     </div>
     <div class="dup-body">
       <p id="duplicatePromptMessage" style="white-space:pre-line;line-height:1.7;color:var(--text);margin:0;"></p>
+      <div id="duplicateNegativeAlert" role="alert" style="display:none;margin-top:1rem;padding:1rem;border:1px solid var(--sys-red);border-radius:12px;background:rgba(239,68,68,.08);">
+        <strong style="color:var(--sys-red);">Bu müşterinin önceki yönlendirmesi olumsuz sonuçlandı.</strong>
+        <p id="duplicateNegativeDetails" style="font-size:.85rem;white-space:pre-line;color:var(--text);margin:.6rem 0;"></p>
+        <label style="display:flex;gap:.65rem;align-items:flex-start;color:var(--text);font-size:.9rem;cursor:pointer;"><input id="duplicateNegativeConsent" type="checkbox" style="margin-top:.2rem;"> Olumsuz sonucu gördüm; müşterinin tekrar aranabileceğini bilerek devam etmek istiyorum.</label>
+        <div id="duplicateNegativeError" style="color:var(--sys-red);font-size:.8rem;margin-top:.5rem;" aria-live="polite"></div>
+      </div>
       <div class="dup-stats" aria-live="polite">
         <div class="dup-stat"><b id="duplicateMonthCount">—</b><span class="dup-muted">Bu ay yönlendirme</span></div>
         <div class="dup-stat"><b id="duplicateBranchCount">—</b><span class="dup-muted">Farklı şube</span></div>
@@ -2580,6 +2586,22 @@ function duplicateRecordTime(record) {
   return parseAnyDate(record.timestamp) || parseAnyDate(record.date);
 }
 
+function getNegativeDuplicateRecord(phone) {
+  var cmp = getCompareNum(phone);
+  var records = allRecordsData.filter(function(record) { return getCompareNum(record.contact) === cmp; });
+  var cached = window.globalContactsMap && window.globalContactsMap[cmp];
+  if (cached) records = records.concat([cached]);
+  return records.filter(function(record) {
+    // result, çalışma sayfasındaki J sütunudur; arama durumu ile karıştırılmaz.
+    var result = String(record.result || '').toLocaleLowerCase('tr-TR');
+    return /(^|[^\p{L}])olumsuz([^\p{L}]|$)/u.test(result) && !/olumsuz\s+değil/i.test(result);
+  }).sort(function(a, b) { return duplicateRecordTime(b) - duplicateRecordTime(a); })[0] || null;
+}
+
+function negativeDuplicateKey(record) {
+  return record ? JSON.stringify([record.branch, record.timestamp || record.date, record.result]) : '';
+}
+
 function renderDuplicateMonthHistory(records, prompt) {
   if (activeDuplicatePrompt !== prompt) return;
   var now = new Date();
@@ -2652,6 +2674,13 @@ function showNextDuplicatePrompt() {
   if (activeDuplicatePrompt || !duplicatePromptQueue.length) return;
   activeDuplicatePrompt = duplicatePromptQueue.shift();
   var record = activeDuplicatePrompt.record;
+  var negative = getNegativeDuplicateRecord(activeDuplicatePrompt.phone);
+  activeDuplicatePrompt.negative = negative;
+  document.getElementById('duplicateNegativeAlert').style.display = negative ? 'block' : 'none';
+  document.getElementById('duplicateNegativeConsent').checked = false;
+  document.getElementById('duplicateNegativeError').textContent = '';
+  document.getElementById('duplicateNegativeDetails').textContent = negative ?
+    (negative.branch || 'Şube belirtilmemiş') + ' · ' + (negative.date || negative.timestamp || 'Tarih belirtilmemiş') + '\nJ sütunu sonucu: ' + negative.result + '\nYeniden yönlendirmek istiyor musunuz? Devam Et veya Satış Ekle için aşağıdaki onayı işaretleyin.' : '';
   var time = parseAnyDate(record.timestamp || record.date);
   var when = time ? new Date(time).toLocaleString('tr-TR') : (record.sheetName || 'Tarih bilgisi bulunamadı');
   document.getElementById('duplicatePromptMessage').textContent =
@@ -2671,6 +2700,12 @@ function showNextDuplicatePrompt() {
 function resolveDuplicatePrompt(action) {
   var prompt = activeDuplicatePrompt;
   if (!prompt || !['continue', 'sale', 'cancel'].includes(action)) return;
+  var negative = getNegativeDuplicateRecord(prompt.phone);
+  if (action !== 'cancel' && negative && !document.getElementById('duplicateNegativeConsent').checked) {
+    document.getElementById('duplicateNegativeError').textContent = 'Devam etmek için olumsuz yönlendirme onayını işaretleyin. Tamam ile kayıt yapmadan pencereyi kapatabilirsiniz.';
+    document.getElementById('duplicateNegativeConsent').focus();
+    return;
+  }
   activeDuplicatePrompt = null;
   document.getElementById('duplicatePrompt').classList.remove('show');
   var input = prompt.input;
@@ -2678,10 +2713,11 @@ function resolveDuplicatePrompt(action) {
   input._duplicatePending = false;
   if (row && action === 'cancel') {
     input._duplicateDismissed = prompt.phone;
-    input._duplicateAllowed = prompt.phone;
+    input._duplicateAllowed = negative ? '' : prompt.phone;
     if (input.focus) input.focus();
   } else if (row && getCompareNum(input.value) === prompt.phone) {
     input._duplicateAllowed = prompt.phone;
+    input._negativeApproved = negativeDuplicateKey(negative);
       var selectors = { name: '.inp-name', branch: '.inp-branch', customerNo: '.inp-customerno', media: '.inp-media', category: '.inp-category', product: '.inp-product' };
       Object.keys(selectors).forEach(function(key) {
         if (prompt.record[key]) row.querySelector(selectors[key]).value = prompt.record[key];
@@ -2706,6 +2742,8 @@ function checkDuplicatePhone(inp, forcePrompt) {
   if (!inp) return false;
   var cmp = getCompareNum(inp.value);
   var record = findDuplicateRecord(inp.value, inp);
+  var negative = getNegativeDuplicateRecord(inp.value);
+  if (negative && inp._negativeApproved !== negativeDuplicateKey(negative)) inp._duplicateAllowed = '';
   var message = record ? 'Mükerrer kayıt: ' + (record.branch || 'Şube belirtilmemiş') + ' / ' + (record.date || record.timestamp || record.sheetName || 'Tarih belirtilmemiş') : '';
   var row = inp.closest ? inp.closest('.entry-card') : null;
   var warning = row ? row.querySelector('.duplicate-warning') : null;
