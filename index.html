@@ -320,6 +320,11 @@ body.dark .theme-toggle .knob{transform:translateX(20px)}
         </div>
 
         <!-- Yükleme Sonrası Canlı İstatistikler & Özet Kartları -->
+        <div style="display:flex;align-items:center;gap:1rem;flex-wrap:wrap;margin-top:1rem;">
+          <input type="file" id="claudeExcelFileInput" accept=".xls,.xlsx,.csv" style="display:none;" onchange="handleExcelFileUpload(this.files, 'claude');this.value='';">
+          <button type="button" class="btn btn-ghost" style="border:1px solid var(--border);" onclick="document.getElementById('claudeExcelFileInput').click()"><i class="fas fa-file-excel mr-1" aria-hidden="true"></i> Claude Excel Verisi Yükle</button>
+          <span style="font-size:.8rem;color:var(--text3);">Ad Soyad, İrtibat Numarası, İl / Şehir, İlçe, Ürün ve Kaynak başlıklı şablon.</span>
+        </div>
         <div id="excelSummaryArea" style="display: none; margin-top: 1.5rem;">
           <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 1rem; margin-bottom: 1.25rem;">
             <div style="background: var(--surface2); border: 1px solid var(--border); border-radius: 1rem; padding: 1rem; text-align: center;">
@@ -713,49 +718,88 @@ body.dark .theme-toggle .knob{transform:translateX(20px)}
 </div>
 
 <style>
-  #duplicatePrompt .dup-dialog{background:var(--card-bg);border:1px solid var(--border);border-radius:1.5rem;width:100%;max-width:760px;max-height:90vh;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 24px 80px rgba(0,0,0,.3);text-align:left;}
-  #duplicatePrompt .dup-header{padding:1.5rem;display:flex;gap:1rem;align-items:center;border-bottom:1px solid var(--border);}
-  #duplicatePrompt .dup-icon{width:48px;height:48px;border-radius:14px;background:rgba(245,158,11,.12);color:var(--sys-orange);display:grid;place-items:center;font-size:1.3rem;flex-shrink:0;}
-  #duplicatePrompt .dup-body{padding:1.5rem;overflow-y:auto;min-height:0;}
-  #duplicatePrompt .dup-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.75rem;margin:1.25rem 0;}
-  #duplicatePrompt .dup-stat{padding:1rem;border:1px solid var(--border);border-radius:12px;background:var(--surface2);}
-  #duplicatePrompt .dup-stat b{display:block;font-size:1.65rem;color:var(--text);font-family:monospace;}
-  #duplicatePrompt .dup-muted{font-size:.8rem;color:var(--text3);line-height:1.5;}
-  #duplicatePrompt .dup-event{display:grid;grid-template-columns:30px 1fr;gap:.75rem;padding:1rem 0;border-bottom:1px solid var(--border);}
-  #duplicatePrompt .dup-number{width:28px;height:28px;border-radius:50%;display:grid;place-items:center;background:rgba(14,165,233,.1);color:var(--sys-blue);font-size:.8rem;font-weight:800;}
-  #duplicatePrompt .dup-tags{display:flex;flex-wrap:wrap;gap:.5rem;margin:.45rem 0;}
-  #duplicatePrompt .dup-tag{padding:.2rem .55rem;border-radius:6px;background:var(--surface2);font-size:.75rem;color:var(--text2);}
-  #duplicatePrompt .dup-footer{padding:1rem 1.5rem;border-top:1px solid var(--border);background:var(--surface2);display:grid;grid-template-columns:1fr 1fr auto;gap:.75rem;}
-  #duplicatePrompt .dup-footer button{height:auto;min-height:48px;white-space:normal;}
-  @media(max-width:520px){#duplicatePrompt .dup-header,#duplicatePrompt .dup-body{padding:1rem;}#duplicatePrompt .dup-stat{padding:.65rem;}#duplicatePrompt .dup-footer{padding:1rem;grid-template-columns:1fr 1fr;}#duplicatePrompt .dup-footer button:last-child{grid-column:1/-1;}}
+  #duplicatePrompt .dup-dialog{background:var(--card-bg);color:var(--text);border:1px solid var(--border);border-radius:18px;width:100%;max-width:560px;max-height:calc(100dvh - 32px);display:flex;flex-direction:column;overflow:hidden;box-shadow:0 24px 80px rgba(0,0,0,.3);text-align:left;}
+  #duplicatePrompt .dup-header{padding:20px 24px;border-bottom:1px solid var(--border);}
+  #duplicatePrompt .dup-heading{margin:0 0 8px;font-size:14px;font-weight:500;color:var(--text3);}
+  #duplicatePrompt h3{margin:0 0 6px;font-size:24px;line-height:1.25;font-weight:750;overflow-wrap:anywhere;text-wrap:balance;}
+  #duplicatePrompt .dup-muted{font-size:13px;color:var(--text3);line-height:1.6;}
+  #duplicatePrompt .dup-body{padding:16px 24px 4px;overflow-y:auto;overscroll-behavior:contain;min-height:0;}
+  #duplicatePrompt .dup-last-card{padding:14px 16px;background:var(--surface2);border-radius:10px;}
+  #duplicatePrompt .dup-section-label{margin:0 0 6px;font-size:12px;color:var(--text3);font-weight:600;}
+  #duplicatePrompt .dup-latest{margin:0;white-space:pre-line;font-size:15px;line-height:1.65;}
+  #duplicatePrompt .dup-product{font-size:14px;margin:8px 0 0;color:var(--text2);overflow-wrap:anywhere;}
+  #duplicatePrompt details{border-bottom:1px solid var(--border);margin-top:0;}
+  #duplicatePrompt #duplicateCustomerDetails{margin-top:8px;}
+  #duplicatePrompt summary{cursor:pointer;min-height:48px;padding:14px 0;font-size:14px;font-weight:600;color:var(--text2);touch-action:manipulation;}
+  #duplicatePrompt .dup-detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px 24px;margin:0 0 12px;}
+  #duplicatePrompt dt{font-size:12px;color:var(--text3);margin-bottom:3px;}
+  #duplicatePrompt dd{font-size:14px;margin:0;overflow-wrap:anywhere;}
+  #duplicatePrompt .dup-month{float:right;font-size:12px;color:var(--text3);font-weight:400;margin-left:6px;}
+  #duplicatePrompt .dup-month b{font-variant-numeric:tabular-nums;color:var(--text);}
+  #duplicatePrompt .dup-history-meta{font-size:12px;color:var(--text3);margin:0 0 8px;}
+  #duplicatePrompt .dup-event{display:grid;grid-template-columns:24px minmax(0,1fr);gap:10px;padding:14px 0;border-top:1px solid var(--border);content-visibility:auto;contain-intrinsic-size:auto 100px;}
+  #duplicatePrompt .dup-number{font-size:12px;color:var(--text3);font-variant-numeric:tabular-nums;padding-top:2px;}
+  #duplicatePrompt .dup-tags{display:flex;flex-wrap:wrap;gap:8px;margin:4px 0;}
+  #duplicatePrompt .dup-tag{font-size:12px;color:var(--text3);}
+  #duplicatePrompt .dup-negative{margin:12px 0 0;padding:12px 14px;border-left:3px solid var(--sys-red);border-radius:0 8px 8px 0;background:rgba(239,68,68,.07);}
+  #duplicatePrompt .dup-negative strong{font-size:15px;color:var(--sys-red);line-height:1.5;}
+  #duplicatePrompt .dup-negative p{font-size:13px;line-height:1.6;white-space:pre-line;color:var(--text2);margin:6px 0 12px;}
+  #duplicatePrompt .dup-consent{display:flex;gap:10px;align-items:flex-start;font-size:13px;line-height:1.6;cursor:pointer;}
+  #duplicatePrompt .dup-consent input{width:18px;height:18px;flex-shrink:0;margin-top:2px;accent-color:var(--sys-blue);}
+  #duplicatePrompt .dup-error{color:var(--sys-red);font-size:12px;margin-top:8px;}
+  #duplicatePrompt .dup-footer{padding:14px 24px 16px;background:var(--card-bg);flex-shrink:0;}
+  #duplicatePrompt .dup-actions{display:flex;gap:10px;align-items:center;}
+  #duplicatePrompt .dup-actions button{min-height:44px;height:auto;border-radius:9px;padding:10px 18px;font-size:14px;white-space:normal;touch-action:manipulation;}
+  #duplicatePrompt .dup-primary{flex:1;background:#0369a1;color:#fff;border:1px solid #0369a1;}
+  #duplicatePrompt .dup-secondary{flex:1;background:transparent;color:var(--text);border:1px solid var(--border);}
+  #duplicatePrompt .dup-close{background:transparent;color:var(--text3);border:1px solid transparent;}
+  #duplicatePrompt .dup-actions button:hover{filter:brightness(1.15);}
+  #duplicatePrompt :is(button,input,summary):focus-visible{outline:2px solid var(--sys-blue);outline-offset:4px;}
+  #duplicatePrompt .dup-note{margin:10px 0 0;font-size:12px;color:var(--text3);line-height:1.5;}
+  @media(max-width:520px){#duplicatePrompt .dup-dialog{border-radius:14px;}#duplicatePrompt .dup-header{padding:16px;}#duplicatePrompt .dup-body{padding:12px 16px 4px;}#duplicatePrompt .dup-footer{padding:12px 16px 14px;}#duplicatePrompt .dup-actions{gap:6px;}#duplicatePrompt .dup-actions button{padding:9px 7px;font-size:13px;}#duplicatePrompt h3{font-size:21px;}}
+  @media(prefers-reduced-motion:reduce){#duplicatePrompt,#duplicatePrompt .dup-dialog{transition:none;animation:none;}}
 </style>
 <div id="duplicatePrompt" class="modal-bg" style="z-index:10000;">
   <div class="modal-content dup-dialog" role="dialog" aria-modal="true" aria-labelledby="duplicatePromptTitle" aria-describedby="duplicatePromptMessage" onkeydown="handleDuplicatePromptKey(event)">
     <div class="dup-header">
-      <div class="dup-icon"><i class="fas fa-user-clock" aria-hidden="true"></i></div>
-      <div style="flex:1;min-width:0;"><div class="dup-muted">MÜŞTERİ GEÇMİŞİ</div><h3 id="duplicatePromptTitle" style="font-size:1.2rem;font-weight:800;color:var(--text);margin:.2rem 0;">Daha önce yönlendirilmiş</h3><div id="duplicatePromptContact" class="dup-muted"></div></div>
+      <p class="dup-heading">Bu müşteri daha önce yönlendirilmiş</p>
+      <h3 id="duplicatePromptTitle">Müşteri bilgileri</h3>
+      <div id="duplicatePromptContact" class="dup-muted"></div>
     </div>
     <div class="dup-body">
-      <p id="duplicatePromptMessage" style="white-space:pre-line;line-height:1.7;color:var(--text);margin:0;"></p>
-      <div id="duplicateNegativeAlert" role="alert" style="display:none;margin-top:1rem;padding:1rem;border:1px solid var(--sys-red);border-radius:12px;background:rgba(239,68,68,.08);">
-        <strong style="color:var(--sys-red);">Bu müşterinin önceki yönlendirmesi olumsuz sonuçlandı.</strong>
-        <p id="duplicateNegativeDetails" style="font-size:.85rem;white-space:pre-line;color:var(--text);margin:.6rem 0;"></p>
-        <label style="display:flex;gap:.65rem;align-items:flex-start;color:var(--text);font-size:.9rem;cursor:pointer;"><input id="duplicateNegativeConsent" type="checkbox" style="margin-top:.2rem;"> Olumsuz sonucu gördüm; müşterinin tekrar aranabileceğini bilerek devam etmek istiyorum.</label>
-        <div id="duplicateNegativeError" style="color:var(--sys-red);font-size:.8rem;margin-top:.5rem;" aria-live="polite"></div>
+      <div class="dup-last-card">
+        <p class="dup-section-label">Son yönlendirme</p>
+        <p id="duplicatePromptMessage" class="dup-latest"></p>
+        <p id="duplicateLatestProduct" class="dup-product"></p>
       </div>
-      <div class="dup-stats" aria-live="polite">
-        <div class="dup-stat"><b id="duplicateMonthCount">—</b><span class="dup-muted">Bu ay yönlendirme</span></div>
-        <div class="dup-stat"><b id="duplicateBranchCount">—</b><span class="dup-muted">Farklı şube</span></div>
-        <div class="dup-stat"><b id="duplicateCategoryCount">—</b><span class="dup-muted">Farklı kategori</span></div>
+      <div id="duplicateNegativeAlert" role="alert" class="dup-negative" style="display:none;">
+        <strong>Önceki yönlendirme olumsuz sonuçlandı</strong>
+        <p id="duplicateNegativeDetails"></p>
+        <label class="dup-consent"><input id="duplicateNegativeConsent" type="checkbox" name="negative-referral-consent"> Olumsuz sonucu gördüm, tekrar aranmasını onaylıyorum.</label>
+        <div id="duplicateNegativeError" class="dup-error" aria-live="polite"></div>
       </div>
-      <div style="display:flex;justify-content:space-between;gap:.5rem;flex-wrap:wrap;"><strong style="color:var(--text);">Bu ayki yönlendirmeler</strong><span id="duplicateHistoryPeriod" class="dup-muted"></span></div>
-      <div id="duplicatePromptHistory" aria-live="polite"></div>
-      <p class="dup-muted" style="margin:1rem 0 0;">Devam Et ve Satış Ekle önceki müşteri bilgilerini satıra doldurur. Satış Ekle için yeni tutar gerekir. Tamam yalnızca bu pencereyi kapatır. Kayıt, Hepsini Kaydet ile yapılır.</p>
+      <details id="duplicateCustomerDetails">
+        <summary>Diğer müşteri bilgileri</summary>
+        <dl class="dup-detail-grid">
+          <div><dt>Müşteri no</dt><dd id="duplicateCustomerNo">—</dd></div>
+          <div><dt>Geliş medyası</dt><dd id="duplicateCustomerMedia">—</dd></div>
+          <div><dt>Kategori</dt><dd id="duplicateCustomerCategory">—</dd></div>
+          <div><dt>Sonuç</dt><dd id="duplicateCustomerResult">—</dd></div>
+        </dl>
+      </details>
+      <details id="duplicateHistoryDisclosure">
+        <summary>Yönlendirme geçmişi <span class="dup-month" aria-live="polite">Bu ay: <b id="duplicateMonthCount">—</b></span></summary>
+        <p class="dup-history-meta"><span id="duplicateHistoryPeriod"></span><br><span id="duplicateBranchCount">—</span> şube, <span id="duplicateCategoryCount">—</span> kategori</p>
+        <div id="duplicatePromptHistory" aria-live="polite"></div>
+      </details>
     </div>
     <div class="dup-footer">
-      <button class="btn btn-primary" onclick="resolveDuplicatePrompt('continue')"><i class="fas fa-arrow-right mr-1"></i> Devam Et</button>
-      <button class="btn btn-primary" style="background:var(--sys-green);" onclick="resolveDuplicatePrompt('sale')"><i class="fas fa-shopping-cart mr-1"></i> Satış Ekle</button>
-      <button id="duplicateCloseButton" class="btn btn-ghost" onclick="resolveDuplicatePrompt('cancel')">Tamam</button>
+      <div class="dup-actions">
+        <button type="button" class="btn dup-primary" onclick="resolveDuplicatePrompt('continue')">Devam Et</button>
+        <button type="button" class="btn dup-secondary" onclick="resolveDuplicatePrompt('sale')">Satış Ekle</button>
+        <button type="button" id="duplicateCloseButton" class="btn dup-close" onclick="resolveDuplicatePrompt('cancel')">Tamam</button>
+      </div>
+      <p class="dup-note">Kayıt, “Hepsini Kaydet” ile yapılır.</p>
     </div>
   </div>
 </div>
@@ -1170,7 +1214,7 @@ if (dropZone) {
   });
 }
 
-function handleExcelFileUpload(files) {
+function handleExcelFileUpload(files, format) {
   if (!files || !files[0]) return;
   var file = files[0];
   var reader = new FileReader();
@@ -1181,23 +1225,67 @@ function handleExcelFileUpload(files) {
       var workbook = XLSX.read(data, { type: 'array' });
       var firstSheetName = workbook.SheetNames[0];
       var worksheet = workbook.Sheets[firstSheetName];
-      var rawJson = XLSX.utils.sheet_to_json(worksheet, { header: 1, defval: '' });
+      var rawJson = XLSX.utils.sheet_to_json(worksheet, { header: 1, defval: '', raw: format !== 'claude' });
 
       if (!rawJson || rawJson.length === 0) {
         showWarning('Boş Dosya', 'Seçilen Excel dosyasında okunabilecek satır bulunamadı.');
         return;
       }
 
-      processParsedExcelData(rawJson);
+      if (format === 'claude') rawJson = prepareClaudeExcelRows(rawJson);
+      if (!rawJson.length) {
+        showWarning('Boş Dosya', 'Şablonda yönlendirilecek müşteri satırı bulunamadı.');
+        return;
+      }
+      processParsedExcelData(rawJson, format);
     } catch(err) {
       showWarning('Excel Okuma Hatası', 'Dosya okunurken bir hata oluştu: ' + err.message);
     }
   };
+  reader.onerror = function() { showWarning('Excel Okuma Hatası', 'Dosya okunamadı. Dosyayı yeniden seçin.'); };
 
   reader.readAsArrayBuffer(file);
 }
 
-function processParsedExcelData(rows) {
+function prepareClaudeExcelRows(rows) {
+  var headerIndex = rows.findIndex(function(row) {
+    var headers = row.map(normalizeLocationString);
+    return headers.includes('ad soyad') && (headers.includes('irtibat numarasi') || headers.includes('telefon'));
+  });
+  if (headerIndex < 0) throw new Error('Claude şablonunda Ad Soyad ve İrtibat Numarası başlıkları bulunamadı.');
+  var headers = rows[headerIndex].map(normalizeLocationString);
+  function column(aliases) { return headers.findIndex(function(header) { return aliases.includes(header); }); }
+  var columns = {
+    name: column(['ad soyad']), phone: column(['irtibat numarasi', 'telefon']),
+    city: column(['il sehir form', 'il sehir', 'sehir', 'il']), district: column(['ilce']),
+    date: column(['tarih']), time: column(['saat']), product: column(['ilgilendigi urun', 'urun', 'urun adi']),
+    source: column(['kaynak', 'gelis medyasi', 'medya']), note: column(['not'])
+  };
+  if (columns.city < 0) throw new Error('Claude şablonunda İl / Şehir (form) sütunu bulunamadı.');
+  function cell(row, key) { return columns[key] < 0 ? '' : String(row[columns[key]] == null ? '' : row[columns[key]]).trim(); }
+  return rows.slice(headerIndex + 1).filter(function(row) {
+    return cell(row, 'name') || cell(row, 'phone') || cell(row, 'city') || cell(row, 'district');
+  }).map(function(row) {
+    var mapped = Array(17).fill('');
+    mapped[13] = cell(row, 'name');
+    mapped[14] = cell(row, 'phone');
+    mapped[15] = [cell(row, 'city'), cell(row, 'district')].filter(Boolean).join(' / ');
+    mapped[1] = [cell(row, 'date'), cell(row, 'time')].filter(Boolean).join(' ');
+    var product = cell(row, 'product');
+    var source = normalizeLocationString(cell(row, 'source'));
+    var media = /instagram|\big\b/.test(source) ? 'Instagram' : /whats\s*app|\bwp\b/.test(source) ? 'Whatsapp' :
+      /web|site/.test(source) ? 'Web Sitesi Form' : /sms/.test(source) ? 'SMS LİNK' : /cagri|telefon/.test(source) ? 'Çağrı' : 'Facebook';
+    var isLimit = /limit.*(?:ogren|sorgula)|limitim/.test(normalizeLocationString(product));
+    mapped[16] = {
+      media: media, product: product || 'ÜRÜN BİLGİSİ',
+      category: isLimit ? 'LİMİT ÖĞREN' : (product ? inferProductCategory(product) : 'GENEL ÜRÜN BİLGİSİ'),
+      note: cell(row, 'note')
+    };
+    return mapped;
+  });
+}
+
+function processParsedExcelData(rows, format) {
   excelParsedRows = [];
   var seenBatchPhones = {};
   var totalCount = 0;
@@ -1206,7 +1294,7 @@ function processParsedExcelData(rows) {
   var invalidCount = 0;
 
   var startIdx = 0;
-  if (rows.length > 0) {
+  if (format !== 'claude' && rows.length > 0) {
     var firstRowStr = rows[0].join(' ').toLocaleLowerCase('tr-TR');
     if (firstRowStr.includes('id') || firstRowStr.includes('name') || firstRowStr.includes('phone') || firstRowStr.includes('telefon') || firstRowStr.includes('ad')) {
       startIdx = 1;
@@ -1216,6 +1304,7 @@ function processParsedExcelData(rows) {
   for (var i = startIdx; i < rows.length; i++) {
     var row = rows[i];
     if (!row || row.length === 0) continue;
+    var extra = format === 'claude' ? row[16] : null;
 
     // N Sütunu -> İsim Soyisim (Index 13)
     // O Sütunu -> Telefon (Index 14)
@@ -1284,9 +1373,10 @@ function processParsedExcelData(rows) {
       phone: cleanPhone,
       rawLocation: rawLocation || '-',
       branch: assignedBranch || '',
-      media: 'Facebook',
-      category: 'LİMİT ÖĞREN',
-      product: 'LİMİT ÖĞRENME',
+      media: extra ? extra.media : 'Facebook',
+      category: extra ? extra.category : 'LİMİT ÖĞREN',
+      product: extra ? extra.product : 'LİMİT ÖĞRENME',
+      importNote: extra ? extra.note : '',
       date: dateFormatted,
       status: status,
       selected: status === 'ready',
@@ -1468,6 +1558,7 @@ function changeExcelPage(dir) {
 function clearExcelImport() {
   excelParsedRows = [];
   document.getElementById('excelFileInput').value = '';
+  document.getElementById('claudeExcelFileInput').value = '';
   document.getElementById('excelSummaryArea').style.display = 'none';
 }
 
@@ -2576,7 +2667,7 @@ var activeDuplicatePrompt = null;
 function handleDuplicatePromptKey(event) {
   if (event.key === 'Escape') { event.preventDefault(); resolveDuplicatePrompt('cancel'); return; }
   if (event.key !== 'Tab') return;
-  var buttons = document.querySelectorAll('#duplicatePrompt button');
+  var buttons = Array.from(document.querySelectorAll('#duplicatePrompt button, #duplicatePrompt input, #duplicatePrompt summary')).filter(function(element) { return !element.disabled && element.getClientRects().length > 0; });
   var first = buttons[0], last = buttons[buttons.length - 1];
   if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); }
   else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
@@ -2584,6 +2675,10 @@ function handleDuplicatePromptKey(event) {
 
 function duplicateRecordTime(record) {
   return parseAnyDate(record.timestamp) || parseAnyDate(record.date);
+}
+
+function duplicateDisplayProduct(product) {
+  return String(product || '').replace(/(\b(?:T\.?\s*C\.?)(?:\s+kimlik(?:\s+no(?:su)?)?)?\s*[:#-]?\s*)\d{11}(?!\d)/gi, '$1•••••••••••');
 }
 
 function getNegativeDuplicateRecord(phone) {
@@ -2622,7 +2717,7 @@ function renderDuplicateMonthHistory(records, prompt) {
   document.getElementById('duplicatePromptHistory').innerHTML = history.map(function(record, index) {
     var time = duplicateRecordTime(record);
     var date = time ? new Date(time).toLocaleString('tr-TR') : 'Tarih belirtilmemiş';
-    return '<div class="dup-event"><div class="dup-number">' + (index + 1) + '</div><div><div style="display:flex;justify-content:space-between;gap:.5rem;flex-wrap:wrap;"><strong style="color:var(--text);">' + safe(record.branch) + '</strong><span class="dup-muted">' + safe(date) + '</span></div><div class="dup-tags"><span class="dup-tag">' + safe(record.category) + '</span><span class="dup-tag">' + safe(record.media) + '</span></div><div style="font-size:.9rem;color:var(--text);overflow-wrap:anywhere;">' + safe(record.product) + '</div></div></div>';
+    return '<div class="dup-event"><div class="dup-number">' + (index + 1) + '</div><div><div style="display:flex;justify-content:space-between;gap:.5rem;flex-wrap:wrap;"><strong style="color:var(--text);">' + safe(record.branch) + '</strong><span class="dup-muted">' + safe(date) + '</span></div><div class="dup-tags"><span class="dup-tag">' + safe(record.category) + '</span><span class="dup-tag">' + safe(record.media) + '</span></div><div style="font-size:.9rem;color:var(--text);overflow-wrap:anywhere;">' + safe(duplicateDisplayProduct(record.product)) + '</div></div></div>';
   }).join('') || '<div class="dup-muted" style="padding:1.25rem 0;">Bu ay kaydedilmiş yönlendirme bulunmuyor. Bekleyen form satırları sayıya dahil edilmez.</div>';
 }
 
@@ -2680,17 +2775,20 @@ function showNextDuplicatePrompt() {
   document.getElementById('duplicateNegativeConsent').checked = false;
   document.getElementById('duplicateNegativeError').textContent = '';
   document.getElementById('duplicateNegativeDetails').textContent = negative ?
-    (negative.branch || 'Şube belirtilmemiş') + ' · ' + (negative.date || negative.timestamp || 'Tarih belirtilmemiş') + '\nJ sütunu sonucu: ' + negative.result + '\nYeniden yönlendirmek istiyor musunuz? Devam Et veya Satış Ekle için aşağıdaki onayı işaretleyin.' : '';
+    (negative.branch || 'Şube belirtilmemiş') + '\n' + (negative.date || negative.timestamp || 'Tarih belirtilmemiş') + ' — ' + negative.result : '';
   var time = parseAnyDate(record.timestamp || record.date);
   var when = time ? new Date(time).toLocaleString('tr-TR') : (record.sheetName || 'Tarih bilgisi bulunamadı');
   document.getElementById('duplicatePromptMessage').textContent =
-    'Bu numaraya ait ' + (record.pending ? 'giriş listesinde bekleyen' : 'önceki yönlendirme') + ' kaydı var.\n\n' +
-    '• Telefon: ' + activeDuplicatePrompt.input.value + '\n• Müşteri: ' + (record.name || 'Belirtilmemiş') +
-    '\n• Şube: ' + (record.branch || 'Belirtilmemiş') + '\n• Tarih: ' + when +
-    '\n• Ürün: ' + (record.product || 'Belirtilmemiş') + '\n• Müşteri No: ' + (record.customerNo || 'Belirtilmemiş') +
-    '\n• Kategori: ' + (record.category || 'Belirtilmemiş') + '\n• Geliş Medyası: ' + (record.media || 'Belirtilmemiş');
+    (record.branch || 'Şube belirtilmemiş') + '\n' + when + (record.pending ? '\nGiriş listesinde bekliyor' : '');
   document.getElementById('duplicatePromptTitle').textContent = record.name || 'Daha önce yönlendirilmiş';
-  document.getElementById('duplicatePromptContact').textContent = activeDuplicatePrompt.input.value + ' · Önceki müşteri bilgileri';
+  document.getElementById('duplicatePromptContact').textContent = activeDuplicatePrompt.input.value;
+  document.getElementById('duplicateLatestProduct').textContent = duplicateDisplayProduct(record.product) || 'Ürün belirtilmemiş';
+  document.getElementById('duplicateCustomerNo').textContent = record.customerNo || 'Belirtilmemiş';
+  document.getElementById('duplicateCustomerMedia').textContent = record.media || 'Belirtilmemiş';
+  document.getElementById('duplicateCustomerCategory').textContent = record.category || 'Belirtilmemiş';
+  document.getElementById('duplicateCustomerResult').textContent = record.result || 'Belirtilmemiş';
+  document.getElementById('duplicateCustomerDetails').open = false;
+  document.getElementById('duplicateHistoryDisclosure').open = false;
   document.getElementById('duplicatePrompt').classList.add('show');
   loadDuplicateMonthHistory(activeDuplicatePrompt);
   var closeButton = document.getElementById('duplicateCloseButton');
