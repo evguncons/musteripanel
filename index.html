@@ -323,6 +323,8 @@ body.dark .theme-toggle .knob{transform:translateX(20px)}
         <div style="display:flex;align-items:center;gap:1rem;flex-wrap:wrap;margin-top:1rem;">
           <input type="file" id="claudeExcelFileInput" accept=".xls,.xlsx,.csv" style="display:none;" onchange="handleExcelFileUpload(this.files, 'claude');this.value='';">
           <button type="button" class="btn btn-ghost" style="border:1px solid var(--border);" onclick="document.getElementById('claudeExcelFileInput').click()"><i class="fas fa-file-excel mr-1" aria-hidden="true"></i> Claude Excel Verisi Yükle</button>
+          <input type="file" id="claudeLeadFileInput" accept=".xls,.xlsx,.csv" style="display:none;" onchange="handleExcelFileUpload(this.files, 'claude-leads');this.value='';">
+          <button type="button" class="btn btn-ghost" style="border:1px solid var(--border);" onclick="document.getElementById('claudeLeadFileInput').click()"><i class="fas fa-file-excel mr-1" aria-hidden="true"></i> Claude Excel 2 — Reklam Verisi Yükle</button>
           <span style="font-size:.8rem;color:var(--text3);">Ad Soyad, İrtibat Numarası, İl / Şehir, İlçe, Ürün ve Kaynak başlıklı şablon.</span>
         </div>
         <div id="excelSummaryArea" style="display: none; margin-top: 1.5rem;">
@@ -1228,7 +1230,7 @@ function handleExcelFileUpload(files, format) {
       var workbook = XLSX.read(data, { type: 'array' });
       var firstSheetName = workbook.SheetNames[0];
       var worksheet = workbook.Sheets[firstSheetName];
-      var rawJson = XLSX.utils.sheet_to_json(worksheet, { header: 1, defval: '', raw: format !== 'claude' });
+      var rawJson = XLSX.utils.sheet_to_json(worksheet, { header: 1, defval: '', raw: format !== 'claude' && format !== 'claude-leads' });
 
       if (!rawJson || rawJson.length === 0) {
         showWarning('Boş Dosya', 'Seçilen Excel dosyasında okunabilecek satır bulunamadı.');
@@ -1236,11 +1238,12 @@ function handleExcelFileUpload(files, format) {
       }
 
       if (format === 'claude') rawJson = prepareClaudeExcelRows(rawJson);
+      if (format === 'claude-leads') rawJson = prepareClaudeLeadRows(rawJson);
       if (!rawJson.length) {
         showWarning('Boş Dosya', 'Şablonda yönlendirilecek müşteri satırı bulunamadı.');
         return;
       }
-      processParsedExcelData(rawJson, format);
+      processParsedExcelData(rawJson, format === 'claude-leads' ? 'claude' : format);
     } catch(err) {
       showWarning('Excel Okuma Hatası', 'Dosya okunurken bir hata oluştu: ' + err.message);
     }
@@ -1248,6 +1251,44 @@ function handleExcelFileUpload(files, format) {
   reader.onerror = function() { showWarning('Excel Okuma Hatası', 'Dosya okunamadı. Dosyayı yeniden seçin.'); };
 
   reader.readAsArrayBuffer(file);
+}
+
+function prepareClaudeLeadRows(rows) {
+  var headerIndex = rows.findIndex(function(row) {
+    var headers = row.map(normalizeLocationString);
+    return headers.includes('full name') && headers.includes('phone number');
+  });
+  if (headerIndex < 0) throw new Error('Reklam şablonunda full_name ve phone_number başlıkları bulunamadı.');
+  var headers = rows[headerIndex].map(normalizeLocationString);
+  function index(aliases) { return headers.findIndex(function(header) { return aliases.includes(header); }); }
+  var cityIndex = index(['yasadiginiz il sehir', 'il sehir', 'city', 'sehir']);
+  var districtIndex = index(['yasadiginiz ilce', 'ilce', 'district']);
+  if (cityIndex < 0) throw new Error('Reklam şablonunda yaşadığınız_il_/_şehir sütunu bulunamadı.');
+  function cell(row, aliases) { var i = index(aliases); return i < 0 ? '' : String(row[i] == null ? '' : row[i]).trim(); }
+  var canonical = [['Tarih', 'Saat', 'Ad Soyad', 'İrtibat Numarası', 'İl / Şehir (form)', 'İlçe', 'İlgilendiği Ürün', 'Kaynak', 'Not']];
+  rows.slice(headerIndex + 1).forEach(function(row) {
+    var name = cell(row, ['full name']);
+    var phone = cell(row, ['phone number']);
+    var city = String(row[cityIndex] || '').trim();
+    var district = districtIndex < 0 ? '' : String(row[districtIndex] || '').trim();
+    if (!name && !phone && !city && !district) return;
+    var clues = ['ad name', 'adset name', 'form name', 'campaign name'].map(function(key) { return cell(row, [key]); });
+    var product = cell(row, ['product', 'urun', 'ilgilendigi urun']);
+    if (!product) {
+      if (clues.some(function(value) { return /limit.*(?:ogren|sorgula)/.test(normalizeLocationString(value)); })) product = 'LİMİT ÖĞRENME';
+      else product = clues.find(function(value) { return value && inferProductCategory(value) !== 'GENEL ÜRÜN BİLGİSİ'; }) || 'ÜRÜN BİLGİSİ';
+    }
+    var platform = normalizeLocationString(cell(row, ['platform']));
+    var media = /^(ig|instagram)$/.test(platform) ? 'Instagram' : /^(fb|facebook|messenger)$/.test(platform) ? 'Facebook' : '';
+    if (!media) throw new Error('Reklam dosyasındaki platform değeri tanınamadı (Excel satırı ' + (canonical.length + headerIndex + 1) + '). ig veya fb olmalı.');
+    var dateText = cell(row, ['created time']);
+    if (/^\d{4}-\d{2}-\d{2}T.*(?:Z|[+-]\d{2}:?\d{2})$/i.test(dateText)) {
+      var date = new Date(dateText);
+      if (!isNaN(date.getTime())) dateText = new Intl.DateTimeFormat('sv-SE', { timeZone: 'Europe/Istanbul', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }).format(date);
+    }
+    canonical.push([dateText, '', name, phone, city, district, product, media, '']);
+  });
+  return prepareClaudeExcelRows(canonical);
 }
 
 function prepareClaudeExcelRows(rows) {
@@ -1572,6 +1613,7 @@ function clearExcelImport() {
   excelParsedRows = [];
   document.getElementById('excelFileInput').value = '';
   document.getElementById('claudeExcelFileInput').value = '';
+  document.getElementById('claudeLeadFileInput').value = '';
   document.getElementById('excelSummaryArea').style.display = 'none';
 }
 
