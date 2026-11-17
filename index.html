@@ -1644,34 +1644,43 @@ async function submitExcelBatch() {
     };
   });
 
+  var confirmedCount = 0;
+  var activeChunkSize = 0;
   try {
+    // Apps Script her satırda Sheet işlemleri yapar; büyük listeler tek çağrıda süreyi aşabilir.
+    for (var offset = 0; offset < payloadData.length; offset += 10) {
+    var chunk = payloadData.slice(offset, offset + 10);
+    activeChunkSize = chunk.length;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Kaydediliyor: ' + confirmedCount + ' / ' + readyRows.length;
     var res = await fetch(GAS_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'text/plain;charset=utf-8' },
       redirect: 'follow',
-      body: JSON.stringify({ action: 'addCustomersBulk', data: payloadData })
+      body: JSON.stringify({ action: 'addCustomersBulk', data: chunk })
     });
 
-    var result = await res.json();
+    var result;
+    try { result = await res.json(); }
+    catch (parseError) { throw new Error('Sunucu okunabilir JSON yanıtı vermedi. Apps Script süre aşımı, erişim veya dağıtım hatası olabilir.'); }
     if (!res.ok || result.status !== 'success') {
-      showWarning('Kayıt Sonucu', (result.message || 'Kayıt işlemi tamamlanamadı.') + '\nBazı satırlar işlenmiş olabilir. Yeniden kaydetmeden önce kayıtları kontrol edin.');
-      return;
+      throw new Error(result.message || ('Sunucu kayıt işlemini onaylamadı (HTTP ' + (res.status || 'bilinmiyor') + ').'));
     }
-    var savedIds = new Set(readyRows.map(function(row) { return row.id; }));
+    var savedIds = new Set(readyRows.slice(offset, offset + chunk.length).map(function(row) { return row.id; }));
     excelParsedRows = excelParsedRows.filter(function(row) { return !savedIds.has(row.id); });
+    confirmedCount += chunk.length;
+    }
     showToast('✓ Seçilen ' + readyRows.length + ' kayıt eklendi (mükerrerler dahil).');
     if (!excelParsedRows.length) clearExcelImport();
-    else renderExcelTable();
-    setTimeout(function() {
-      refreshData();
-    }, 1200);
 
   } catch(e) {
-    showWarning('Kayıt Doğrulanamadı', 'Sunucudan kayıt sonucu alınamadı. Seçimler korundu. Yeniden kaydetmeden önce kayıtları kontrol edin.');
+    showWarning('Kayıt Doğrulanamadı', confirmedCount + ' / ' + readyRows.length + ' kaydın eklendiği doğrulandı.\n' +
+      (e.message || 'Bağlantı hatası oluştu.') + '\nSon gönderilen ' + activeChunkSize + ' satırın bir kısmı yazılmış olabilir. Kalan satırlar korundu; yeniden göndermeden önce son grubu tabloda kontrol edin.');
   } finally {
     btn.innerHTML = origHtml;
     btn.disabled = false;
     updateExcelSummaryCounters();
+    if (excelParsedRows.length) renderExcelTable();
+    if (confirmedCount) setTimeout(function() { refreshData(); }, 1200);
   }
 }
 
