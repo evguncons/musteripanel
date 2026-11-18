@@ -1651,23 +1651,44 @@ async function submitExcelBatch() {
     for (var offset = 0; offset < payloadData.length; offset += 10) {
     var chunk = payloadData.slice(offset, offset + 10);
     activeChunkSize = chunk.length;
+    var signature = JSON.stringify(chunk);
+    var attempts = submitExcelBatch.requests || (submitExcelBatch.requests = new Map());
+    var requestId = attempts.get(signature);
+    if (!requestId) {
+      requestId = 'excel_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2) + Math.random().toString(36).slice(2);
+      attempts.set(signature, requestId);
+    }
     btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Kaydediliyor: ' + confirmedCount + ' / ' + readyRows.length;
-    var res = await fetch(GAS_URL, {
+    var res;
+    var result;
+    try {
+    res = await fetch(GAS_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'text/plain;charset=utf-8' },
       redirect: 'follow',
-      body: JSON.stringify({ action: 'addCustomersBulk', data: chunk })
+      body: JSON.stringify({ action: 'addCustomersBulk', data: chunk, requestId: requestId })
     });
-
-    var result;
     try { result = await res.json(); }
     catch (parseError) { throw new Error('Sunucu okunabilir JSON yanıtı vermedi. Apps Script süre aşımı, erişim veya dağıtım hatası olabilir.'); }
+    } catch (connectionError) {
+      btn.innerHTML = 'Sunucudaki kayıt sonucu kontrol ediliyor…';
+      try {
+        var statusResponse = await fetch(GAS_URL + '?action=getImportStatus&requestId=' + encodeURIComponent(requestId) + '&t=' + Date.now());
+        result = await statusResponse.json();
+        if (!statusResponse.ok || !result || !result.status || result.status === 'unknown') throw new Error('Sonuç bulunamadı');
+        res = statusResponse;
+      } catch (statusError) {
+        throw new Error((connectionError.message || 'Bağlantı kesildi.') + ' İşlem durumu da sorgulanamadı. Güncel code.gs dağıtımını ve internet bağlantısını kontrol edin.');
+      }
+    }
+    if (result.status === 'processing') throw new Error('Sunucu kayıt işlemini hâlâ yürütüyor. Biraz bekleyin; aynı sayfadan tekrar Kaydet dediğinizde işlem kimliği korunur.');
     if (!res.ok || result.status !== 'success') {
       throw new Error(result.message || ('Sunucu kayıt işlemini onaylamadı (HTTP ' + (res.status || 'bilinmiyor') + ').'));
     }
     var savedIds = new Set(readyRows.slice(offset, offset + chunk.length).map(function(row) { return row.id; }));
     excelParsedRows = excelParsedRows.filter(function(row) { return !savedIds.has(row.id); });
     confirmedCount += chunk.length;
+    attempts.delete(signature);
     }
     showToast('✓ Seçilen ' + readyRows.length + ' kayıt eklendi (mükerrerler dahil).');
     if (!excelParsedRows.length) clearExcelImport();
