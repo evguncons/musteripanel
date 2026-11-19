@@ -1682,12 +1682,19 @@ async function submitExcelBatch() {
       }
     }
     if (result.status === 'processing') throw new Error('Sunucu kayıt işlemini hâlâ yürütüyor. Biraz bekleyin; aynı sayfadan tekrar Kaydet dediğinizde işlem kimliği korunur.');
+    if (Array.isArray(result.savedIndices)) {
+      var confirmedIndices = Array.from(new Set(result.savedIndices.filter(function(index) { return Number.isInteger(index) && index >= 0 && index < chunk.length; })));
+      var partialIds = new Set(confirmedIndices.map(function(index) { return readyRows[offset + index].id; }));
+      excelParsedRows = excelParsedRows.filter(function(row) { return !partialIds.has(row.id); });
+      confirmedCount += confirmedIndices.length;
+      if (result.status === 'success' && confirmedIndices.length !== chunk.length) throw new Error('Sunucu gruptaki tüm satırları onaylamadı. Onaylananlar listeden kaldırıldı.');
+    }
     if (!res.ok || result.status !== 'success') {
       throw new Error(result.message || ('Sunucu kayıt işlemini onaylamadı (HTTP ' + (res.status || 'bilinmiyor') + ').'));
     }
     var savedIds = new Set(readyRows.slice(offset, offset + chunk.length).map(function(row) { return row.id; }));
     excelParsedRows = excelParsedRows.filter(function(row) { return !savedIds.has(row.id); });
-    confirmedCount += chunk.length;
+    if (!Array.isArray(result.savedIndices)) confirmedCount += chunk.length;
     attempts.delete(signature);
     }
     showToast('✓ Seçilen ' + readyRows.length + ' kayıt eklendi (mükerrerler dahil).');
