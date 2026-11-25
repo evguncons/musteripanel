@@ -965,8 +965,27 @@ function playNotificationSound() {
 }
 
 function getTodayDT() {
-    var n = new Date();
-    return new Date(n.getTime() - n.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+    return new Intl.DateTimeFormat('sv-SE', { timeZone: 'Europe/Istanbul', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }).format(new Date()).replace(' ', 'T');
+}
+
+function normalizeImportDate(value) {
+  var text = String(value == null ? '' : value).trim();
+  if (!text) return '';
+  // Excel'de görünen saat korunur; kaynak saat dilimi tarayıcı saatine çevrilmez.
+  var match = text.match(/^(\d{4})-(\d{1,2})-(\d{1,2})(?:[T\s](\d{1,2}):(\d{2})(?::(\d{2}))?)?(?:\.\d+)?(?:Z|[+-]\d{2}:?\d{2})?$/i);
+  var tr = text.match(/^(\d{1,2})[./](\d{1,2})[./](\d{4})(?:\s+(\d{1,2}):(\d{2})(?::(\d{2}))?)?$/);
+  if (tr) match = [tr[0], tr[3], tr[2], tr[1], tr[4], tr[5], tr[6]];
+  if (!match && /^\d{5}(?:\.\d+)?$/.test(text)) {
+    var serialDate = new Date(Date.UTC(1899, 11, 30) + Math.round(Number(text) * 86400) * 1000);
+    return serialDate.toISOString().slice(0, 19).replace('T', ' ');
+  }
+  if (!match) return null;
+  var year = Number(match[1]), month = Number(match[2]), day = Number(match[3]);
+  var hour = Number(match[4] || 0), minute = Number(match[5] || 0), second = Number(match[6] || 0);
+  var date = new Date(Date.UTC(year, month - 1, day));
+  if (date.getUTCFullYear() !== year || date.getUTCMonth() !== month - 1 || date.getUTCDate() !== day || hour > 23 || minute > 59 || second > 59) return null;
+  var pad = function(number) { return String(number).padStart(2, '0'); };
+  return year + '-' + pad(month) + '-' + pad(day) + ' ' + pad(hour) + ':' + pad(minute) + (match[6] ? ':' + pad(second) : '');
 }
 
 function parseTurkishFloat(val) {
@@ -1282,10 +1301,6 @@ function prepareClaudeLeadRows(rows) {
     var media = /^(ig|instagram)$/.test(platform) ? 'Instagram' : /^(fb|facebook|messenger)$/.test(platform) ? 'Facebook' : '';
     if (!media) throw new Error('Reklam dosyasındaki platform değeri tanınamadı (Excel satırı ' + (canonical.length + headerIndex + 1) + '). ig veya fb olmalı.');
     var dateText = cell(row, ['created time']);
-    if (/^\d{4}-\d{2}-\d{2}T.*(?:Z|[+-]\d{2}:?\d{2})$/i.test(dateText)) {
-      var date = new Date(dateText);
-      if (!isNaN(date.getTime())) dateText = new Intl.DateTimeFormat('sv-SE', { timeZone: 'Europe/Istanbul', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }).format(date);
-    }
     canonical.push([dateText, '', name, phone, city, district, product, media, '']);
   });
   return prepareClaudeExcelRows(canonical);
@@ -1358,14 +1373,8 @@ function processParsedExcelData(rows, format) {
     var rawLocation = String(row[15] || '').trim();
 
     var rawDate = row[1] || row[0] || '';
-    var dateFormatted = getTodayDT().replace('T', ' ');
-    if (rawDate) {
-      var parsedT = parseAnyDate(rawDate);
-      if (parsedT > 0) {
-        var dObj = new Date(parsedT);
-        dateFormatted = new Date(dObj.getTime() - dObj.getTimezoneOffset() * 60000).toISOString().slice(0, 16).replace('T', ' ');
-      }
-    }
+    var normalizedDate = normalizeImportDate(rawDate);
+    var dateFormatted = normalizedDate || (!rawDate ? getTodayDT().replace('T', ' ') : String(rawDate));
 
     if (!rawName && !rawPhone && !rawLocation) continue;
 
@@ -1378,7 +1387,11 @@ function processParsedExcelData(rows, format) {
     var reason = 'Kayıt Yapılabilir';
 
     // 1. ŞEHİR KONTROLÜ: İstanbul, Bursa, Düzce, Kocaeli, Sakarya/Adapazarı dışındakiler (Trabzon, Ankara vb.) ES GEÇİLİR!
-    if (!assignedBranch) {
+    if (normalizedDate === null) {
+      status = 'invalid';
+      reason = 'Geçersiz Tarih / Saat: ' + rawDate;
+      invalidCount++;
+    } else if (!assignedBranch) {
       status = 'invalid';
       reason = 'Bölge Dışı / Şube Yok (' + (rawLocation || 'Belirtilmedi') + ')';
       invalidCount++;
@@ -2913,7 +2926,7 @@ function resolveDuplicatePrompt(action) {
         if (prompt.record[key]) row.querySelector(selectors[key]).value = prompt.record[key];
       });
       input.value = getCompareNum(prompt.record.contact || input.value);
-      row.querySelector('input[type="datetime-local"]').value = getTodayDT();
+      if (!row.querySelector('input[type="datetime-local"]').value) row.querySelector('input[type="datetime-local"]').value = getTodayDT();
       row._requiresSaleAmount = action === 'sale';
       var amount = row.querySelector('.inp-amount');
       amount.value = '';
@@ -3201,7 +3214,7 @@ function applySmartParsing() {
 
     targetRow.querySelector('.inp-name').value = parsed.name;
     targetRow.querySelector('.inp-contact').value = parsed.contact;
-    if(parsed.date) targetRow.querySelector('input[type="datetime-local"]').value = parsed.date;
+    targetRow.querySelector('input[type="datetime-local"]').value = getTodayDT();
     
     // Eğer müşteri bölge dışındaysa şube seçimi BOŞ bırakılır, kullanıcı uyarılır
     if(branch) {
