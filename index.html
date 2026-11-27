@@ -3008,7 +3008,7 @@ async function submitAllRows(){
     if(!branch||!name||!media){hasEmptyError=true; continue;}
 
     data.push({
-      date:dv.replace('T',' '),
+      date:normalizeImportDate(dv),
       branch:branch,
       name:name,
       contact:contact,
@@ -3028,6 +3028,13 @@ async function submitAllRows(){
   if (btn) { btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Kaydediliyor...'; btn.disabled = true; }
 
   try {
+    var policyResponse = await fetch(GAS_URL + '?action=getDatePolicy&t=' + Date.now());
+    var policy;
+    try { policy = await policyResponse.json(); } catch (policyError) { policy = null; }
+    if (!policyResponse.ok || !policy || policy.datePolicy !== 'selected-v1') {
+      showWarning('Sunucu Güncellenmeli', 'Bağlı Apps Script dağıtımı seçilen tarih-saat politikasını doğrulamıyor. Güncel code.gs dosyasını Apps Script’e aktarın ve mevcut web uygulaması dağıtımını yeni sürüme geçirin. Hiçbir kayıt gönderilmedi.');
+      return;
+    }
     var res = await fetch(GAS_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'text/plain;charset=utf-8' },
@@ -3221,12 +3228,10 @@ function applySmartParsing() {
       rows = document.querySelectorAll('#inputContainer > .entry-card');
       targetRow = rows[rows.length - 1];
     }
-    var dateInput = targetRow.querySelector('input[type="datetime-local"]');
-    var keepDate = dateInput._dateManuallyEdited || (typeof dateInput.defaultValue === 'string' && dateInput.value !== dateInput.defaultValue);
 
     targetRow.querySelector('.inp-name').value = parsed.name;
     targetRow.querySelector('.inp-contact').value = parsed.contact;
-    if (!keepDate) dateInput.value = getTodayDT();
+    // Tarih yalnızca satır oluşturulurken başlatılır; çözümleme seçili tarihi değiştirmez.
     
     // Eğer müşteri bölge dışındaysa şube seçimi BOŞ bırakılır, kullanıcı uyarılır
     if(branch) {
