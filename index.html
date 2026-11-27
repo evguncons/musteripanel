@@ -3231,7 +3231,11 @@ function applySmartParsing() {
 
     targetRow.querySelector('.inp-name').value = parsed.name;
     targetRow.querySelector('.inp-contact').value = parsed.contact;
-    // Tarih yalnızca satır oluşturulurken başlatılır; çözümleme seçili tarihi değiştirmez.
+    // Şablonun açık Tarih alanını kullan; kullanıcının elle yaptığı seçimi koru.
+    var dateInput = targetRow.querySelector('input[type="datetime-local"]');
+    var manuallySelectedDate = dateInput._dateManuallyEdited ||
+      (typeof dateInput.defaultValue === 'string' && dateInput.value !== dateInput.defaultValue);
+    if (parsed.date && !manuallySelectedDate) dateInput.value = parsed.date;
     
     // Eğer müşteri bölge dışındaysa şube seçimi BOŞ bırakılır, kullanıcı uyarılır
     if(branch) {
